@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}همگام‌سازی مشتریان | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <a href="{% url 'accounting:sync_dashboard' %}" class="text-blue-600 hover:underline text-sm">
+                <i class="fas fa-arrow-right ml-2"></i> بازگشت به داشبورد
+            </a>
+            <h1 class="text-2xl font-bold mt-2">👥 همگام‌سازی مشتریان</h1>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary" onclick="return confirm('آیا از همگام‌سازی مشتریان اطمینان دارید؟')">
+                <i class="fas fa-sync ml-2"></i> شروع همگام‌سازی
+            </button>
+        </form>
+    </div>
+    
+    <div class="bg-yellow-50 rounded-xl p-4 mb-6 border border-yellow-200">
+        <p class="text-sm text-yellow-800">
+            <i class="fas fa-info-circle ml-2"></i>
+            این عملیات مشتریان جدید را از سیستم حسابداری دریافت و به سیستم اضافه می‌کند.
+            مشتریان موجود به‌روزرسانی می‌شوند.
+        </p>
+    </div>
+    
+    <!-- لیست لاگ‌ها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b">
+            <h3 class="font-bold">📋 تاریخچه همگام‌سازی مشتریان</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-right">تاریخ</th>
+                        <th class="px-4 py-2 text-right">وضعیت</th>
+                        <th class="px-4 py-2 text-right">تعداد جدید</th>
+                        <th class="px-4 py-2 text-right">خطاها</th>
+                        <th class="px-4 py-2 text-right">پیام</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2">{{ log.started_at|to_jalali }}</td>
+                        <td class="px-4 py-2">
+                            {% if log.status == 'completed' %}
+                                <span class="text-green-600">✅ تکمیل شده</span>
+                            {% elif log.status == 'processing' %}
+                                <span class="text-yellow-600">⏳ در حال پردازش</span>
+                            {% else %}
+                                <span class="text-red-600">❌ ناموفق</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2">{{ log.new_items_count }}</td>
+                        <td class="px-4 py-2">{{ log.failed_items_count }}</td>
+                        <td class="px-4 py-2 text-sm">{{ log.error_message|truncatechars:50|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-4 text-center text-gray-500">هیچ لاگی یافت نشد</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

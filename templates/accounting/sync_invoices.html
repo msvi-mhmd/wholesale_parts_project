@@ -1,0 +1,55 @@
+<!-- templates/accounting/sync_invoices.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}همگام‌سازی فاکتورها{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8 max-w-2xl">
+    <div class="mb-4">
+        <a href="{% url 'accounting:sync_dashboard' %}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به داشبورد
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h1 class="text-2xl font-bold mb-4">📄 همگام‌سازی فاکتورها</h1>
+        <p class="text-gray-500 mb-6">دریافت فاکتورها از سیستم حسابداری و ذخیره در دیتابیس</p>
+        
+        <form method="post" class="mb-6">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary  w-full py-3 text-lg">
+                <i class="fas fa-sync-alt ml-2"></i> شروع همگام‌سازی فاکتورها
+            </button>
+        </form>
+        
+        <div class="border-t pt-4">
+            <h3 class="font-bold text-lg mb-3">📋 لاگ‌های اخیر</h3>
+            {% if logs %}
+            <div class="space-y-2">
+                {% for log in logs %}
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <span class="text-sm font-medium">{{ log.started_at|to_jalali }}</span>
+                        <span class="text-sm text-gray-500 mr-2">{{ log.new_items_count }} فاکتور جدید</span>
+                    </div>
+                    <div>
+                        {% if log.status == 'completed' %}
+                            <span class="text-green-600 text-sm">✅ تکمیل شده</span>
+                        {% elif log.status == 'processing' %}
+                            <span class="text-yellow-600 text-sm">⏳ در حال پردازش</span>
+                        {% else %}
+                            <span class="text-red-600 text-sm">❌ ناموفق</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-400 text-center py-4">هیچ لاگی یافت نشد</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

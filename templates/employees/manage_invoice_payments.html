@@ -1,0 +1,75 @@
+<!-- templates/employees/manage_invoice_payments.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}مدیریت پرداخت‌های فاکتور{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <h1 class="text-2xl font-bold mb-6">مدیریت پرداخت‌های فاکتور</h1>
+    
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-yellow-50 p-4 rounded-xl">
+            <p class="text-sm text-yellow-600">در انتظار تایید</p>
+            <p class="text-2xl font-bold">{{ pending_count }}</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-xl">
+            <p class="text-sm text-green-600">پرداخت شده</p>
+            <p class="text-2xl font-bold">{{ paid_count }}</p>
+        </div>
+        <div class="bg-red-50 p-4 rounded-xl">
+            <p class="text-sm text-red-600">ناموفق</p>
+            <p class="text-2xl font-bold">{{ failed_count }}</p>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="px-4 py-3 text-right">فاکتور</th>
+                    <th class="px-4 py-3 text-right">مشتری</th>
+                    <th class="px-4 py-3 text-right">مبلغ</th>
+                    <th class="px-4 py-3 text-right">روش</th>
+                    <th class="px-4 py-3 text-right">وضعیت</th>
+                    <th class="px-4 py-3 text-right">عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-3">{{ payment.invoice.invoice_id }}</td>
+                    <td class="px-4 py-3">{{ payment.customer.user.get_full_name }}</td>
+                    <td class="px-4 py-3">{{ payment.amount|format_price }} ریال</td>
+                    <td class="px-4 py-3">{{ payment.get_method_display }}</td>
+                    <td class="px-4 py-3">
+                        {% if payment.status == 'awaiting_approval' %}
+                            <span class="text-yellow-600">در انتظار تایید</span>
+                        {% elif payment.status == 'approved' %}
+                            <span class="text-green-600">تایید شده</span>
+                        {% elif payment.status == 'paid' %}
+                            <span class="text-blue-600">پرداخت شده</span>
+                        {% else %}
+                            <span class="text-red-600">{{ payment.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if payment.status == 'awaiting_approval' %}
+                            <a href="{% url 'employees:confirm_invoice_payment' payment.id %}" class="text-green-600 hover:underline ml-2" onclick="return confirm('تایید شود؟')">تایید</a>
+                            <a href="{% url 'employees:reject_invoice_payment' payment.id %}" class="text-red-600 hover:underline" onclick="return confirm('رد شود؟')">رد</a>
+                        {% elif payment.status == 'approved' and not payment.sent_to_accounting %}
+                            <a href="{% url 'employees:send_invoice_payment_to_accounting' payment.id %}" class="text-blue-600 hover:underline">ارسال به حسابداری</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">هیچ پرداختی یافت نشد</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

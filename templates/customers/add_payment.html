@@ -1,0 +1,76 @@
+<!-- templates/customers/add_payment.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ثبت پرداخت جدید | پنل کاربری{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-yellow-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">ثبت پرداخت جدید</h1>
+                <p class="text-sm opacity-90">لطفاً اطلاعات پرداخت خود را وارد کنید</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="p-6">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">مبلغ (ریال) *</label>
+                        <input type="number" name="amount" required min="1000" step="1000"
+                               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">نوع پرداخت *</label>
+                        <select name="payment_type" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="">انتخاب کنید</option>
+                            {% for type in payment_types %}
+                            <option value="{{ type.id }}">{{ type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">کد پیگیری</label>
+                        <input type="text" name="confirmation_code" 
+                               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                        <p class="text-xs text-gray-500 mt-1">در صورت وجود کد پیگیری وارد کنید</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">تصویر رسید</label>
+                        <input type="file" name="receipt_image" accept="image/*"
+                               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                        <p class="text-xs text-gray-500 mt-1">تصویر رسید بانکی یا کارت به کارت (اختیاری)</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">یادداشت</label>
+                        <textarea name="notes" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                  placeholder="توضیحات اضافی..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-6 pt-4 border-t">
+                    <a href="{% url 'customers:payment_history' %}" class="flex-1 text-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        انصراف
+                    </a>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
+                        ثبت پرداخت
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="bg-yellow-50 rounded-lg p-4 mt-6">
+            <p class="text-sm text-yellow-800">
+                <i class="fas fa-info-circle ml-2"></i>
+                پس از ثبت پرداخت، کارشناسان ما اطلاعات را بررسی کرده و در اسرع وقت تایید خواهند کرد.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

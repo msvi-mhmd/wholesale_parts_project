@@ -1,0 +1,125 @@
+<!-- templates/employees/edit_employee_permissions.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}مدیریت دسترسی‌های کارمند | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<style>
+    .permission-group {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .permission-group-title {
+        font-weight: bold;
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    .permission-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0;
+    }
+    .permission-item input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+    .permission-item label {
+        font-size: 0.85rem;
+        color: #374151;
+        cursor: pointer;
+    }
+    .permission-item label.checked {
+        color: #2563eb;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-purple-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">مدیریت دسترسی‌ها</h1>
+                <p class="text-sm opacity-90">{{ employee.first_name }} {{ employee.last_name }}</p>
+            </div>
+            
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for module, perms in grouped_permissions.items %}
+                    <div class="permission-group">
+                        <div class="permission-group-title">{{ module }}</div>
+                        <div class="mb-2">
+                            <span class="text-sm text-blue-600 cursor-pointer hover:underline" onclick="toggleGroup(this)">✓ انتخاب همه</span>
+                        </div>
+                        {% for perm in perms %}
+                        <div class="permission-item">
+                            <input type="checkbox" name="permissions" value="{{ perm.id }}" id="perm_{{ perm.id }}"
+                                   {% if perm in employee.permissions.all %}checked{% endif %}>
+                            <label for="perm_{{ perm.id }}" {% if perm in employee.permissions.all %}class="checked"{% endif %}>
+                                {{ perm.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <a href="{% url 'employees:manage_employees' %}" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                        انصراف
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                        ذخیره دسترسی‌ها
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleGroup(btn) {
+        const group = btn.closest('.permission-group');
+        const checkboxes = group.querySelectorAll('input[type="checkbox"]');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+            // به‌روزرسانی ظاهر label
+            const label = cb.closest('.permission-item').querySelector('label');
+            if (label) {
+                if (cb.checked) {
+                    label.classList.add('checked');
+                } else {
+                    label.classList.remove('checked');
+                }
+            }
+        });
+        
+        btn.textContent = allChecked ? '✓ انتخاب همه' : '✕ حذف همه';
+    }
+    
+    // به‌روزرسانی ظاهر label هنگام کلیک روی checkbox
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const label = this.closest('.permission-item').querySelector('label');
+            if (label) {
+                if (this.checked) {
+                    label.classList.add('checked');
+                } else {
+                    label.classList.remove('checked');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

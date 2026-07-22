@@ -1,0 +1,232 @@
+<!-- templates/customers/payment_history.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}تاریخچه پرداخت‌ها | پنل کاربری{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">تاریخچه پرداخت‌ها</h1>
+        <div class="flex gap-3">
+            <a href="{% url 'customers:customer_panel' %}" class="text-yellow-600 hover:underline">
+                <i class="fas fa-arrow-right ml-2"></i> بازگشت به پنل کاربری
+            </a>
+        </div>
+    </div>
+    
+    <!-- آمار -->
+    <div class="bg-yellow-50 rounded-xl p-4 mb-6">
+        <p class="text-sm text-yellow-600">جمع کل پرداخت‌ها</p>
+        <p class="text-2xl font-bold text-yellow-700">{{ total_payments|format_price }} ریال</p>
+    </div>
+    
+    <!-- لیست پرداخت‌ها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">شماره پرداخت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تاریخ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مبلغ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">نوع پرداخت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">نحوه پرداخت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">کد پیگیری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr class="border-b hover:bg-gray-50">
+
+                        <td class="px-6 py-4 font-mono text-sm">{{ payment.payment_id }}</td>
+                        
+                        <td class="px-6 py-4">{{ payment.date|to_jalali }}</td>
+                        
+                        <td class="px-6 py-4">{{ payment.amount|format_price }} ریال</td>
+                        
+                        <td class="px-6 py-4">
+                            {% if payment.payment_category == 'wallet' %}
+                                <span class="text-blue-600">شارژ کیف پول</span>
+                            {% elif payment.payment_category == 'invoice' %}
+                                <span class="text-green-600">پرداخت فاکتور</span>
+                            {% elif payment.payment_category == 'debt' %}
+                                <span class="text-orange-600">پرداخت بدهی</span>
+                            {% else %}
+                                <span class="text-gray-600">{{ payment.get_payment_category_display }}</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td class="px-6 py-4">{{ payment.payment_type.name }}</td>
+                        
+                        <td class="px-6 py-4">{{ payment.confirmation_code|default:"-" }}</td>
+                        
+                        <td class="px-6 py-4">
+                            {% if payment.status == 'confirmed' %}
+                                <span class="text-green-600">تایید شده</span>
+                            {% elif payment.status == 'rejected' %}
+                                <span class="text-red-600">رد شده</span>
+                            {% else %}
+                                <span class="text-yellow-600">در انتظار تایید</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td class="px-6 py-4">
+                            <button onclick="showPaymentDetails({{ payment.id }})" class="text-yellow-600 hover:underline">
+                                <i class="fas fa-eye"></i> مشاهده
+                            </button>
+                        </td>
+                     
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-credit-card text-4xl mb-2 block"></i>
+                            هیچ پرداختی ثبت نشده است
+                        </td>
+                     </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if payments.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if payments.has_previous %}
+                <a href="?page={{ payments.previous_page_number }}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in payments.paginator.page_range %}
+                    {% if payments.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > payments.number|add:'-3' and num < payments.number|add:'3' %}
+                        <a href="?page={{ num }}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if payments.has_next %}
+                <a href="?page={{ payments.next_page_number }}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- مودال مشاهده جزئیات پرداخت -->
+<div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+        <div class="flex justify-between items-center border-b px-6 py-4">
+            <h3 class="text-xl font-bold">جزئیات پرداخت</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="paymentDetails" class="p-6">
+            <!-- جزئیات با AJAX بارگذاری می‌شود -->
+        </div>
+    </div>
+</div>
+
+<script>
+function showPaymentDetails(paymentId) {
+    const modal = document.getElementById('paymentModal');
+    const detailsDiv = document.getElementById('paymentDetails');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    detailsDiv.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-2xl"></i><p>در حال بارگذاری...</p></div>';
+    
+    fetch(`/customers/payments/${paymentId}/detail/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                let statusClass = '';
+                let statusText = '';
+                if (data.status === 'confirmed') {
+                    statusClass = 'text-green-600';
+                    statusText = 'تایید شده';
+                } else if (data.status === 'rejected') {
+                    statusClass = 'text-red-600';
+                    statusText = 'رد شده';
+                } else {
+                    statusClass = 'text-yellow-600';
+                    statusText = 'در انتظار تایید';
+                }
+                
+                detailsDiv.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-gray-600">شماره پرداخت:</span>
+                            <span class="font-mono">${data.payment_id}</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-gray-600">تاریخ:</span>
+                            <span>${data.date}</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-gray-600">مبلغ:</span>
+                            <span class="font-bold text-yellow-600">${data.amount} ریال</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-gray-600">نوع پرداخت:</span>
+                            <span>${data.payment_type}</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-gray-600">کد پیگیری:</span>
+                            <span>${data.confirmation_code || '-'}</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-gray-600">وضعیت:</span>
+                            <span class="${statusClass}">${statusText}</span>
+                        </div>
+                        ${data.notes ? `<div class="pt-3 mt-3"><span class="text-gray-600">یادداشت:</span><p class="text-sm mt-1 bg-gray-50 p-2 rounded">${data.notes}</p></div>` : ''}
+                        ${data.receipt_image ? `<div class="pt-3 mt-3"><span class="text-gray-600">تصویر رسید:</span><div class="mt-2"><a href="${data.receipt_image}" target="_blank" class="text-yellow-600 hover:underline">مشاهده رسید</a></div></div>` : ''}
+                    </div>
+                `;
+            } else {
+                detailsDiv.innerHTML = '<div class="text-center py-4 text-red-500">خطا در بارگذاری اطلاعات</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            detailsDiv.innerHTML = '<div class="text-center py-4 text-red-500">خطا در ارتباط با سرور</div>';
+        });
+}
+
+function closeModal() {
+    const modal = document.getElementById('paymentModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// بستن مودال با کلیک بیرون
+document.getElementById('paymentModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// بستن مودال با کلید ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('paymentModal');
+        if (modal && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    }
+});
+</script>
+{% endblock %}

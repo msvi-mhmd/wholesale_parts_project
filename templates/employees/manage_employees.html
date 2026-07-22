@@ -1,0 +1,105 @@
+<!-- templates/employees/manage_employees.html -->
+{% extends 'base.html' %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}مدیریت کارمندان | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت کارمندان</h1>
+        <a href="{% url 'employees:add_employee' %}" class="btn-primary px-4 py-2 rounded-lg">
+            <i class="fas fa-plus ml-2"></i> افزودن کارمند جدید
+        </a>
+    </div>
+    
+    <!-- جستجو -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="flex gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" value="{{ search }}" 
+                       placeholder="جستجو بر اساس نام، کد ملی یا سمت..."
+                       class="w-full border rounded-lg px-4 py-2">
+            </div>
+            <button type="submit" class="btn-primary">جستجو</button>
+            {% if search %}
+            <a href="{% url 'employees:manage_employees' %}" class="btn-outline">حذف فیلتر</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <!-- لیست کارمندان -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">نام و نام خانوادگی</th>
+                        <th class="px-6 py-3 text-sm font-semibold">کد ملی</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تلفن</th>
+                        <th class="px-6 py-3 text-sm font-semibold">سمت</th>
+                        
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4">{{ employee.first_name }} {{ employee.last_name }}</td>
+                        <td class="px-6 py-4">{{ employee.national_id }}</td>
+                        <td class="px-6 py-4">{{ employee.phone }}</td>
+                        <td class="px-6 py-4">{{ employee.position }}</td>
+                        <td class="px-6 py-4">
+                            {% if employee.is_active %}
+                                <span class="text-green-600">فعال</span>
+                            {% else %}
+                                <span class="text-red-600">غیرفعال</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'employees:edit_employee' employee.id %}" class="text-yellow-600 hover:underline ml-3">
+                                <i class="fas fa-edit"></i> ویرایش
+                            </a>
+                        </td>
+                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            هیچ کارمندی یافت نشد
+                        </td>
+                     </tr>
+                    {% endfor %}
+                </tbody>
+             </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if employees.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if employees.has_previous %}
+                <a href="?page={{ employees.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in employees.paginator.page_range %}
+                    {% if employees.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > employees.number|add:'-3' and num < employees.number|add:'3' %}
+                        <a href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if employees.has_next %}
+                <a href="?page={{ employees.next_page_number }}{% if search %}&search={{ search }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

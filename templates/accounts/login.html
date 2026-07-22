@@ -1,0 +1,1180 @@
+<!-- templates/accounts/login.html -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود | پرشین گلف</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Bold.ttf" %}') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Black.ttf" %}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Medium.ttf" %}') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-ExtraBold.ttf" %}') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/peyda-light.ttf" %}') format('truetype');
+            font-weight: 200;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100dvw;
+            height: auto;
+            direction: rtl;
+        }
+
+        body {
+            text-align: center;
+            align-items: center;
+            font-family: 'Peyda', sans-serif;
+        }
+
+        .container {
+            width: 100dvw;
+            height: 100dvh;
+            display: flex;
+            flex-direction: row;
+            background: linear-gradient(270deg, #2d3748, #4a5568, #2d3748);
+            align-items: center;
+        }
+
+        .half {
+            width: 50dvw;
+            align-items: center;
+        }
+
+        #right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* دکمه بازگشت به خانه */
+        .return-home {
+            display: flex;
+            align-self: flex-start;
+            font-family: 'Peyda';
+            font-weight: 500;
+            text-decoration: none;
+            color: #cbd5e0;
+            margin: 0 0 20px 0;
+            padding: 8px 16px;
+            border: 1px solid #4a5568;
+            border-radius: 999px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            align-items: center;
+            gap: 8px;
+        }
+        .return-home:hover {
+            color: #c9a84c;
+            border-color: #c9a84c;
+            background: rgba(201, 168, 76, 0.1);
+        }
+        .return-home i {
+            font-size: 0.9rem;
+        }
+
+        .title {
+            width: 60%;
+            color: #c9a84c;
+            text-align: center;
+            align-items: center;
+            margin: 0 auto 1.5rem;
+            font-family: 'Peyda';
+            font-weight: 700;
+            text-shadow: 0px 0px 20px rgba(0, 0, 0, 0.7);
+        }
+        .title h1 {
+            font-size: 2.5rem;
+        }
+        .title p {
+            font-size: 0.9rem;
+            font-weight: 300;
+            margin-top: 0.3rem;
+            color: #cbd5e0;
+        }
+
+        .row {
+            width: 60%;
+            min-height: 50px;
+            color: gray;
+            text-align: center;
+            align-items: center;
+            padding: 0;
+            border-radius: 999px;
+            margin: 15px auto;
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+        }
+
+        .form-img {
+            width: 50px;
+            min-width: 50px;
+            height: 50px;
+            min-height: 50px;
+            margin: 0;
+            background-color: rgb(199, 199, 199);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3748;
+            font-size: 1.5rem;
+        }
+
+        .form-inp {
+            width: 100%;
+            min-height: 50px;
+            height: 100%;
+            margin: 0;
+            border: none;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 0 1rem;
+            font-family: 'Peyda';
+            transition: all 0.3s ease;
+        }
+        .form-inp:focus {
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0px 0px 20px rgba(201, 168, 76, 0.4);
+        }
+
+        .login-button {
+            width: 30%;
+            min-height: 40px;
+            font-size: 1.2rem;
+            font-family: 'Peyda';
+            font-weight: 800;
+            border-radius: 999px;
+            color: #2d3748;
+            background: #c9a84c;
+            border: none;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+            margin: 15px auto;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+
+        .login-button:hover {
+            background: #ffc800;
+            color: #1a202c;
+            transform: scale(1.02);
+        }
+
+        .forgot {
+            text-decoration: none;
+            color: #cbd5e0;
+            font-family: 'Peyda';
+            transition: all 0.2s ease-in-out;
+            font-size: 0.9rem;
+        }
+        .forgot:hover {
+            color: #c9a84c;
+        }
+
+        .otp-button {
+            width: 60%;
+            min-height: 40px;
+            font-size: 0.9rem;
+            font-family: 'Peyda';
+            font-weight: 500;
+            border-radius: 999px;
+            color: #cbd5e0;
+            background: transparent;
+            border: 1px solid #cbd5e0;
+            transition: all 0.3s ease-in-out;
+            margin: 10px auto;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+        .otp-button:hover {
+            background: #c9a84c;
+            color: #1a202c;
+            border-color: #c9a84c;
+        }
+
+        /* ===== مودال‌های OTP ===== */
+        .otp-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .otp-modal.show {
+            display: flex;
+        }
+        .otp-modal-content {
+            background: #2d3748;
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid #4a5568;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .otp-modal-close {
+            position: absolute;
+            top: 12px;
+            left: 20px;
+            color: #cbd5e0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.3s;
+            background: none;
+            border: none;
+        }
+        .otp-modal-close:hover {
+            color: #c9a84c;
+            transform: rotate(90deg);
+        }
+        .otp-modal-title {
+            color: #c9a84c;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.3rem;
+            font-family: 'Peyda', sans-serif;
+        }
+        .otp-modal-sub {
+            color: #cbd5e0;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Peyda', sans-serif;
+        }
+        .otp-modal .row {
+            width: 100%;
+            margin: 10px auto;
+        }
+        .otp-modal .form-inp {
+            width: 100%;
+            min-height: 50px;
+            border: none;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 0 1rem;
+            font-family: 'Peyda', sans-serif;
+            transition: all 0.3s ease;
+            letter-spacing: 8px;
+            font-weight: 700;
+        }
+        .otp-modal .form-inp:focus {
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0px 0px 20px rgba(201, 168, 76, 0.4);
+        }
+        .otp-modal .form-img {
+            width: 50px;
+            min-width: 50px;
+            height: 50px;
+            min-height: 50px;
+            background-color: rgb(199, 199, 199);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3748;
+            font-size: 1.3rem;
+        }
+        .otp-modal .send-btn {
+            width: 100%;
+            min-height: 45px;
+            font-size: 1rem;
+            font-family: 'Peyda', sans-serif;
+            font-weight: 700;
+            border-radius: 999px;
+            color: #2d3748;
+            background: #c9a84c;
+            border: none;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+            margin-top: 15px;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+        .otp-modal .send-btn:hover {
+            background: #ffc800;
+            color: #1a202c;
+            transform: scale(1.02);
+        }
+        .otp-modal .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .otp-modal .send-btn .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .otp-modal .error-msg {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 0.5rem;
+            font-family: 'Peyda', sans-serif;
+            display: none;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 0.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+        .otp-modal .error-msg.show {
+            display: block;
+        }
+        .otp-modal .success-msg {
+            color: #51cf66;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 0.5rem;
+            font-family: 'Peyda', sans-serif;
+            display: none;
+            background: rgba(0, 200, 0, 0.1);
+            padding: 0.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 200, 0, 0.2);
+        }
+        .otp-modal .success-msg.show {
+            display: block;
+        }
+        .otp-modal .timer {
+            color: #cbd5e0;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 0.8rem;
+            font-family: 'Peyda', sans-serif;
+        }
+        .otp-modal .timer span {
+            color: #c9a84c;
+            font-weight: 700;
+        }
+        .otp-modal .resend-link {
+            color: #c9a84c;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            background: none;
+            border: none;
+            font-size: 0.85rem;
+            font-family: 'Peyda', sans-serif;
+        }
+        .otp-modal .resend-link:hover {
+            color: #ffc800;
+            text-decoration: underline;
+        }
+        .otp-modal .resend-link:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== مودال شماره تلفن ===== */
+        .phone-modal .otp-modal-title i {
+            margin-left: 10px;
+        }
+
+        /* ===== ریسپانسیو مودال ===== */
+        @media (max-width: 480px) {
+            .otp-modal-content {
+                padding: 1.5rem;
+            }
+            .otp-modal-title {
+                font-size: 1.1rem;
+            }
+            .otp-modal .form-inp {
+                min-height: 45px;
+                font-size: 1rem;
+                letter-spacing: 4px;
+            }
+            .otp-modal .form-img {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                min-height: 40px;
+                font-size: 1rem;
+            }
+            .otp-modal .send-btn {
+                min-height: 40px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .req-text {
+            margin-top: 20px;
+            color: #cbd5e0;
+            font-family: 'Peyda';
+            font-weight: 400;
+            font-size: 1.2rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .req-text:hover {
+            color: #c9a84c;
+        }
+
+        .req-link {
+            text-decoration: none;
+            color: #c9a84c;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .req-link:hover {
+            color: #ffc800;
+            text-decoration: underline;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: auto;
+            border-radius: 0 20px 20px 0;
+        }
+        
+        /* چک‌باکس */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #cbd5e0;
+            font-size: 0.9rem;
+            font-family: 'Peyda';
+        }
+        .remember-me input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #c9a84c;
+            cursor: pointer;
+        }
+
+        /* پیام‌های خطا */
+        .messages {
+            width: 60%;
+            margin: 0 auto 0.5rem;
+        }
+        .message {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Peyda';
+        }
+        .message.error {
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+        .message.success {
+            background: rgba(0, 200, 0, 0.15);
+            color: #51cf66;
+            border: 1px solid #51cf66;
+        }
+        .message.info {
+            background: rgba(0, 100, 200, 0.15);
+            color: #5c7cfa;
+            border: 1px solid #5c7cfa;
+        }
+
+        /* یادداشت مشتریان */
+        .info-note {
+            width: 60%;
+            background: rgba(201, 168, 76, 0.15);
+            border: 1px solid #c9a84c;
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .info-note p {
+            color: #cbd5e0;
+            font-size: 0.85rem;
+            font-family: 'Peyda';
+        }
+        .info-note i {
+            color: #c9a84c;
+            margin-left: 0.5rem;
+        }
+
+        .divider {
+            width: 60%;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+        .divider hr {
+            flex: 1;
+            border-color: #4a5568;
+        }
+        .divider span {
+            color: #cbd5e0;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width:1081px) {
+            .row {
+                height: 30px;
+                min-height: 30px;
+            }
+            .form-img {
+                width: 30px;
+                height: 30px;
+                min-width: 30px;
+                min-height: 30px;
+                font-size: 1rem;
+            }
+            .form-inp {
+                min-height: 30px;
+                font-size: 1rem;
+            }
+            .title h1 {
+                font-size: 2rem;
+            }
+            .return-home {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+
+        /* ===== تبلت و موبایل: حذف تصویر چپ ===== */
+        @media (max-width: 1024px) {
+            /* حذف تصویر سمت چپ در تبلت و موبایل */
+            #left {
+                display: none !important;
+                width: 0 !important;
+            }
+            #right {
+                width: 100dvw !important;
+                padding: 1.5rem;
+            }
+            .container {
+                justify-content: center;
+            }
+            .row {
+                width: 70%;
+            }
+            .title {
+                width: 70%;
+            }
+            .title h1 {
+                font-size: 2rem;
+            }
+            .login-button {
+                width: 40%;
+            }
+            .otp-button {
+                width: 70%;
+            }
+            .messages {
+                width: 70%;
+            }
+            .info-note {
+                width: 70%;
+            }
+            .divider {
+                width: 70%;
+            }
+            .remember-me {
+                font-size: 0.85rem;
+            }
+            .return-home {
+                font-size: 0.85rem;
+                padding: 6px 14px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #right {
+                padding: 1.5rem;
+            }
+            .row {
+                width: 80%;
+            }
+            .title {
+                width: 80%;
+            }
+            .title h1 {
+                font-size: 1.8rem;
+            }
+            .login-button {
+                width: 50%;
+            }
+            .otp-button {
+                width: 80%;
+            }
+            .messages {
+                width: 80%;
+            }
+            .info-note {
+                width: 80%;
+            }
+            .divider {
+                width: 80%;
+            }
+            .return-home {
+                font-size: 0.8rem;
+                padding: 5px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #right {
+                padding: 1rem;
+            }
+            .row {
+                width: 90%;
+                min-height: 40px;
+            }
+            .form-img {
+                width: 35px;
+                height: 35px;
+                min-width: 35px;
+                min-height: 35px;
+                font-size: 0.9rem;
+            }
+            .form-inp {
+                min-height: 40px;
+                font-size: 0.9rem;
+            }
+            .title {
+                width: 90%;
+            }
+            .title h1 {
+                font-size: 1.5rem;
+            }
+            .title p {
+                font-size: 0.8rem;
+            }
+            .login-button {
+                width: 60%;
+                font-size: 1rem;
+                min-height: 35px;
+            }
+            .otp-button {
+                width: 90%;
+                font-size: 0.8rem;
+                min-height: 35px;
+            }
+            .messages {
+                width: 90%;
+            }
+            .info-note {
+                width: 90%;
+            }
+            .info-note p {
+                font-size: 0.75rem;
+            }
+            .divider {
+                width: 90%;
+            }
+            .remember-me {
+                font-size: 0.75rem;
+            }
+            .forgot {
+                font-size: 0.75rem;
+            }
+            .req-text {
+                font-size: 0.9rem;
+            }
+            .return-home {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+            .return-home i {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="half" id="right">
+            <!-- دکمه بازگشت به خانه -->
+            <a class="return-home" href="{% url 'home' %}">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت به خانه
+            </a>
+
+            <div class="title">
+                <h1>ورود به حساب</h1>
+                <p>پرشین گلف</p>
+            </div>
+
+            <!-- پیام‌ها -->
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input class="form-inp" id="username" name="username" type="text" 
+                           placeholder="نام کاربری / شماره تلفن" required>
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <input class="form-inp" id="password" name="password" type="password" 
+                           placeholder="رمز عبور" required>
+                </div>
+
+                <div style="width:70%; display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember-me">
+                        مرا به خاطر بسپار
+                    </label>
+                    <a class="forgot" href="#">رمز عبور را فراموش کرده‌اید؟</a>
+                </div>
+
+                <button type="submit" class="login-button">ورود</button>
+
+                <div class="divider">
+                    <hr>
+                    <span>یا</span>
+                    <hr>
+                </div>
+
+                <button type="button" onclick="openPhoneModal()" class="otp-button">
+                    <i class="fas fa-mobile-alt ml-2"></i> ورود با کد یکبار مصرف (OTP)
+                </button>
+
+                <p class="req-text">
+                    حساب کاربری ندارید؟<br>
+                    <a class="req-link" href="{% url 'accounts:register_request' %}">درخواست ثبت نام</a>
+                </p>
+
+                <div class="info-note">
+                    <p>
+                        <i class="fas fa-info-circle"></i>
+                        مشتریان گرامی، نام کاربری و رمز عبور اولیه شما شماره تلفن شماست.
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <div class="half" id="left">
+            <a href="{% url 'home' %}">
+                <img class="cover-image" src="{% static 'images/login-cover.png' %}" alt="ورود">
+            </a>
+        </div>
+    </div>
+
+        <!-- ===== مودال شماره تلفن ===== -->
+    <div class="otp-modal phone-modal" id="phoneModal">
+        <div class="otp-modal-content">
+            <button class="otp-modal-close" onclick="closePhoneModal()">&times;</button>
+            
+            <div class="otp-modal-title">
+                <i class="fas fa-mobile-alt"></i>
+                ورود با کد یکبار مصرف
+            </div>
+            <div class="otp-modal-sub">
+                کد تایید به شماره تلفن شما ارسال می‌شود
+            </div>
+            
+            <div class="row">
+                <div class="form-img">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <input class="form-inp" id="otpPhoneInput" type="tel" 
+                       placeholder="شماره تلفن (۰۹۱۲۳۴۵۶۷۸۹)" maxlength="11" dir="ltr">
+            </div>
+            
+            <div class="error-msg" id="phoneError">لطفاً شماره تلفن معتبر وارد کنید</div>
+            
+            <button class="send-btn" id="otpSendBtn" onclick="sendOtpNumber()">
+                <i class="fas fa-paper-plane ml-2"></i> دریافت کد تایید
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== مودال تایید OTP ===== -->
+    <div class="otp-modal" id="verifyModal">
+        <div class="otp-modal-content">
+            <button class="otp-modal-close" onclick="closeVerifyModal()">&times;</button>
+            
+            <div class="otp-modal-title">
+                <i class="fas fa-shield-alt"></i>
+                تایید کد یکبار مصرف
+            </div>
+            <div class="otp-modal-sub" id="verifySub">
+                کد ۶ رقمی ارسال شده به شماره <span id="verifyPhone" style="color:#c9a84c;"></span> را وارد کنید
+            </div>
+            
+            <div class="row">
+                <div class="form-img">
+                    <i class="fas fa-key"></i>
+                </div>
+                <input class="form-inp" id="otpCodeInput" type="text" 
+                       placeholder="کد ۶ رقمی" maxlength="6" dir="ltr" autocomplete="off">
+            </div>
+            
+            <div class="error-msg" id="verifyError">کد تایید اشتباه است</div>
+            <div class="success-msg" id="verifySuccess">✓ کد تایید صحیح است</div>
+            
+            <button class="send-btn" id="otpVerifyBtn" onclick="verifyOtpCode()">
+                <i class="fas fa-check ml-2"></i> تایید و ورود
+            </button>
+            
+            <div class="timer" id="timerDisplay">
+                <i class="fas fa-clock"></i> زمان باقی‌مانده: <span id="timerCount">5:00</span>
+            </div>
+            
+            <div style="text-align:center; margin-top: 0.5rem;">
+                <button class="resend-link" id="resendBtn" onclick="resendOtp()">
+                    <i class="fas fa-redo ml-1"></i> ارسال مجدد کد
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+             // ===== متغیرها =====
+        let timerInterval = null;
+        let timeLeft = 300; // 5 دقیقه
+
+        // ===== مودال شماره تلفن =====
+        function openPhoneModal() {
+            document.getElementById('phoneModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('otpPhoneInput').focus();
+            document.getElementById('phoneError').classList.remove('show');
+            document.getElementById('phoneError').textContent = '';
+            document.getElementById('otpSendBtn').disabled = false;
+            document.getElementById('otpSendBtn').innerHTML = '<i class="fas fa-paper-plane ml-2"></i> دریافت کد تایید';
+        }
+
+        function closePhoneModal() {
+            document.getElementById('phoneModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+            document.getElementById('otpPhoneInput').value = '';
+        }
+
+        // ===== مودال تایید OTP =====
+        function openVerifyModal(phone) {
+            document.getElementById('verifyPhone').textContent = phone;
+            document.getElementById('verifyModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('otpCodeInput').value = '';
+            document.getElementById('otpCodeInput').focus();
+            document.getElementById('verifyError').classList.remove('show');
+            document.getElementById('verifySuccess').classList.remove('show');
+            document.getElementById('otpVerifyBtn').disabled = false;
+            document.getElementById('otpVerifyBtn').innerHTML = '<i class="fas fa-check ml-2"></i> تایید و ورود';
+            
+            // شروع تایمر
+            startTimer();
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('verifyModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+            stopTimer();
+        }
+
+        // ===== تایمر =====
+        function startTimer() {
+            timeLeft = 300;
+            updateTimerDisplay();
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    document.getElementById('resendBtn').disabled = false;
+                    document.getElementById('timerDisplay').innerHTML = '⏰ کد منقضی شد. <button class="resend-link" onclick="resendOtp()">ارسال مجدد</button>';
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerCount').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // ===== ارسال OTP =====
+        function sendOtpNumber() {
+            const phone = document.getElementById('otpPhoneInput').value.trim();
+            const errorEl = document.getElementById('phoneError');
+            const btn = document.getElementById('otpSendBtn');
+
+            if (!phone || phone.length !== 11 || !phone.startsWith('09')) {
+                errorEl.textContent = 'لطفاً شماره تلفن معتبر (۱۱ رقم) وارد کنید';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            errorEl.classList.remove('show');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> در حال ارسال...';
+
+            fetch("{% url 'accounts:send_otp' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `phone=${phone}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closePhoneModal();
+                    openVerifyModal(phone);
+                } else if (data.error) {
+                    errorEl.textContent = data.error;
+                    errorEl.classList.add('show');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane ml-2"></i> دریافت کد تایید';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorEl.textContent = 'خطا در ارتباط با سرور';
+                errorEl.classList.add('show');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane ml-2"></i> دریافت کد تایید';
+            });
+        }
+
+        // ===== تایید OTP =====
+        function verifyOtpCode() {
+            const code = document.getElementById('otpCodeInput').value.trim();
+            const errorEl = document.getElementById('verifyError');
+            const successEl = document.getElementById('verifySuccess');
+            const btn = document.getElementById('otpVerifyBtn');
+
+            if (!code || code.length !== 6) {
+                errorEl.textContent = 'لطفاً کد ۶ رقمی را وارد کنید';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            errorEl.classList.remove('show');
+            successEl.classList.remove('show');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> در حال بررسی...';
+
+            // ارسال کد برای تایید
+            fetch("{% url 'accounts:verify_otp' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `otp=${code}`
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.success) {
+                    successEl.textContent = '✅ کد تایید صحیح است. در حال ورود...';
+                    successEl.classList.add('show');
+                    setTimeout(() => {
+                        window.location.href = "{% url 'accounts:dashboard_redirect' %}";
+                    }, 1000);
+                } else if (data && data.error) {
+                    errorEl.textContent = data.error;
+                    errorEl.classList.add('show');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check ml-2"></i> تایید و ورود';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorEl.textContent = 'خطا در ارتباط با سرور';
+                errorEl.classList.add('show');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check ml-2"></i> تایید و ورود';
+            });
+        }
+
+        // ===== ارسال مجدد =====
+        function resendOtp() {
+            const btn = document.getElementById('resendBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-1"></i> در حال ارسال...';
+
+            const phone = document.getElementById('verifyPhone').textContent;
+
+            fetch("{% url 'accounts:send_otp' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `phone=${phone}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    stopTimer();
+                    startTimer();
+                    document.getElementById('timerDisplay').innerHTML = '<i class="fas fa-clock"></i> زمان باقی‌مانده: <span id="timerCount">5:00</span>';
+                    document.getElementById('resendBtn').disabled = false;
+                    document.getElementById('resendBtn').innerHTML = '<i class="fas fa-redo ml-1"></i> ارسال مجدد کد';
+                    document.getElementById('verifyError').classList.remove('show');
+                    document.getElementById('verifySuccess').textContent = '✅ کد جدید ارسال شد';
+                    document.getElementById('verifySuccess').classList.add('show');
+                    setTimeout(() => {
+                        document.getElementById('verifySuccess').classList.remove('show');
+                    }, 3000);
+                } else {
+                    alert('خطا در ارسال مجدد کد');
+                    document.getElementById('resendBtn').disabled = false;
+                    document.getElementById('resendBtn').innerHTML = '<i class="fas fa-redo ml-1"></i> ارسال مجدد کد';
+                }
+            })
+            .catch(error => {
+                alert('خطا در ارتباط با سرور');
+                document.getElementById('resendBtn').disabled = false;
+                document.getElementById('resendBtn').innerHTML = '<i class="fas fa-redo ml-1"></i> ارسال مجدد کد';
+            });
+        }
+
+        // ===== کلیدهای میانبر =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePhoneModal();
+                closeVerifyModal();
+            }
+        });
+
+        // ارسال با Enter در فیلد کد
+        document.getElementById('otpCodeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyOtpCode();
+            }
+        });
+
+        // فقط عدد در فیلد کد OTP
+        document.getElementById('otpCodeInput').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 6);
+        });
+
+        // بستن مودال با کلیک روی پس‌زمینه
+        document.getElementById('phoneModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePhoneModal();
+            }
+        });
+
+        document.getElementById('verifyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVerifyModal();
+            }
+        });
+        // ارسال فرم با Enter
+        document.querySelectorAll('.form-inp').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.querySelector('.login-button').click();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

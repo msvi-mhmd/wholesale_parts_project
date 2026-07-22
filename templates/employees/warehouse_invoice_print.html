@@ -1,0 +1,346 @@
+<!-- templates/employees/warehouse_invoice_print.html -->
+{% load static %}
+{% load product_extras %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیش فاکتور انبار - {{ invoice.invoice_id }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Vazirmatn', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #fff;
+            padding: 20px;
+            color: #1e293b;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            background: #fff;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #c9a84c;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #c9a84c;
+            font-size: 1.8rem;
+        }
+        
+        .header .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 30px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-grid .label {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+        
+        .info-grid .value {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th {
+            background: #c9a84c;
+            color: #fff;
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        
+        td {
+            padding: 8px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+        }
+        
+        .total-row {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+        
+        .total-row td {
+            border-top: 2px solid #c9a84c;
+            padding: 12px;
+        }
+        
+        .footer {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        
+        .signature-box {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        
+        .signature-box .sign-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .signature-box .sign-item .line {
+            width: 150px;
+            border-bottom: 1px solid #94a3b8;
+            margin: 8px auto 0;
+        }
+        
+        .signature-box .sign-item .label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 5rem;
+            color: rgba(201, 168, 76, 0.08);
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+                background: #fff;
+            }
+            .invoice-container {
+                border: none;
+                padding: 20px;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .signature-box .sign-item .line {
+                border-bottom: 1px solid #000;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            .signature-box {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .signature-box .sign-item .line {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">پرشین گلف</div>
+    
+    <div class="invoice-container">
+        <!-- هدر -->
+        <div class="header">
+            <h1>🏭 پیش فاکتور انبار</h1>
+            <div class="subtitle">{{ company_name }}</div>
+            <div class="subtitle" style="font-size:0.75rem;">{{ company_address }} | {{ company_phone }}</div>
+        </div>
+        
+        <!-- اطلاعات -->
+        <div class="info-grid">
+            <div>
+                <div class="label">شماره فاکتور</div>
+                <div class="value">{{ invoice.invoice_id }}</div>
+            </div>
+            <div>
+                <div class="label">تاریخ ثبت</div>
+                <div class="value">{{ invoice.date|to_jalali }}</div>
+            </div>
+            <div>
+                <div class="label">نام مشتری</div>
+                <div class="value">{{ invoice.customer.user.first_name }} {{ invoice.customer.user.last_name }}</div>
+            </div>
+            <div>
+                <div class="label">کد ملی</div>
+                <div class="value">{{ invoice.customer.user.national_id }}</div>
+            </div>
+            <div>
+                <div class="label">شماره تلفن</div>
+                <div class="value">{{ invoice.customer.user.phone }}</div>
+            </div>
+            <div>
+                <div class="label">وضعیت</div>
+                <div class="value">
+                    {% if invoice.status.code == 'CONFIRMED' %}
+                        <span style="color:#16a34a;">تایید شده</span>
+                    {% elif invoice.status.code == 'PENDING' %}
+                        <span style="color:#eab308;">در انتظار تایید</span>
+                    {% else %}
+                        <span style="color:#dc2626;">{{ invoice.status.name }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- جدول محصولات -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ردیف</th>
+                    <th style="text-align:right;">نام محصول</th>
+                    <th>برند</th>
+                    <th>تعداد</th>
+                    <th>وضعیت موجودی</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- templates/employees/warehouse_invoice_print.html -->
+
+            {% for item in invoice.invoice_items.all %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td style="text-align:right;">
+                    {% with product=item.get_product %}
+                        {% if product %}
+                            {{ product.name }}
+                        {% else %}
+                            {{ item.product_code }}
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    {% with product=item.get_product %}
+                        {% if product %}
+                            {{ product.brand.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td>
+                    {% with product=item.get_product %}
+                        {% if product and product.left_in_stock >= item.quantity %}
+                            <span style="color:#16a34a;">موجود</span>
+                        {% elif product %}
+                            <span style="color:#dc2626;">کمبود موجودی ({{ product.left_in_stock }})</span>
+                        {% else %}
+                            <span style="color:#dc2626;">نامشخص</span>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- جمع -->
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-top:2px solid #c9a84c; margin-top:10px;">
+            <div>
+                <span style="font-weight:600;">تعداد اقلام:</span>
+                <span>{{ invoice.invoice_items.count }}</span>
+            </div>
+            <div>
+                <span style="font-weight:600;">تعداد کل:</span>
+                <span>{{ invoice.invoice_items.all|length }}</span>
+            </div>
+            <div>
+                <span style="font-weight:600;">مبلغ کل:</span>
+                <span style="color:#c9a84c; font-weight:700;">{{ invoice.total|format_price }} ریال</span>
+            </div>
+        </div>
+        
+        <!-- یادداشت -->
+        {% if invoice.notes %}
+        <div style="margin-top:15px; padding:10px; background:#f8fafc; border-radius:6px; font-size:0.85rem;">
+            <span style="font-weight:600;">یادداشت:</span>
+            <span>{{ invoice.notes }}</span>
+        </div>
+        {% endif %}
+        
+        <!-- امضاها -->
+        <div class="signature-box">
+            <div class="sign-item">
+                <div class="line"></div>
+                <div class="label">امضا و مهر انبار</div>
+            </div>
+            <div class="sign-item">
+                <div class="line"></div>
+                <div class="label">امضا مسئول فروش</div>
+            </div>
+            <div class="sign-item">
+                <div class="line"></div>
+                <div class="label">امضا مشتری</div>
+            </div>
+        </div>
+        
+        <!-- فوتر -->
+        <div class="footer">
+            <span>چاپ شده توسط: {{ user.get_full_name|default:user.username }}</span>
+            <span id="print-date">تاریخ چاپ: </span>
+        </div>
+        
+        <!-- دکمه چاپ -->
+        <div style="text-align:center; margin-top:20px;" class="no-print">
+            <button onclick="window.print()" style="background:#c9a84c; color:#fff; border:none; padding:10px 30px; border-radius:8px; font-size:1rem; cursor:pointer;">
+                <i class="fas fa-print"></i> چاپ
+            </button>
+            <button onclick="window.close()" style="background:#64748b; color:#fff; border:none; padding:10px 30px; border-radius:8px; font-size:1rem; cursor:pointer; margin-right:10px;">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // نمایش تاریخ فعلی شمسی در فوتر
+        document.getElementById('print-date').textContent += new Date().toLocaleDateString('fa-IR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).replace(/\//g, '/');
+    </script>
+</body>
+</html>

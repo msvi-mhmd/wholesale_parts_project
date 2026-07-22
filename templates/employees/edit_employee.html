@@ -1,0 +1,267 @@
+<!-- templates/employees/edit_employee.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ویرایش کارمند | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<style>
+    .access-section {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        background: #fafafa;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .access-section:hover {
+        border-color: #fbbf24;
+        background: #fefce8;
+    }
+    .access-section input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        flex-shrink: 0;
+        accent-color: #eab308;
+    }
+    .access-section label {
+        font-weight: 500;
+        color: #1e293b;
+        cursor: pointer;
+        font-size: 0.95rem;
+        flex: 1;
+    }
+    .access-section .access-desc {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: normal;
+    }
+    .access-section .access-icon {
+        font-size: 1.2rem;
+        color: #64748b;
+        width: 30px;
+        text-align: center;
+    }
+    .select-all-access {
+        font-size: 0.8rem;
+        padding: 4px 14px;
+        border-radius: 4px;
+        border: 1px solid #eab308;
+        background: white;
+        cursor: pointer;
+        transition: 0.2s;
+        color: #eab308;
+    }
+    .select-all-access:hover {
+        background: #eab308;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-yellow-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">ویرایش کارمند</h1>
+                <p class="text-sm opacity-90">{{ employee.first_name }} {{ employee.last_name }}</p>
+            </div>
+            
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                
+                <!-- اطلاعات پایه -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">نام *</label>
+                        <input type="text" name="first_name" value="{{ employee.first_name }}" required 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">نام خانوادگی *</label>
+                        <input type="text" name="last_name" value="{{ employee.last_name }}" required 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">کد ملی</label>
+                        <input type="text" value="{{ employee.national_id }}" 
+                               class="w-full border rounded-lg px-4 py-2 bg-gray-100" readonly>
+                        <p class="text-xs text-gray-400 mt-1">کد ملی قابل تغییر نیست</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">شماره تلفن *</label>
+                        <input type="tel" name="phone" value="{{ employee.phone }}" required 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ایمیل</label>
+                        <input type="email" name="email" value="{{ employee.email|default:'' }}" 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">سمت *</label>
+                        <input type="text" name="position" value="{{ employee.position }}" required 
+                               placeholder="مثال: کارشناس فروش" 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">رمز عبور جدید</label>
+                        <input type="password" name="new_password" 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" 
+                               placeholder="در صورت تمایل رمز جدید وارد کنید">
+                        <p class="text-xs text-gray-400 mt-1">در صورت تمایل رمز عبور را تغییر دهید</p>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">آدرس</label>
+                        <textarea name="address" rows="2" 
+                                  class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent">{{ employee.address|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="is_active" {% if employee.is_active %}checked{% endif %} 
+                                   class="w-4 h-4 text-yellow-600 focus:ring-yellow-500">
+                            <span class="text-sm font-medium text-gray-700">فعال</span>
+                        </label>
+                        <p class="text-xs text-gray-400 mt-1">در صورت غیرفعال بودن، کارمند نمی‌تواند وارد سیستم شود</p>
+                    </div>
+                </div>
+                
+                <!-- بخش دسترسی‌ها -->
+                <div class="mt-8 pt-4 border-t">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg">دسترسی‌های کارمند</h3>
+                            <p class="text-sm text-gray-500">بخش‌هایی که این کارمند به آنها دسترسی دارد را انتخاب کنید</p>
+                        </div>
+                        <button type="button" class="select-all-access" onclick="toggleAllAccess()">انتخاب همه</button>
+                    </div>
+                    
+                    <!-- مدیریت مشتریان -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-users"></i></span>
+                        <input type="checkbox" name="access_customers" id="access_customers" {% if employee.access_customers %}checked{% endif %}>
+                        <label for="access_customers">
+                            مدیریت مشتریان
+                            <span class="access-desc">مشاهده، افزودن، ویرایش و حذف مشتریان</span>
+                        </label>
+                    </div>
+                    
+                    <!-- مدیریت محصولات -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-boxes"></i></span>
+                        <input type="checkbox" name="access_products" id="access_products" {% if employee.access_products %}checked{% endif %}>
+                        <label for="access_products">
+                            مدیریت محصولات
+                            <span class="access-desc">مشاهده، افزودن، ویرایش، حذف و وارد کردن انبوه محصولات</span>
+                        </label>
+                    </div>
+                    
+                    <!-- مدیریت فاکتورها -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-receipt"></i></span>
+                        <input type="checkbox" name="access_invoices" id="access_invoices" {% if employee.access_invoices %}checked{% endif %}>
+                        <label for="access_invoices">
+                            مدیریت فاکتورها
+                            <span class="access-desc">مشاهده، تایید، رد، ویرایش و حذف فاکتورها</span>
+                        </label>
+                    </div>
+                    
+                    <!-- مدیریت پرداخت‌ها -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-credit-card"></i></span>
+                        <input type="checkbox" name="access_payments" id="access_payments" {% if employee.access_payments %}checked{% endif %}>
+                        <label for="access_payments">
+                            مدیریت پرداخت‌ها
+                            <span class="access-desc">مشاهده، تایید، رد، ویرایش و حذف پرداخت‌ها</span>
+                        </label>
+                    </div>
+                    
+                    <!-- مدیریت کارمندان -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-user-tie"></i></span>
+                        <input type="checkbox" name="access_employees" id="access_employees" {% if employee.access_employees %}checked{% endif %}>
+                        <label for="access_employees">
+                            مدیریت کارمندان
+                            <span class="access-desc">مشاهده، افزودن، ویرایش، حذف کارمندان و مدیریت دسترسی‌ها</span>
+                        </label>
+                    </div>
+                    
+                    <!-- گزارشات -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-chart-bar"></i></span>
+                        <input type="checkbox" name="access_reports" id="access_reports" {% if employee.access_reports %}checked{% endif %}>
+                        <label for="access_reports">
+                            گزارشات
+                            <span class="access-desc">مشاهده داشبورد گزارشات و خروجی Excel</span>
+                        </label>
+                    </div>
+                    
+                    <!-- همگام‌سازی قیمت‌ها -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-sync-alt"></i></span>
+                        <input type="checkbox" name="access_sync" id="access_sync" {% if employee.access_sync %}checked{% endif %}>
+                        <label for="access_sync">
+                            همگام‌سازی قیمت‌ها
+                            <span class="access-desc">همگام‌سازی قیمت محصولات با سیستم حسابداری</span>
+                        </label>
+                    </div>
+                    
+                    <!-- مدیریت برندها و دسته‌بندی -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-tags"></i></span>
+                        <input type="checkbox" name="access_brands_categories" id="access_brands_categories" {% if employee.access_brands_categories %}checked{% endif %}>
+                        <label for="access_brands_categories">
+                            مدیریت برندها و دسته‌بندی
+                            <span class="access-desc">مشاهده، افزودن، ویرایش و حذف برندها، دسته‌بندی‌ها و خودروها</span>
+                        </label>
+                    </div>
+                    
+                    <!-- مدیریت محتوا (بلاگ) -->
+                    <div class="access-section">
+                        <span class="access-icon"><i class="fas fa-newspaper"></i></span>
+                        <input type="checkbox" name="access_blog" id="access_blog" {% if employee.access_blog %}checked{% endif %}>
+                        <label for="access_blog">
+                            مدیریت محتوا (بلاگ)
+                            <span class="access-desc">مشاهده، افزودن، ویرایش و حذف پست‌های بلاگ</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <a href="{% url 'employees:manage_employees' %}" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                        انصراف
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">
+                        ذخیره تغییرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleAllAccess() {
+        const checkboxes = document.querySelectorAll('.access-section input[type="checkbox"]');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+        });
+        const btn = document.querySelector('.select-all-access');
+        btn.textContent = allChecked ? 'انتخاب همه' : 'حذف همه';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,485 @@
+<!-- templates/products/product_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}خرید {{ product.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .gallery-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+    
+    .gallery-thumb {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+    
+    .gallery-thumb.active {
+        border-color: #2563eb;
+    }
+    
+    .main-image {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: contain;
+        background: white;
+        border-radius: 12px;
+    }
+    
+    .spec-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .price-large {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2563eb;
+    }
+    
+    .old-price {
+        text-decoration: line-through;
+        color: #9ca3af;
+        font-size: 1.1rem;
+    }
+
+    .similar-scroll {
+        display: flex;
+        overflow-x: auto;
+        gap: 1rem;
+        padding: 0.5rem 0 1rem 0;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .similar-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .similar-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .similar-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    
+    .similar-card {
+        flex: 0 0 200px;
+        transition: transform 0.2s;
+    }
+    
+    .similar-card:hover {
+        transform: translateY(-4px);
+    }
+    
+    @media (min-width: 640px) {
+        .similar-card {
+            flex: 0 0 220px;
+        }
+    }
+    
+    @media (min-width: 768px) {
+        .similar-card {
+            flex: 0 0 240px;
+        }
+    }
+    
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: box-shadow 0.2s;
+        height: 100%;
+    }
+    
+    .product-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    }
+    
+    .product-image {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+    }
+    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <!-- Breadcrumb -->
+    <div class="text-sm text-gray-500 mb-6">
+        <a href="{% url 'home' %}" class="hover:text-yellow-600">خانه</a> &gt;
+        <a href="{% url 'products:category_products' product.sub_category.main_category.slug %}" class="hover:text-yellow-600">
+            {{ product.sub_category.main_category.name }}
+        </a> &gt;
+        <a href="{% url 'products:category_products' product.sub_category.slug %}" class="hover:text-yellow-600">
+            {{ product.sub_category.name }}
+        </a> &gt;
+        <span>{{ product.name }}</span>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- گالری تصاویر -->
+        <div>
+            <div class="bg-white rounded-xl p-4" style="max-width: 600px;">
+                <img id="mainImage" src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}"  alt="{{ product.name }}"  class="main-image" loading="lazy">
+            </div>
+            
+            {% if product.images.count > 1 %}
+            <div class="gallery-container mt-4">
+                {% for img in product.images.all %}
+                <img src="{{ img.thumb.url }}" alt="{{ product.name }}"   class="gallery-thumb {% if forloop.first %}active{% endif %}" onclick="changeImage(this, '{{ img.image.url }}')" loading="lazy">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- اطلاعات محصول -->
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold mb-4">{{ product.name }}</h1>
+            
+            <a href="{% url 'products:brand_products' product.brand.slug %}" class="inline-block text-yellow-600 hover:underline mb-4">
+                <i class="fas fa-tag ml-1"></i> {{ product.brand.name }}
+            </a>
+            
+            <!-- قیمت -->
+            <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                {% if show_price %}
+                    {% if product.off_price %}
+                        <div class="flex items-baseline gap-3">
+                            <span class="price-large">{{ product.off_price|format_price  }}</span>
+                            <span class="old-price">{{ product.price|format_price }}</span>
+                            <span class="bg-red-500 text-white px-2 py-1 rounded-lg text-sm">
+                                {{ product.discount_percent }}% تخفیف
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="price-large">{{ product.price|format_price }}</div>
+                    {% endif %}
+                    <div class="text-gray-500 text-sm mt-2">ریال</div>
+                {% else %}
+                    <div class="text-gray-500">برای مشاهده قیمت، وارد حساب کاربری خود شوید</div>
+                    <a href="{% url 'accounts:login' %}" class="btn-primary inline-block mt-3">ورود به حساب</a>
+                {% endif %}
+            </div>
+            
+            <!-- موجودی -->
+            <div class="mb-6">
+                {% if product.is_in_stock %}
+                    <span class="text-green-600 flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i> موجود در انبار
+                    </span>
+                    <div class="text-gray-500 text-sm mt-1">تعداد باقیمانده: {{ product.left_in_stock }} عدد</div>
+                {% else %}
+                    <span class="text-red-600 flex items-center gap-2">
+                        <i class="fas fa-times-circle"></i> ناموجود
+                    </span>
+                {% endif %}
+            </div>
+            
+            <!-- دکمه افزودن به سبد خرید -->
+            {% if show_price and product.is_in_stock %}
+            <button onclick="addToCart({{ product.id }})" class="w-full btn-primary py-3 text-lg">
+                <i class="fas fa-cart-plus ml-2"></i> افزودن به سبد خرید
+            </button>
+            {% endif %}
+            
+            <!-- مشخصات -->
+            <div class="mt-8">
+                <h3 class="font-bold text-lg mb-4">مشخصات محصول</h3>
+                <div class="border rounded-xl overflow-hidden">
+                    <div class="spec-item">
+                        <span class="text-gray-600">برند:</span>
+                        <span>{{ product.brand.name }}</span>
+                    </div>
+                    {% if product.specialty %}
+                    <div class="spec-item">
+                        <span class="text-gray-600">نوع محصول:</span>
+                        <span>{{ product.specialty }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="spec-item">
+                        <span class="text-gray-600">امتیاز خرید:</span>
+                        <span>{{ product.point_of_buy }} امتیاز</span>
+                    </div>
+                    {% if product.suitable_car.all %}
+                    <div class="spec-item">
+                        <span class="text-gray-600">خودروهای مناسب:</span>
+                        <span>{{ product.suitable_car.all|join:"، " }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- در product_detail.html، بعد از مشخصات محصول -->
+            {% if product.aliases.all %}
+            <div class="mt-4">
+                <h4 class="font-semibold text-sm text-gray-600 mb-2">نام‌های دیگر محصول:</h4>
+                <div class="flex flex-wrap gap-2">
+                    {% for alias in product.aliases.all %}
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{{ alias.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- توضیحات بیشتر -->
+    <div class="mt-12">
+        <h3 class="font-bold text-lg mb-4">توضیحات بیشتر</h3>
+        <div class="bg-white rounded-xl p-6">
+            <p class="text-gray-700 leading-relaxed">{{ product.full_description|linebreaks }}</p>
+        </div>
+    </div>
+    
+    <!-- محصولات مشابه -->
+    {% if similar_products %}
+    <div class="mt-16">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-xl">محصولات مشابه</h3>
+            <a href="{% url 'products:category_products' product.sub_category.slug %}" class="text-yellow-600 hover:underline">
+                مشاهده همه <i class="fas fa-arrow-left mr-1"></i>
+            </a>
+        </div>
+        
+        <div class="similar-scroll">
+            {% for similar in similar_products %}
+            <div class="similar-card">
+                <div class="product-card">
+                    <a href="{% url 'products:product_detail' similar.slug %}">
+                        <img src="{% if similar.images.first %}{{ similar.images.first.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}" 
+                             alt="{{ similar.name }}" class="product-image w-full">
+                        <div class="p-3">
+                            <h4 class="font-semibold text-sm line-clamp-2">{{ similar.name }}</h4>
+                            {% if show_price %}
+                                {% if similar.off_price %}
+                                    <div class="mt-2">
+                                        <span class="text-yellow-600 font-bold">{{ similar.off_price|format_price }}</span>
+                                        <span class="text-gray-400 text-xs line-through mr-1">{{ similar.price|format_price }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="mt-2 text-yellow-600 font-bold">{{ similar.price|format_price }}</div>
+                                {% endif %}
+                                <div class="text-gray-400 text-xs">ریال</div>
+                            {% else %}
+                                <div class="mt-2 text-gray-400 text-sm">ورود برای مشاهده قیمت</div>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+        <!-- بخش کامنت‌ها  -->
+    <div class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="font-bold text-lg">💬 نظرات ({{ comments_count }})</h3>
+                {% if comments_count > 0 %}
+                <div class="flex items-center gap-2 mt-1">
+                    <div class="text-yellow-500">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="text-sm text-gray-500">میانگین {{ avg_rating|floatformat:1 }} از 5</span>
+                </div>
+                {% endif %}
+            </div>
+            {% if user.is_authenticated and user.user_type == 'customer' %}
+            <button onclick="document.getElementById('commentForm').classList.toggle('hidden')" class="btn-primary">
+                <i class="fas fa-plus ml-2"></i> ثبت نظر
+            </button>
+            {% endif %}
+        </div>
+        
+        <!-- فرم ثبت نظر -->
+        {% if user.is_authenticated and user.user_type == 'customer' %}
+        <div id="commentForm" class="hidden bg-gray-50 rounded-xl p-6 mb-6">
+            <h4 class="font-bold mb-4">ثبت نظر جدید</h4>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="submit_comment" value="1">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">عنوان (اختیاری)</label>
+                        {{ comment_form.title }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">امتیاز</label>
+                        {{ comment_form.rating }}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">متن نظر</label>
+                    {{ comment_form.comment }}
+                </div>
+                
+                <div class="mt-4 flex gap-3">
+                    <button type="submit" class="btn-primary">ثبت نظر</button>
+                    <button type="button" onclick="document.getElementById('commentForm').classList.add('hidden')" class="btn-outline">انصراف</button>
+                </div>
+            </form>
+            <p class="text-xs text-gray-500 mt-2">نظر شما پس از تایید کارشناسان نمایش داده می‌شود.</p>
+        </div>
+        {% elif not user.is_authenticated %}
+        <div class="bg-blue-50 rounded-xl p-4 text-center mb-6">
+            <p class="text-blue-700">برای ثبت نظر <a href="{% url 'accounts:login' %}" class="font-bold hover:underline">وارد</a> حساب کاربری خود شوید.</p>
+        </div>
+        {% elif user.user_type != 'customer' %}
+        <div class="bg-gray-50 rounded-xl p-4 text-center mb-6">
+            <p class="text-gray-500">فقط مشتریان می‌توانند نظر ثبت کنند.</p>
+        </div>
+        {% endif %}
+        
+        <!-- نمایش نظرات -->
+        {% if comments %}
+        <div class="space-y-4">
+            {% for comment in comments %}
+            <div class="bg-white rounded-xl shadow-sm p-4 border-r-4 {% if comment.status == 'approved' %}border-green-500{% else %}border-yellow-500{% endif %}">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold">{{ comment.user.get_full_name|default:comment.user.username }}</span>
+                            <div class="text-yellow-500 text-sm">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= comment.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if comment.title %}
+                        <h4 class="font-semibold text-gray-800 mt-1">{{ comment.title }}</h4>
+                        {% endif %}
+                        <p class="text-gray-600 mt-2">{{ comment.comment|linebreaks }}</p>
+                        <p class="text-xs text-gray-400 mt-2">{{ comment.created_at|to_jalali }}</p>
+                    </div>
+                    
+                    {% if user.is_authenticated and user.user_type in 'admin,employee' %}
+                    <div class="flex gap-2">
+                        {% if comment.status == 'pending' %}
+                        <span class="text-yellow-600 text-xs">در انتظار تایید</span>
+                        {% elif comment.status == 'approved' %}
+                        <span class="text-green-600 text-xs">تایید شده</span>
+                        {% else %}
+                        <span class="text-red-600 text-xs">رد شده</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- پاسخ‌ها -->
+                {% if comment.replies.all %}
+                <div class="mt-4 pr-6 border-r-2 border-gray-200 space-y-3">
+                    {% for reply in comment.replies.all %}
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="font-bold text-sm">{{ reply.user.get_full_name|default:reply.user.username }}</span>
+                                <p class="text-gray-600 text-sm mt-1">{{ reply.comment }}</p>
+                                <p class="text-xs text-gray-400 mt-1">{{ reply.created_at|to_jalali }}</p>
+                            </div>
+                            <span class="text-xs text-blue-600">پاسخ</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- فرم پاسخ (فقط برای کارمند/ادمین) -->
+                {% if user.is_authenticated and user.user_type in 'admin,employee' and comment.status == 'approved' %}
+                <div class="mt-4">
+                    <button onclick="document.getElementById('replyForm_{{ comment.id }}').classList.toggle('hidden')" class="text-blue-600 text-sm hover:underline">
+                        <i class="fas fa-reply ml-1"></i> پاسخ
+                    </button>
+                    <div id="replyForm_{{ comment.id }}" class="hidden mt-3">
+                        <form method="post" class="flex gap-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="submit_reply" value="1">
+                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                            <input type="text" name="reply_text" placeholder="پاسخ خود را وارد کنید..." class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="submit" class="btn-primary text-sm">ارسال</button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 bg-gray-50 rounded-xl">
+            <i class="fas fa-comment-slash text-4xl text-gray-300 mb-2"></i>
+            <p class="text-gray-500">هنوز نظری برای این محصول ثبت نشده است.</p>
+            {% if user.is_authenticated and user.user_type == 'customer' %}
+            <p class="text-sm text-gray-400 mt-2">اولین نفری باشید که نظر می‌دهید!</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function changeImage(element, src) {
+        document.getElementById('mainImage').src = src;
+        document.querySelectorAll('.gallery-thumb').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+    
+    function addToCart(productId) {
+        fetch("{% url 'customers:add_to_cart' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ product_id: productId, quantity: 1 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('محصول به سبد خرید اضافه شد');
+                updateCartCount();
+            } else {
+                alert('خطا: ' + data.error);
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}داشبورد همگام‌سازی | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <h1 class="text-2xl font-bold mb-6">📊 داشبورد همگام‌سازی با سیستم حسابداری</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-bold text-lg mb-4">👥 مشتریان</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ customers_count }}</p>
+            <p class="text-sm text-gray-500">تعداد مشتریان همگام‌سازی شده</p>
+            {% if last_customer_sync %}
+            <p class="text-xs text-gray-400 mt-2">آخرین همگام‌سازی: {{ last_customer_sync.completed_at|to_jalali}}</p>
+            {% endif %}
+            <a href="{% url 'accounting:sync_customers' %}" class="btn-primary inline-block mt-4">همگام‌سازی مشتریان</a>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-bold text-lg mb-4">📦 محصولات</h3>
+            <p class="text-3xl font-bold text-green-600">{{ products_count }}</p>
+            <p class="text-sm text-gray-500">تعداد محصولات همگام‌سازی شده</p>
+            {% if last_product_sync %}
+            <p class="text-xs text-gray-400 mt-2">آخرین همگام‌سازی: {{ last_product_sync.completed_at|to_jalali}}</p>
+            {% endif %}
+            <a href="{% url 'accounting:sync_products' %}" class="btn-primary inline-block mt-4">همگام‌سازی محصولات</a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-bold text-lg mb-4">📄 فاکتورها</h3>
+            <p class="text-3xl font-bold text-purple-600">{{ invoices_count }}</p>
+            <p class="text-sm text-gray-500">تعداد فاکتورهای همگام‌سازی شده</p>
+            {% if last_invoice_sync %}
+            <p class="text-xs text-gray-400 mt-2">آخرین همگام‌سازی: {{ last_invoice_sync.completed_at|to_jalali}}</p>
+            {% endif %}
+            <a href="{% url 'accounting:sync_invoices' %}" class="btn-primary inline-block mt-4">
+                همگام‌سازی فاکتورها
+            </a>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-bold text-lg mb-4">💳 پرداخت‌ها</h3>
+            <p class="text-3xl font-bold text-green-600">{{ payments_count }}</p> 
+            <p class="text-sm text-gray-500">تعداد پرداخت‌های همگام‌سازی شده</p>
+            {% if last_payment_sync %}
+            <p class="text-xs text-gray-400 mt-2">آخرین همگام‌سازی: {{ last_payment_sync.completed_at|to_jalali }}</p>
+            {% endif %}
+            <a href="{% url 'accounting:sync_payments' %}" class="btn-primary inline-block mt-4 ">
+                <i class="fas fa-sync-alt ml-2"></i> همگام‌سازی پرداخت‌ها
+            </a>
+        </div>
+
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">📋 لاگ‌های اخیر</h3>
+            <a href="{% url 'accounting:sync_logs' %}" class="text-blue-600 hover:underline text-sm">مشاهده همه</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-right">نوع</th>
+                        <th class="px-4 py-2 text-right">تاریخ</th>
+                        <th class="px-4 py-2 text-right">وضعیت</th>
+                        <th class="px-4 py-2 text-right">تعداد جدید</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs|slice:":5" %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2">{{ log.get_sync_type_display }}</td>
+                        <td class="px-4 py-2">{{ log.started_at|to_jalali }}</td>
+                        <td class="px-4 py-2">
+                            {% if log.status == 'completed' %}
+                                <span class="text-green-600">✅ تکمیل شده</span>
+                            {% elif log.status == 'processing' %}
+                                <span class="text-yellow-600">⏳ در حال پردازش</span>
+                            {% else %}
+                                <span class="text-red-600">❌ ناموفق</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2">{{ log.new_items_count }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-4 text-center text-gray-500">هیچ لاگی یافت نشد</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

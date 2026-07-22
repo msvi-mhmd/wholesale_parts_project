@@ -1,0 +1,155 @@
+<!-- templates/reports/sales_report.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}گزارش فروش | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+<style>
+    .persian-datepicker {
+        z-index: 9999 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <a href="{% url 'reports:index' %}" class="text-yellow-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به داشبورد
+        </a>
+
+        <h1 class="text-2xl font-bold">گزارش فروش</h1>
+        
+        <a href="{% url 'reports:export_excel' 'sales' %}?{{ request.GET.urlencode }}" 
+           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+            <i class="fas fa-file-excel ml-2"></i> خروجی اکسل
+        </a>
+    </div>
+    
+    <!-- فیلتر تاریخ -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" id="dateFrom" name="date_from" value="{{ date_from|default:'' }}" placeholder="از تاریخ (مثال: 1403-01-01)" class="border rounded-lg px-4 py-2" dir="ltr">
+            <input type="text" id="dateTo" name="date_to" value="{{ date_to|default:'' }}" placeholder="تا تاریخ (مثال: 1403-12-29)" class="border rounded-lg px-4 py-2" dir="ltr">
+            <button type="submit" class="btn-primary">جستجو</button>
+            <a href="{% url 'reports:sales_report' %}" class="btn-outline">حذف فیلتر</a>
+        </form>
+    </div>
+    
+    <!-- آمار -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-yellow-50 rounded-xl p-4">
+            <p class="text-sm text-yellow-600">کل فروش</p>
+            <p class="text-2xl font-bold">{{ total_sales|format_price }} ریال</p>
+        </div>
+        <div class="bg-green-50 rounded-xl p-4">
+            <p class="text-sm text-green-600">تخفیف اعمال شده</p>
+            <p class="text-2xl font-bold">{{ total_discount|format_price }} ریال</p>
+        </div>
+        <div class="bg-orange-50 rounded-xl p-4">
+            <p class="text-sm text-orange-600">تعداد فاکتورها</p>
+            <p class="text-2xl font-bold">{{ invoice_count|format_price }}</p>
+        </div>
+    </div>
+    
+    <!-- فروش به تفکیک روز -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h3 class="font-bold text-lg mb-4">فروش به تفکیک روز (۳۰ روز اخیر)</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm">تاریخ</th>
+                        <th class="px-6 py-3 text-sm text-center">تعداد فاکتور</th>
+                        <th class="px-6 py-3 text-sm text-center">مبلغ فروش</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in sales_by_day %}
+                    <tr class="border-b">
+                        <td class="px-6 py-3">{{ day.day|to_jalali }}</td>
+                        <td class="px-6 py-3 text-center">{{ day.count|format_price }}</td>
+                        <td class="px-6 py-3 text-center">{{ day.total|format_price }} ریال</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">هیچ داده‌ای وجود ندارد</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- فروش به تفکیک مشتری -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="font-bold text-lg mb-4">مشتریان برتر</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm">نام مشتری</th>
+                        <th class="px-6 py-3 text-sm text-center">تعداد فاکتور</th>
+                        <th class="px-6 py-3 text-sm text-center">مبلغ خرید</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in sales_by_customer %}
+                    <tr class="border-b">
+                        <td class="px-6 py-3">{{ customer.customer__user__first_name }} {{ customer.customer__user__last_name }}</td>
+                        <td class="px-6 py-3 text-center">{{ customer.count|format_price }}</td>
+                        <td class="px-6 py-3 text-center">{{ customer.total|format_price }} ریال</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">هیچ داده‌ای وجود ندارد</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#dateFrom').persianDatepicker({
+            format: 'YYYY-MM-DD',
+            autoClose: true,
+            initialValue: false,
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            }
+        });
+        
+        $('#dateTo').persianDatepicker({
+            format: 'YYYY-MM-DD',
+            autoClose: true,
+            initialValue: false,
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

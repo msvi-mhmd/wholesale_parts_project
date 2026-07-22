@@ -1,0 +1,269 @@
+<!-- templates/customers/invoice_history.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}تاریخچه سفارشات | پنل کاربری{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">تاریخچه سفارشات</h1>
+        <a href="{% url 'customers:customer_panel' %}" class="text-yellow-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به پنل کاربری
+        </a>
+    </div>
+    
+    <!-- آمار -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-yellow-50 rounded-xl p-4">
+            <p class="text-sm text-yellow-600">جمع کل خریدها</p>
+            <p class="text-2xl font-bold text-yellow-700">{{ total_purchases|format_price }} ریال</p>
+        </div>
+        <div class="bg-purple-50 rounded-xl p-4">
+            <p class="text-sm text-purple-600">امتیاز کسب شده</p>
+            <p class="text-2xl font-bold text-purple-700">{{ total_points_earned|format_price }} امتیاز</p>
+        </div>
+    </div>
+    
+    <!-- فیلتر وضعیت -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="flex gap-4">
+            <select name="status" class="border rounded-lg px-4 py-2">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="PENDING" {% if request.GET.status == 'PENDING' %}selected{% endif %}>در انتظار تایید</option>
+                <option value="CONFIRMED" {% if request.GET.status == 'CONFIRMED' %}selected{% endif %}>تایید شده</option>
+                <option value="REJECTED" {% if request.GET.status == 'REJECTED' %}selected{% endif %}>رد شده</option>
+            </select>
+            <button type="submit" class="btn-primary">فیلتر</button>
+            {% if request.GET.status %}
+            <a href="{% url 'customers:invoice_history' %}" class="btn-outline">حذف فیلتر</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <!-- لیست فاکتورها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">شماره فاکتور</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تاریخ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مبلغ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-mono text-sm">{{ invoice.invoice_id }}</td>
+                        <td class="px-6 py-4">{{ invoice.date|to_jalali }}</td>
+                        <td class="px-6 py-4">{{ invoice.total|format_price }} ریال</td>
+                        <td class="px-6 py-4">
+                            {% if invoice.status.code == 'CONFIRMED' %}
+                                <span class="text-green-600">تایید شده</span>
+                            {% elif invoice.status.code == 'PENDING' %}
+                                <span class="text-yellow-600">در انتظار تایید</span>
+                            {% else %}
+                                <span class="text-red-600">{{ invoice.status.name }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'customers:invoice_detail' invoice.invoice_id %}" class="text-yellow-600 hover:underline">
+                                <i class="fas fa-eye"></i> مشاهده
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            هیچ سفارشی ثبت نشده است
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div> 
+        
+
+        <!-- صفحه‌بندی -->
+        {% if invoices.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if invoices.has_previous %}
+                <a href="?page={{ invoices.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in invoices.paginator.page_range %}
+                    {% if invoices.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > invoices.number|add:'-3' and num < invoices.number|add:'3' %}
+                        <a href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if invoices.has_next %}
+                <a href="?page={{ invoices.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<script>
+    // ===== متغیرهای پرداخت فاکتور =====
+let currentInvoiceId = null;
+let currentInvoiceAmount = 0;
+
+// ===== توابع مودال پرداخت فاکتور =====
+function openPayModal(invoiceId, amount) {
+    currentInvoiceId = invoiceId;
+    currentInvoiceAmount = parseInt(amount);
+    
+    document.getElementById('payInvoiceId').textContent = invoiceId;
+    document.getElementById('payInvoiceAmount').textContent = parseInt(amount).toLocaleString();
+    document.getElementById('payMaxAmount').textContent = parseInt(amount).toLocaleString();
+    document.getElementById('payAmount').value = parseInt(amount);
+    document.getElementById('payInvoiceIdHidden').value = invoiceId;
+    
+    document.getElementById('payModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    togglePayFields();
+}
+
+function closePayModal() {
+    document.getElementById('payModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    document.getElementById('payForm').reset();
+    document.getElementById('payOfflineFields').style.display = 'block';
+    document.getElementById('payOnlineMessage').classList.add('hidden');
+    currentInvoiceId = null;
+    currentInvoiceAmount = 0;
+}
+
+// ===== تغییر فیلدها بر اساس نوع پرداخت =====
+function togglePayFields() {
+    const paymentType = document.getElementById('payPaymentType');
+    const selectedOption = paymentType.options[paymentType.selectedIndex];
+    const isOnline = selectedOption && selectedOption.text.includes('آنلاین');
+    
+    const offlineFields = document.getElementById('payOfflineFields');
+    const onlineMessage = document.getElementById('payOnlineMessage');
+    const submitBtn = document.getElementById('paySubmitBtn');
+    
+    if (isOnline) {
+        offlineFields.style.display = 'none';
+        onlineMessage.classList.remove('hidden');
+        submitBtn.textContent = 'پرداخت آنلاین';
+    } else {
+        offlineFields.style.display = 'block';
+        onlineMessage.classList.add('hidden');
+        submitBtn.textContent = 'ثبت درخواست';
+    }
+}
+
+// ===== ارسال فرم پرداخت فاکتور =====
+document.getElementById('payForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const paymentType = document.getElementById('payPaymentType');
+    const selectedOption = paymentType.options[paymentType.selectedIndex];
+    const isOnline = selectedOption && selectedOption.text.includes('آنلاین');
+    const amount = document.getElementById('payAmount').value;
+    const invoiceId = document.getElementById('payInvoiceIdHidden').value;
+    
+    if (!amount || parseInt(amount) < 1000) {
+        alert('لطفاً مبلغ معتبر (حداقل ۱۰۰۰۰ ریال) وارد کنید');
+        return;
+    }
+    
+    if (parseInt(amount) > currentInvoiceAmount) {
+        alert('مبلغ پرداختی نباید بیشتر از مبلغ فاکتور باشد');
+        return;
+    }
+    
+    if (!paymentType.value) {
+        alert('لطفاً نوع پرداخت را انتخاب کنید');
+        return;
+    }
+    
+    if (isOnline) {
+        // پرداخت آنلاین
+        const formData = new FormData();
+        formData.append('amount', amount);
+        formData.append('payment_type', paymentType.value);
+        formData.append('invoice_id', invoiceId);
+        
+        fetch("{% url 'customers:online_payment' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.payment_url;
+            } else {
+                alert('خطا: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در ارتباط با سرور');
+        });
+    } else {
+        // پرداخت غیر آنلاین
+        const formData = new FormData(this);
+        
+        // اضافه کردن invoice_id به فرم
+        formData.append('invoice_id', invoiceId);
+        
+        fetch("{% url 'customers:add_payment' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data && data.error) {
+                alert('خطا: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در ارتباط با سرور');
+        });
+    }
+});
+
+// بستن مودال با کلیک روی پس‌زمینه
+document.getElementById('payModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePayModal();
+    }
+});
+
+// بستن با کلید ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePayModal();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,124 @@
+<!-- templates/employees/manage_registration_requests.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}درخواست‌های ثبت‌نام | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">📋 درخواست‌های ثبت‌نام</h1>
+        <div class="flex gap-2">
+            <a href="?status=pending" class="btn-outline text-sm">در انتظار</a>
+            <a href="?status=viewed" class="btn-outline text-sm">مشاهده شده</a>
+        </div>
+    </div>
+    
+    <!-- آمار -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-yellow-50 rounded-xl p-4">
+            <p class="text-sm text-yellow-600">در انتظار بررسی</p>
+            <p class="text-2xl font-bold">{{ pending_count }}</p>
+        </div>
+        <div class="bg-blue-50 rounded-xl p-4">
+            <p class="text-sm text-blue-600">مشاهده شده</p>
+            <p class="text-2xl font-bold">{{ viewed_count }}</p>
+        </div>
+    </div>
+    
+    <!-- فیلترها -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="text" name="search" value="{{ search }}" placeholder="جستجوی نام، کد ملی یا تلفن..." class="border rounded-lg px-4 py-2">
+            <select name="status" class="border rounded-lg px-4 py-2">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>در انتظار بررسی</option>
+                <option value="viewed" {% if status_filter == 'viewed' %}selected{% endif %}>مشاهده شده</option>
+            </select>
+            <button type="submit" class="btn-primary">جستجو</button>
+        </form>
+    </div>
+    
+    <!-- لیست درخواست‌ها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-4 py-3 text-sm font-semibold">نام و نام خانوادگی</th>
+                        <th class="px-4 py-3 text-sm font-semibold">کد ملی</th>
+                        <th class="px-4 py-3 text-sm font-semibold">تلفن</th>
+                        <th class="px-4 py-3 text-sm font-semibold">تاریخ درخواست</th>
+                        <th class="px-4 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-4 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr class="border-b hover:bg-gray-50 {% if not req.is_viewed %}bg-yellow-50{% endif %}">
+                        <td class="px-4 py-3">
+                            <div class="font-medium">{{ req.first_name }} {{ req.last_name }}</div>
+                            {% if req.invitation_code %}
+                            <div class="text-xs text-gray-400">کد معرف: {{ req.invitation_code }}</div>
+                            {% endif %}
+                            {% if not req.is_viewed %}
+                            <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">جدید</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">{{ req.national_id }}</td>
+                        <td class="px-4 py-3">{{ req.phone }}</td>
+                        <td class="px-4 py-3">{{ req.created_at|to_jalali }}</td>
+                        <td class="px-4 py-3">
+                            {% if req.is_viewed %}
+                                <span class="text-blue-600">مشاهده شده</span>
+                            {% else %}
+                                <span class="text-yellow-600">در انتظار بررسی</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <a href="{% url 'employees:view_registration_request' req.id %}" class="text-blue-600 hover:underline">
+                                <i class="fas fa-eye"></i> مشاهده
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            هیچ درخواستی یافت نشد
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if requests.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if requests.has_previous %}
+                <a href="?page={{ requests.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in requests.paginator.page_range %}
+                    {% if requests.number == num %}
+                        <span class="px-3 py-1 bg-blue-600 text-white rounded">{{ num }}</span>
+                    {% elif num > requests.number|add:'-3' and num < requests.number|add:'3' %}
+                        <a href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if requests.has_next %}
+                <a href="?page={{ requests.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+<!-- templates/sliders/slider_form.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8 max-w-2xl">
+    <div class="mb-4">
+        <a href="{% url 'sliders:slider_list' %}" class="text-gray-600 hover:text-gray-800 text-sm">
+            <i class="fas fa-arrow-right ml-1"></i> بازگشت به لیست اسلایدرها
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h1 class="text-xl font-bold text-gray-800 mb-4">{{ title }}</h1>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">عنوان <span class="text-red-500">*</span></label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.title.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">زیرنویس</label>
+                {{ form.subtitle }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">تصویر <span class="text-red-500">*</span></label>
+                {{ form.image }}
+                {% if slider and slider.image %}
+                <div class="mt-2">
+                    <img src="{{ slider.image.url }}" alt="{{ slider.title }}" class="w-32 h-24 object-cover rounded border">
+                </div>
+                {% endif %}
+                <p class="text-xs text-gray-400 mt-1">اندازه توصیه شده: 1920x600 پیکسل</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">لینک دکمه</label>
+                {{ form.link }}
+                <p class="text-xs text-gray-400 mt-1">مثال: /products/ یا https://example.com</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">متن دکمه</label>
+                {{ form.link_text }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">موقعیت</label>
+                {{ form.position }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ترتیب نمایش</label>
+                {{ form.order }}
+                <p class="text-xs text-gray-400 mt-1">اعداد کوچکتر زودتر نمایش داده میشوند</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                {{ form.is_active }}
+                <label class="text-sm font-medium text-gray-700">فعال</label>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <a href="{% url 'sliders:slider_list' %}" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">انصراف</a>
+                <button type="submit" class="btn-primary px-5 py-2 rounded-lg text-sm transition">
+                    <i class="fas fa-save ml-2"></i>
+                    ذخیره
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+<!-- templates/employees/registration_request_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}جزئیات درخواست ثبت‌نام | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-blue-600 text-white px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold">جزئیات درخواست ثبت‌نام</h1>
+                        <p class="text-sm opacity-90">{{ request.first_name }} {{ request.last_name }}</p>
+                    </div>
+                    {% if not request.is_viewed %}
+                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">جدید</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-gray-500">نام</p>
+                        <p class="font-medium">{{ request.first_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">نام خانوادگی</p>
+                        <p class="font-medium">{{ request.last_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">کد ملی</p>
+                        <p class="font-medium">{{ request.national_id }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">شماره تلفن</p>
+                        <p class="font-medium">{{ request.phone }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">ایمیل</p>
+                        <p class="font-medium">{{ request.email|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">شهر</p>
+                        <p class="font-medium">{{ request.city|default:"-" }}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-sm text-gray-500">آدرس</p>
+                        <p class="font-medium">{{ request.address|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">کد معرف</p>
+                        <p class="font-medium">{{ request.invitation_code|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">وضعیت</p>
+                        <p class="font-medium">
+                            {% if request.is_viewed %}
+                                <span class="text-blue-600">مشاهده شده</span>
+                            {% else %}
+                                <span class="text-yellow-600">در انتظار بررسی</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">تاریخ درخواست</p>
+                        <p class="font-medium">{{ request.created_at|to_jalali }}</p>
+                    </div>
+                    {% if request.viewed_at %}
+                    <div>
+                        <p class="text-sm text-gray-500">تاریخ مشاهده</p>
+                        <p class="font-medium">{{ request.viewed_at|to_jalali }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-6 pt-4 border-t">
+                    <a href="{% url 'employees:manage_registration_requests' %}" class="btn-outline">
+                        <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

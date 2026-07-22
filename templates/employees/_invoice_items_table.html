@@ -1,0 +1,67 @@
+<!-- templates/employees/_invoice_items_table.html -->
+{% load product_extras %}
+
+<table class="w-full" id="invoiceItemsTable">
+    <thead class="bg-gray-50">
+        <tr class="text-right border-b">
+            <th class="px-4 py-3">نام محصول</th>
+            <th class="px-4 py-3 text-center">تعداد</th>
+            <th class="px-4 py-3 text-center">قیمت واحد</th>
+            <th class="px-4 py-3 text-center">جمع</th>
+            <th class="px-4 py-3 text-center">امتیاز</th>
+            <th class="px-4 py-3 text-center">عملیات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in invoice.invoice_items.all %}
+        <tr class="border-b" id="item-row-{{ item.id }}">
+            <td class="px-4 py-3">
+                {% with product=item.get_product %}
+                    {% if product %}
+                        <a href="{% url 'products:product_detail' product.slug %}" class="text-yellow-600 hover:underline" target="_blank">
+                            {{ product.name }}
+                        </a>
+                        <p class="text-xs text-gray-500">{{ product.brand.name }}</p>
+                        <p class="text-xs text-gray-400">کد: {{ item.product_code }}</p>
+                    {% else %}
+                        <span class="text-gray-500">کد: {{ item.product_code }}</span>
+                        <p class="text-xs text-red-400">محصول یافت نشد</p>
+                    {% endif %}
+                {% endwith %}
+            </td>
+            <td class="px-4 py-3 text-center">
+                <div class="flex items-center justify-center gap-2">
+                    <button onclick="updateQuantity({{ item.id }}, -1)" 
+                            class="w-6 h-6 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 flex items-center justify-center"
+                            {% if invoice.status.code != 'PENDING' %}disabled{% endif %}>
+                        <i class="fas fa-minus text-xs"></i>
+                    </button>
+                    <span class="item-quantity-{{ item.id }} font-bold w-8 text-center">{{ item.quantity }}</span>
+                    <button onclick="updateQuantity({{ item.id }}, 1)" 
+                            class="w-6 h-6 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 flex items-center justify-center"
+                            {% if invoice.status.code != 'PENDING' %}disabled{% endif %}>
+                        <i class="fas fa-plus text-xs"></i>
+                    </button>
+                </div>
+            </td>
+            <td class="px-4 py-3 text-center">{{ item.price|format_price }} ریال</td>
+            <td class="px-4 py-3 text-center item-total-{{ item.id }}">{{ item.price|multiply:item.quantity|format_price }} ریال</td>
+            <td class="px-4 py-3 text-center item-points-{{ item.id }}">{{ item.points_earned|format_price }}</td>
+            <td class="px-4 py-3 text-center">
+                <button onclick="removeItem({{ item.id }})" 
+                        class="text-red-600 hover:text-red-800"
+                        {% if invoice.status.code != 'PENDING' %}disabled{% endif %}>
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center py-8 text-gray-400">
+                <i class="fas fa-box-open text-2xl block mb-2"></i>
+                هیچ محصولی در این فاکتور وجود ندارد
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

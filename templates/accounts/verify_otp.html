@@ -1,0 +1,72 @@
+<!-- templates/accounts/verify_otp.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تایید کد | پرشین گلف{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                تایید کد یکبار مصرف
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                کد تایید به شماره تلفن شما ارسال شد
+            </p>
+        </div>
+        
+        <form class="mt-8 space-y-6" method="post">
+            {% csrf_token %}
+            
+            <div>
+                <label for="otp" class="block text-sm font-medium text-gray-700">کد تایید</label>
+                <input type="text" name="otp" id="otp" required maxlength="6"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 text-center text-2xl tracking-widest"
+                       placeholder="------">
+                <p class="text-xs text-gray-500 mt-2 text-center">
+                    کد ۶ رقمی ارسال شده به شماره تلفن خود را وارد کنید
+                </p>
+            </div>
+            
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                    تایید
+                </button>
+            </div>
+        </form>
+        
+        <div class="text-center">
+            <p class="text-sm text-gray-600">
+                کد دریافت نکردید؟
+                <a href="{% url 'accounts:resend_otp' %}" class="text-yellow-600 hover:text-yellow-500 font-medium">
+                    ارسال مجدد
+                </a>
+            </p>
+            <p class="text-xs text-gray-400 mt-2">
+                کد ارسال شده ۵ دقیقه اعتبار دارد
+            </p>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'accounts:login' %}" class="text-sm text-gray-500 hover:text-gray-700">
+                ← بازگشت به صفحه ورود
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تنظیم cursor روی فیلد OTP
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('otp').focus();
+    });
+    
+    // حرکت خودکار به فیلد بعدی (اختیاری)
+    document.getElementById('otp').addEventListener('input', function(e) {
+        if (this.value.length === 6) {
+            this.form.submit();
+        }
+    });
+</script>
+{% endblock %}

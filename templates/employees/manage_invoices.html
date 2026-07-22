@@ -1,0 +1,217 @@
+<!-- templates/employees/manage_invoices.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}مدیریت فاکتورها | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+<style>
+    .datepicker-here {
+        cursor: pointer;
+        direction: ltr;
+        text-align: center;
+    }
+    .persian-datepicker {
+        z-index: 9999 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت فاکتورها</h1>
+    </div>
+    
+    <!-- آمار -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-yellow-100 rounded-xl p-4">
+            <p class="text-sm text-yellow-600">در انتظار تایید</p>
+            <p class="text-2xl font-bold">{{ pending_count }}</p>
+        </div>
+        <div class="bg-green-100 rounded-xl p-4">
+            <p class="text-sm text-green-600">تایید شده</p>
+            <p class="text-2xl font-bold">{{ confirmed_count }}</p>
+        </div>
+        <div class="bg-blue-100 rounded-xl p-4">
+            <p class="text-sm text-blue-600">جمع کل</p>
+            <p class="text-2xl font-bold">{{ total_amount|format_price }} ریال</p>
+        </div>
+    </div>
+    
+    <!-- فیلترها با تقویم شمسی -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <input type="text" name="search" value="{{ search }}" placeholder="شماره فاکتور یا نام مشتری..." class="border rounded-lg px-4 py-2">
+            <select name="status" class="border rounded-lg px-4 py-2">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>در انتظار تایید</option>
+                <option value="CONFIRMED" {% if status_filter == 'CONFIRMED' %}selected{% endif %}>تایید شده</option>
+                <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>رد شده</option>
+            </select>
+            <input type="text" id="dateFrom" name="date_from" value="{{ request.GET.date_from }}" placeholder="از تاریخ (مثال: 1403-01-01)" class="border rounded-lg px-4 py-2" dir="ltr">
+            <input type="text" id="dateTo" name="date_to" value="{{ request.GET.date_to }}" placeholder="تا تاریخ (مثال: 1403-12-29)" class="border rounded-lg px-4 py-2" dir="ltr">
+            <button type="submit" class="btn-primary">جستجو</button>
+        </form>
+    </div>
+    
+    <!-- لیست فاکتورها با تاریخ شمسی -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">شماره فاکتور</th>
+                        <th class="px-6 py-3 text-sm font-semibold">شماره حسابداری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مشتری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تاریخ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مبلغ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">ارسال به حسابداری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-mono text-sm">{{ invoice.invoice_id }}</td>
+                        <td class="px-6 py-4">
+                            {% if invoice.accounting_invoice_id %}
+                                <span class="text-blue-600">{{ invoice.accounting_invoice_id }}</span>
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">{{ invoice.customer.user.first_name }} {{ invoice.customer.user.last_name }}</td>
+                        <td class="px-6 py-4">{{ invoice.date|to_jalali }}</td>
+                        <td class="px-6 py-4">{{ invoice.total|format_price }} ریال</td>
+                        <td class="px-6 py-4">
+                            {% if invoice.status.code == 'CONFIRMED' %}
+                                <span class="text-green-600">تایید شده</span>
+                            {% elif invoice.status.code == 'PENDING' %}
+                                <span class="text-yellow-600">در انتظار تایید</span>
+                            {% else %}
+                                <span class="text-red-600">{{ invoice.status.name }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if invoice.sent_to_accounting == True %}
+                                <span class="text-green-600">ارسال شده</span>
+                            {% else %}
+                                <span class="text-red-600">ارسال نشده</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'employees:invoice_detail_admin' invoice.invoice_id %}" class="text-blue-600 hover:underline ml-3">
+                                <i class="fas fa-eye"></i> مشاهده
+                            </a>
+                            {% if invoice.status.code == 'PENDING' %}
+                            <a href="{% url 'employees:confirm_invoice' invoice.id %}" 
+                               class="text-green-600 hover:underline ml-3"
+                               onclick="return confirm('آیا از تایید این فاکتور اطمینان دارید؟')">
+                                <i class="fas fa-check"></i> تایید
+                            </a>
+                            <button onclick="rejectInvoice({{ invoice.id }})" class="text-red-600 hover:underline">
+                                <i class="fas fa-times"></i> رد
+                            </button>
+                            {% else %}
+                            <span class="text-gray-400"></span>
+                            {% endif %}
+                        </td>
+                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            هیچ فاکتوری یافت نشد
+                        </td>
+                     </tr>
+                    {% endfor %}
+                </tbody>
+             </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if invoices.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if invoices.has_previous %}
+                <a href="?page={{ invoices.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in invoices.paginator.page_range %}
+                    {% if invoices.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > invoices.number|add:'-3' and num < invoices.number|add:'3' %}
+                        <a href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if invoices.has_next %}
+                <a href="?page={{ invoices.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // تنظیمات تقویم شمسی
+        const datepickerOptions = {
+            format: 'YYYY-MM-DD',
+            autoClose: true,
+            initialValue: false,
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            }
+        };
+        
+        // فعال کردن تقویم برای فیلد "از تاریخ"
+        if ($('#dateFrom').length) {
+            $('#dateFrom').persianDatepicker(datepickerOptions);
+        }
+        
+        // فعال کردن تقویم برای فیلد "تا تاریخ"
+        if ($('#dateTo').length) {
+            $('#dateTo').persianDatepicker(datepickerOptions);
+        }
+    });
+
+    function rejectInvoice(invoiceId) {
+        let reason = prompt('لطفا دلیل رد فاکتور را وارد کنید:');
+        if (reason) {
+            fetch(`/employees/invoices/${invoiceId}/reject/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `reason=${encodeURIComponent(reason)}`
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('خطا در رد فاکتور');
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

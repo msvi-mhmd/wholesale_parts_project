@@ -1,0 +1,276 @@
+<!-- templates/employees/manage_payments.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}مدیریت پرداخت‌ها | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+<style>
+    .datepicker-here {
+        cursor: pointer;
+        direction: ltr;
+        text-align: center;
+    }
+    .persian-datepicker {
+        z-index: 9999 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت پرداخت‌ها</h1>
+    </div>
+    
+    <!-- آمار -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-yellow-50 rounded-xl p-4">
+            <p class="text-sm text-yellow-600">پرداخت‌های در انتظار تایید</p>
+            <p class="text-2xl font-bold">{{ total_pending|format_price }} ریال</p>
+        </div>
+        <div class="bg-green-50 rounded-xl p-4">
+            <p class="text-sm text-green-600">پرداخت‌های تایید شده</p>
+            <p class="text-2xl font-bold">{{ total_confirmed|format_price }} ریال</p>
+        </div>
+    </div>
+    
+    <!-- فیلترها با دیت پیکر فارسی -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" name="search" value="{{ search }}" placeholder="شماره پرداخت یا نام مشتری..." class="border rounded-lg px-4 py-2">
+            <select name="status" class="border rounded-lg px-4 py-2">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>در انتظار تایید</option>
+                <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>تایید شده</option>
+                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>رد شده</option>
+            </select>
+            <input type="text" id="dateFrom" name="date_from" value="{{ request.GET.date_from }}" placeholder="از تاریخ (مثال: 1403-01-01)" class="border rounded-lg px-4 py-2" dir="ltr">
+            <input type="text" id="dateTo" name="date_to" value="{{ request.GET.date_to }}" placeholder="تا تاریخ (مثال: 1403-12-29)" class="border rounded-lg px-4 py-2" dir="ltr">
+            <div class="md:col-span-4">
+                <button type="submit" class="btn-primary">جستجو</button>
+                <a href="{% url 'employees:manage_payments' %}" class="btn-outline mr-2">حذف فیلترها</a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- لیست پرداخت‌ها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">شماره پرداخت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مشتری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تاریخ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مبلغ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">نوع پرداخت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">کد پیگیری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-mono text-sm">{{ payment.payment_id }}</td>
+                        <td class="px-6 py-4">{{ payment.customer.user.first_name }} {{ payment.customer.user.last_name }}</td>
+                        <td class="px-6 py-4">{{ payment.date|to_jalali }}</td>
+                        <td class="px-6 py-4">{{ payment.amount|format_price }} ریال</td>
+                        <td class="px-6 py-4">{{ payment.payment_type.name }}</td>
+                        <td class="px-6 py-4">{{ payment.confirmation_code|default:"-" }}</td>
+                        <td class="px-6 py-4">
+                            {% if payment.status == 'confirmed' %}
+                                <span class="text-green-600">تایید شده</span>
+                            {% elif payment.status == 'rejected' %}
+                                <span class="text-red-600">رد شده</span>
+                            {% else %}
+                                <span class="text-yellow-600">در انتظار تایید</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button onclick="showPaymentDetails('{{ payment.id }}')" class="text-blue-600 hover:underline ml-3">
+                                <i class="fas fa-eye"></i> مشاهده
+                            </button>
+                            {% if payment.status == 'pending' %}
+                            <a href="{% url 'employees:confirm_payment' payment.id %}" 
+                               class="text-green-600 hover:underline ml-3"
+                               onclick="return confirm('آیا از تایید این پرداخت اطمینان دارید؟')">
+                                <i class="fas fa-check"></i> تایید
+                            </a>
+                            <a href="{% url 'employees:reject_payment' payment.id %}" 
+                               class="text-red-600 hover:underline"
+                               onclick="return confirm('آیا از رد این پرداخت اطمینان دارید؟')">
+                                <i class="fas fa-times"></i> رد
+                            </a>
+                            {% elif payment.status == 'confirmed' %}
+                            <span class="text-green-600">تایید شده</span>
+                            {% else %}
+                            <span class="text-red-600">رد شده</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-credit-card text-4xl mb-2 block"></i>
+                            هیچ پرداختی یافت نشد
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if payments.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if payments.has_previous %}
+                <a href="?page={{ payments.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in payments.paginator.page_range %}
+                    {% if payments.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > payments.number|add:'-3' and num < payments.number|add:'3' %}
+                        <a href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if payments.has_next %}
+                <a href="?page={{ payments.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- مودال نمایش جزئیات پرداخت -->
+<div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+        <div class="flex justify-between items-center border-b px-6 py-4">
+            <h3 class="text-xl font-bold">جزئیات پرداخت</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="paymentDetails" class="p-6">
+            <!-- جزئیات با AJAX بارگذاری می‌شود -->
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+<script>
+    // تقویم شمسی برای فیلدهای تاریخ
+    $(document).ready(function() {
+        $('#dateFrom').persianDatepicker({
+            format: 'YYYY-MM-DD',
+            autoClose: true,
+            initialValue: false,
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            }
+        });
+        
+        $('#dateTo').persianDatepicker({
+            format: 'YYYY-MM-DD',
+            autoClose: true,
+            initialValue: false,
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            }
+        });
+    });
+
+    function showPaymentDetails(paymentId) {
+        const modal = document.getElementById('paymentModal');
+        const detailsDiv = document.getElementById('paymentDetails');
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        detailsDiv.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-2xl"></i><p>در حال بارگذاری...</p></div>';
+        
+        fetch(`/employees/payments/${paymentId}/detail/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    detailsDiv.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">شماره پرداخت:</span>
+                                <span class="font-mono">${data.payment_id}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">مشتری:</span>
+                                <span>${data.customer_name}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">تاریخ:</span>
+                                <span>${data.date}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">مبلغ:</span>
+                                <span class="font-bold text-yellow-600">${data.amount} ریال</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">نوع پرداخت:</span>
+                                <span>${data.payment_type}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">کد پیگیری:</span>
+                                <span>${data.confirmation_code || '-'}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">وضعیت:</span>
+                                <span class="${data.status === 'confirmed' ? 'text-green-600' : (data.status === 'rejected' ? 'text-red-600' : 'text-yellow-600')}">${data.status_text}</span>
+                            </div>
+                            ${data.notes ? `<div class="pt-3 mt-3"><span class="text-gray-600">یادداشت:</span><p class="text-sm mt-1 bg-gray-50 p-2 rounded">${data.notes}</p></div>` : ''}
+                            ${data.receipt_image ? `<div class="pt-3 mt-3"><span class="text-gray-600">تصویر رسید:</span><div class="mt-2"><a href="${data.receipt_image}" target="_blank" class="text-yellow-600 hover:underline">مشاهده رسید</a></div></div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    detailsDiv.innerHTML = '<div class="text-center py-4 text-red-500">خطا در بارگذاری اطلاعات</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                detailsDiv.innerHTML = '<div class="text-center py-4 text-red-500">خطا در ارتباط با سرور</div>';
+            });
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('paymentModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.getElementById('paymentModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+</script>
+{% endblock %}

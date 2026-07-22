@@ -1,0 +1,120 @@
+<!-- templates/employees/manage_cars.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}مدیریت خودروها | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت خودروها</h1>
+        <button onclick="document.getElementById('addCarBrandModal').classList.remove('hidden')" 
+                class="btn-primary px-4 py-2 rounded-lg">
+            <i class="fas fa-plus ml-2"></i> افزودن برند خودرو
+        </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for brand in car_brands %}
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="header-primary px-4 py-3 border-b">
+                <h3 class="font-bold text-lg">{{ brand.name }}</h3>
+                <p class="text-sm text-gray-300">{{ brand.country }}</p>
+            </div>
+            <div class="p-4">
+                <ul class="space-y-2">
+                    {% for car in brand.cars.all %}
+                    <li class="flex justify-between items-center border-b pb-2">
+                        <span>{{ car.name }} ({{ car.model }})</span>
+                        <button class="text-red-500 hover:text-red-700 text-sm">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </li>
+                    {% empty %}
+                    <li class="text-gray-400 text-sm">مدلی ثبت نشده است</li>
+                    {% endfor %}
+                </ul>
+                <button onclick="addCar('{{ brand.id }}')" 
+                        class="mt-3 text-sm hover:underline" style="color: #c9a84c;">
+                    <i class="fas fa-plus"></i> افزودن مدل
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-8 text-gray-500">
+            هیچ برند خودرویی یافت نشد
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ===== مودال افزودن برند خودرو (وسط) ===== -->
+<div id="addCarBrandModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b px-6 py-4 sticky top-0 bg-white rounded-t-xl">
+            <h3 class="text-xl font-bold">افزودن برند خودرو</h3>
+            <button onclick="document.getElementById('addCarBrandModal').classList.add('hidden')" 
+                    class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            <input type="hidden" name="add_car_brand" value="1">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">نام برند *</label>
+                    <input type="text" name="car_brand_name" required class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">کشور</label>
+                    <input type="text" name="country" value="ایران" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6 pt-4 border-t">
+                <button type="button" onclick="document.getElementById('addCarBrandModal').classList.add('hidden')" 
+                        class="flex-1 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                    انصراف
+                </button>
+                <button type="submit" class="btn-primary flex-1 px-4 py-2 rounded-lg">
+                    افزودن
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function addCar(brandId) {
+        const name = prompt('نام خودرو را وارد کنید:');
+        if (name && name.trim()) {
+            const model = prompt('سال تولید را وارد کنید (اختیاری):');
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '';
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+            form.innerHTML = `
+                <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                <input type="hidden" name="add_car" value="1">
+                <input type="hidden" name="car_brand_id" value="${brandId}">
+                <input type="hidden" name="car_name" value="${name.trim()}">
+                <input type="hidden" name="model" value="${model || ''}">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    // بستن مودال با کلیک روی پس‌زمینه
+    document.getElementById('addCarBrandModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+    
+    // بستن با کلید ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('addCarBrandModal').classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

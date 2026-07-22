@@ -1,0 +1,93 @@
+<!-- templates/blog/list.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}بلاگ | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">📝 بلاگ</h1>
+        <a href="{% url 'home' %}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به خانه
+        </a>
+    </div>
+    
+    <!-- فیلتر دسته‌بندی -->
+    {% if categories %}
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="{% url 'blog:list' %}" class="px-4 py-2 {% if not request.GET.category %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %} rounded-lg text-sm hover:bg-blue-600 hover:text-white transition">
+            همه
+        </a>
+        {% for cat in categories %}
+        <a href="?category={{ cat.slug }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-blue-600 hover:text-white transition {% if request.GET.category == cat.slug %}bg-blue-600 text-white{% endif %}">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- لیست پست‌ها -->
+    {% if posts %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for post in posts %}
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition group">
+            <a href="{% url 'blog:detail' post.slug %}">
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+                {% else %}
+                    <div class="w-full h-48 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                {% endif %}
+                <div class="p-4">
+                    <div class="flex justify-between text-xs text-gray-500 mb-2">
+                        <span><i class="fas fa-user"></i> {{ post.author }}</span>
+                        <span><i class="fas fa-calendar-alt"></i> {{ post.created_at|to_jalali }}</span>
+                    </div>
+                    <h2 class="text-lg font-bold mb-2 line-clamp-2">{{ post.title }}</h2>
+                    <p class="text-gray-600 text-sm line-clamp-3">{{ post.summary|truncatechars:120 }}</p>
+                    <div class="mt-3 text-blue-600 text-sm font-medium hover:underline">
+                        مطالعه بیشتر <i class="fas fa-arrow-left mr-1"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+        <i class="fas fa-newspaper text-6xl text-gray-300 mb-4 block"></i>
+        <p class="text-gray-500 text-lg">هیچ پستی منتشر نشده است</p>
+        <p class="text-gray-400 text-sm mt-2">به زودی مطالب جدیدی منتشر خواهد شد</p>
+    </div>
+    {% endif %}
+    
+    <!-- صفحه‌بندی -->
+    {% if posts.has_other_pages %}
+    <div class="flex justify-center mt-8">
+        <div class="flex gap-2">
+            {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+               class="px-4 py-2 border rounded-lg hover:bg-gray-50">قبلی</a>
+            {% endif %}
+            
+            {% for num in posts.paginator.page_range %}
+                {% if posts.number == num %}
+                    <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ num }}</span>
+                {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                    <a href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+                       class="px-4 py-2 border rounded-lg hover:bg-gray-50">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+               class="px-4 py-2 border rounded-lg hover:bg-gray-50">بعدی</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

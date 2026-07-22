@@ -1,0 +1,76 @@
+<!-- templates/history.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تاریخچه شرکت | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-600 to-purple-800 text-white px-6 py-4">
+            <h1 class="text-2xl font-bold">تاریخچه شرکت</h1>
+            <p class="text-sm opacity-90">بیش از دو دهه تجربه درخشان در صنعت لوازم یدکی</p>
+        </div>
+        
+        <div class="p-6">
+            <!-- تایم‌لاین -->
+            <div class="relative pr-8 border-r-2 border-purple-200 space-y-8">
+                <div class="relative">
+                    <div class="absolute -right-11 top-0 w-6 h-6 bg-purple-600 rounded-full"></div>
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h3 class="font-bold text-purple-800">۱۴۰۰ - امروز</h3>
+                        <p class="text-gray-700 mt-2">راه‌اندازی سامانه آنلاین فروش عمده و توسعه بازار به سراسر کشور</p>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute -right-11 top-0 w-6 h-6 bg-purple-600 rounded-full"></div>
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h3 class="font-bold text-purple-800">۱۳۹۵ - ۱۴۰۰</h3>
+                        <p class="text-gray-700 mt-2">افتتاح شعبه دوم در تهران و افزایش سبد محصولات به بیش از ۵۰۰۰ قلم</p>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute -right-11 top-0 w-6 h-6 bg-purple-600 rounded-full"></div>
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h3 class="font-bold text-purple-800">۱۳۸۵ - ۱۳۹۵</h3>
+                        <p class="text-gray-700 mt-2">توسعه شبکه توزیع و نمایندگی‌های فروش در استان‌های مختلف</p>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute -right-11 top-0 w-6 h-6 bg-purple-600 rounded-full"></div>
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h3 class="font-bold text-purple-800">۱۳۸۰ - ۱۳۸۵</h3>
+                        <p class="text-gray-700 mt-2">تأسیس شرکت و شروع فعالیت در زمینه تامین لوازم یدکی خودرو</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- افتخارات -->
+            <div class="mt-8 pt-6 border-t">
+                <h2 class="text-xl font-bold text-purple-700 mb-4">افتخارات و دستاوردها</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <i class="fas fa-trophy text-2xl text-yellow-500"></i>
+                        <span>بهترین تامین‌کننده لوازم یدکی سال ۱۴۰۱</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <i class="fas fa-medal text-2xl text-yellow-500"></i>
+                        <span>گواهینامه ISO 9001:2015</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <i class="fas fa-certificate text-2xl text-green-500"></i>
+                        <span>نماد اعتماد الکترونیکی</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <i class="fas fa-chart-line text-2xl text-purple-500"></i>
+                        <span>رشد ۳۰۰ درصدی در ۵ سال اخیر</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

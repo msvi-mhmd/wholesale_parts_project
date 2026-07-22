@@ -1,0 +1,188 @@
+<!-- templates/products/product_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}محصولات | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- سایدبار فیلترها -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm p-4 sticky top-24">
+                <h3 class="font-bold text-lg mb-4">فیلتر محصولات</h3>
+                
+                <form method="get" id="filterForm">
+                    <!-- دسته‌بندی -->
+                    <div class="mb-4">
+                        <label class="font-semibold block mb-2">دسته‌بندی</label>
+                        <select name="category" class="w-full border rounded-lg px-3 py-2" onchange="this.form.submit()">
+                            <option value="">همه دسته‌ها</option>
+                            {% for category in categories %}
+                                <optgroup label="{{ category.name }}">
+                                    {% for sub in category.subcategories.all %}
+                                    <option value="{{ sub.slug }}" {% if request.GET.category == sub.slug %}selected{% endif %}>
+                                        {{ sub.name }}
+                                    </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- برند -->
+                    <div class="mb-4">
+                        <label class="font-semibold block mb-2">برند</label>
+                        <select name="brand" class="w-full border rounded-lg px-3 py-2" onchange="this.form.submit()">
+                            <option value="">همه برندها</option>
+                            {% for brand in brands %}
+                            <option value="{{ brand.slug }}" {% if request.GET.brand == brand.slug %}selected{% endif %}>
+                                {{ brand.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- خودرو مناسب -->
+                    <div class="mb-4">
+                        <label class="font-semibold block mb-2">خودروی مناسب</label>
+                        <select name="car" class="w-full border rounded-lg px-3 py-2" onchange="this.form.submit()">
+                            <option value="">همه خودروها</option>
+                            {% for car in cars %}
+                            <option value="{{ car.id }}" {% if request.GET.car == car.id|stringformat:"s" %}selected{% endif %}>
+                                {{ car.car_brand.name }} {{ car.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- محدوده قیمت -->
+                    <div class="mb-4">
+                        <label class="font-semibold block mb-2">محدوده قیمت</label>
+                        <div class="flex gap-2">
+                            <input type="number" name="min_price" placeholder="از" 
+                                   class="w-1/2 border rounded-lg px-3 py-2" 
+                                   value="{{ request.GET.min_price }}"
+                                   onchange="this.form.submit()">
+                            <input type="number" name="max_price" placeholder="تا" 
+                                   class="w-1/2 border rounded-lg px-3 py-2" 
+                                   value="{{ request.GET.max_price }}"
+                                   onchange="this.form.submit()">
+                        </div>
+                    </div>
+                    
+                    <!-- موجودی -->
+                    <div class="mb-4">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="in_stock" value="true" 
+                                   {% if request.GET.in_stock == 'true' %}checked{% endif %}
+                                   onchange="this.form.submit()">
+                            <span>فقط محصولات موجود</span>
+                        </label>
+                    </div>
+                    
+                    <!-- مرتب‌سازی -->
+                    <div class="mb-4">
+                        <label class="font-semibold block mb-2">مرتب‌سازی</label>
+                        <select name="sort" class="w-full border rounded-lg px-3 py-2" onchange="this.form.submit()">
+                            <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>جدیدترین</option>
+                            <option value="price" {% if sort == 'price' %}selected{% endif %}>ارزان‌ترین</option>
+                            <option value="-price" {% if sort == '-price' %}selected{% endif %}>گران‌ترین</option>
+                            <option value="-sold_number" {% if sort == '-sold_number' %}selected{% endif %}>پرفروش‌ترین</option>
+                            <option value="name" {% if sort == 'name' %}selected{% endif %}>نام (الفبا)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full btn-primary">اعمال فیلتر</button>
+                    <a href="{% url 'products:product_list' %}" class="block text-center mt-2 text-gray-500 text-sm">حذف همه فیلترها</a>
+                </form>
+            </div>
+        </div>
+        
+        <!-- لیست محصولات -->
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                <p class="text-gray-600">{{ products.paginator.count }} محصول یافت شد</p>
+            </div>
+            
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card">
+                    <a href="{% url 'products:product_detail' product.slug %}" class="block">
+                        <div class="relative">
+                            {% if product.off_price %}
+                            <span class="discount-badge">{{ product.discount_percent }}%</span>
+                            {% endif %}
+                            <!-- استفاده از تصویر کوچک برای کارت محصول -->
+                            <img src="{% if product.images.first %}{{ product.images.first.thumb.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}" alt="{{ product.name }}" class="product-image w-full" loading="lazy">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-sm line-clamp-2 mb-2">{{ product.name }}</h3>
+                            <p class="text-gray-500 text-xs mb-2">{{ product.brand.name }}</p>
+                            
+                            {% if show_price %}
+                                {% if product.off_price %}
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-gray-400 text-xs line-through">{{ product.price|format_price }}</span>
+                                    </div>
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-blue-600 font-bold">{{ product.off_price|format_price }} ریال</span>
+                                    </div>
+                                {% else %}
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-gray-400 text-xs ">قیمت :</span>
+                                    </div>
+                                    <div class="text-blue-600 font-bold">{{ product.price|format_price }} ریال</div>
+                                {% endif %}
+                            {% else %}
+                                <div class="text-gray-400 text-sm">ورود برای مشاهده قیمت</div>
+                            {% endif %}
+                            
+                            {% if not product.is_in_stock %}
+                            <div class="mt-2 text-red-500 text-xs">ناموجود</div>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500">محصولی یافت نشد</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- صفحه‌بندی -->
+            {% if products.has_other_pages %}
+            <div class=" flex justify-center mt-8" style="max-height: 40px;">
+                <div class="flex gap-2">
+                    {% if products.has_previous %}
+                    <a href="?page={{ products.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                       class="px-4 py-2 border rounded-lg hover:bg-gray-50">قبلی</a>
+                    {% endif %}
+                    
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                            <span class="px-4 py-2 bg-yellow-600 text-white rounded-lg">{{ num }}</span>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                            <a href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                               class="px-4 py-2 border rounded-lg hover:bg-gray-50">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if products.has_next %}
+                    <a href="?page={{ products.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                       class="px-4 py-2 border rounded-lg hover:bg-gray-50">بعدی</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const showPrice = {{ show_price|lower }};
+</script>
+{% endblock %}

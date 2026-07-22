@@ -1,0 +1,75 @@
+<!-- templates/sliders/slider_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}مدیریت اسلایدرها{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت اسلایدرها</h1>
+        <a href="{% url 'sliders:slider_create' %}" class="btn-primary">
+            <i class="fas fa-plus ml-2"></i> اسلایدر جدید
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">تصویر</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عنوان</th>
+                        <th class="px-6 py-3 text-sm font-semibold">موقعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">ترتیب</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slider in sliders %}
+                    <tr class="border-b hover:bg-gray-50" data-id="{{ slider.id }}">
+                        <td class="px-6 py-4">
+                            <img src="{{ slider.image.url }}" alt="{{ slider.title }}" class="w-20 h-16 object-cover rounded">
+                        </td>
+                        <td class="px-6 py-4 font-medium">{{ slider.title }}</td>
+                        <td class="px-6 py-4">{{ slider.get_position_display }}</td>
+                        <td class="px-6 py-4">{{ slider.order }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-xs
+                                {% if slider.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {% if slider.is_active %}فعال{% else %}غیرفعال{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'sliders:slider_edit' slider.id %}" class="text-blue-600 hover:underline ml-3">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'sliders:slider_toggle' slider.id %}" 
+                               class="{% if slider.is_active %}text-yellow-600{% else %}text-green-600{% endif %} hover:underline ml-3"
+                               onclick="return confirm('آیا از تغییر وضعیت این اسلایدر اطمینان دارید؟')">
+                                <i class="fas {% if slider.is_active %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
+                            </a>
+                            <a href="{% url 'sliders:slider_delete' slider.id %}" 
+                               class="text-red-600 hover:underline ml-3">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-image text-4xl mb-2 block"></i>
+                            هیچ اسلایدری یافت نشد
+                            <br>
+                            <a href="{% url 'sliders:slider_create' %}" class="text-blue-600 hover:underline">اولین اسلایدر را ایجاد کنید</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

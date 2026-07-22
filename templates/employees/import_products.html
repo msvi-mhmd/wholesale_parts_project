@@ -1,0 +1,110 @@
+<!-- templates/employees/import_products.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}وارد کردن انبوه محصولات | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-purple-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">وارد کردن انبوه محصولات</h1>
+                <p class="text-sm opacity-90">با استفاده از فایل Excel یا CSV</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- راهنما -->
+                <div class="bg-yellow-50 rounded-lg p-4 mb-6">
+                    <h3 class="font-bold text-yellow-800 mb-2">راهنمای فایل Excel:</h3>
+                    <ul class="text-sm text-yellow-700 space-y-1">
+                        <li>• ستون‌های مورد نیاز: <strong>name, price, left_in_stock</strong></li>
+                        <li>• ستون‌های اختیاری: brand, main_category, sub_category, off_price, specialty</li>
+                        <li>• فرمت فایل: .xlsx یا .csv</li>
+                        <li>• حداکثر حجم: 5 مگابایت</li>
+                    </ul>
+                </div>
+                
+                <!-- نمونه فرمت فایل -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 class="font-bold text-gray-700 mb-2">نمونه فرمت فایل:</h3>
+                    <pre class="text-xs bg-white p-3 rounded overflow-x-auto">
+name                | brand | main_category | sub_category | price   | left_in_stock
+لنت ترمز جلو       | بوش   | سیستم ترمز    | لنت ترمز    | 450000  | 100
+لنت ترمز عقب       | بوش   | سیستم ترمز    | لنت ترمز    | 420000  | 80
+دیسک ترمز جلو      | بوش   | سیستم ترمز    | دیسک ترمز   | 850000  | 50
+                    </pre>
+                    <a href="#" id="downloadSample" class="text-yellow-600 text-sm mt-2 inline-block">
+                        <i class="fas fa-download ml-1"></i> دانلود فایل نمونه
+                    </a>
+                </div>
+                
+                <!-- فرم آپلود -->
+                <form method="post" enctype="multipart/form-data" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            فایل Excel یا CSV
+                        </label>
+                        <input type="file" name="excel_file" accept=".xlsx,.xls,.csv" required
+                               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <p class="text-xs text-gray-500 mt-1">فایل‌های با فرمت xlsx، xls، csv پشتیبانی می‌شوند</p>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <a href="{% url 'employees:manage_products' %}" class="flex-1 text-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            انصراف
+                        </a>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            <i class="fas fa-upload ml-2"></i> شروع وارد کردن
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- نکات مهم -->
+        <div class="bg-yellow-50 rounded-lg p-4 mt-6">
+            <h3 class="font-bold text-yellow-800 mb-2">نکات مهم:</h3>
+            <ul class="text-sm text-yellow-700 space-y-1">
+                <li>• قبل از وارد کردن، از وجود دسته‌بندی‌ها و برندها در سیستم اطمینان حاصل کنید</li>
+                <li>• در صورت عدم وجود برند یا دسته‌بندی، خودکار ایجاد می‌شوند</li>
+                <li>• قیمت‌ها باید به صورت عدد (بدون کاما) وارد شوند</li>
+                <li>• پس از وارد کردن، محصولات به صورت خودکار فعال می‌شوند</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // دانلود فایل نمونه
+    document.getElementById('downloadSample').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // ایجاد داده نمونه
+        const sampleData = [
+            ['name', 'brand', 'main_category', 'sub_category', 'price', 'off_price', 'left_in_stock', 'specialty'],
+            ['لنت ترمز جلو', 'بوش', 'سیستم ترمز', 'لنت ترمز', '450000', '', '100', 'اورجینال'],
+            ['لنت ترمز عقب', 'بوش', 'سیستم ترمز', 'لنت ترمز', '420000', '380000', '80', ''],
+            ['دیسک ترمز جلو', 'بوش', 'سیستم ترمز', 'دیسک ترمز', '850000', '', '50', ''],
+            ['فیلتر روغن', 'مان', 'سیستم روغن کاری', 'فیلتر', '120000', '', '200', '']
+        ];
+        
+        // تبدیل به CSV
+        let csvContent = sampleData.map(row => row.join(',')).join('\n');
+        
+        // ایجاد لینک دانلود
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', 'sample_products.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+<!-- templates/terms_and_conditions.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}قوانین و مقررات | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-yellow-600 to-yellow-800 text-white px-6 py-4">
+            <h1 class="text-2xl font-bold">قوانین و مقررات</h1>
+            <p class="text-sm opacity-90">لطفاً قبل از استفاده از سایت، قوانین زیر را مطالعه فرمایید</p>
+        </div>
+        
+        <div class="p-6 space-y-6">
+            <div>
+                <h2 class="text-xl font-bold text-yellow-600 mb-3">۱. قوانین عمومی</h2>
+                <p class="text-gray-700 leading-relaxed">
+                    استفاده از سایت عمده‌فروشی لوازم یدکی پرشین گلف به منزله پذیرش تمامی قوانین و مقررات زیر می‌باشد. 
+                    لطفاً قبل از هرگونه اقدام، این قوانین را به دقت مطالعه فرمایید.
+                </p>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold text-yellow-600 mb-3">۲. شرایط ثبت‌نام</h2>
+                <ul class="list-disc pr-8 space-y-2 text-gray-700">
+                    <li>ثبت‌نام در سایت صرفاً با تأیید مدیریت امکان‌پذیر است</li>
+                    <li>اطلاعات وارد شده باید کاملاً صحیح و منطبق با مدارک هویتی باشد</li>
+                    <li>هر شخص تنها مجاز به داشتن یک حساب کاربری است</li>
+                    <li>مسئولیت حفظ امنیت اطلاعات حساب کاربری بر عهده کاربر می‌باشد</li>
+                </ul>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold text-yellow-600 mb-3">۳. قوانین خرید و فروش</h2>
+                <ul class="list-disc pr-8 space-y-2 text-gray-700">
+                    <li>کلیه قیمت‌ها به ریال بوده و شامل مالیات نمی‌باشد</li>
+                    <li>سفارشات پس از تأیید مدیریت، قطعی محسوب می‌شوند</li>
+                    <li>موجودی کالاها به صورت لحظه‌ای به‌روز می‌شود</li>
+                    <li>در صورت بروز مشکل در موجودی، همکاران ما با شما تماس خواهند گرفت</li>
+                    <li>برای خرید عمده با شرایط ویژه، لطفاً با پشتیبانی تماس بگیرید</li>
+                </ul>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold text-yellow-600 mb-3">۴. قوانین پرداخت و اعتبار</h2>
+                <ul class="list-disc pr-8 space-y-2 text-gray-700">
+                    <li>پرداخت‌ها از طریق کارت به کارت، واریز بانکی یا اعتبار حساب انجام می‌شود</li>
+                    <li>رسید پرداخت پس از تأیید، به حساب کاربری اضافه می‌شود</li>
+                    <li>سقف اعتبار هر مشتری توسط مدیریت تعیین می‌شود</li>
+                    <li>در صورت عدم تسویه به موقع، حساب کاربری مسدود خواهد شد</li>
+                </ul>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold text-yellow-600 mb-3">۵. قوانین ارسال و تحویل</h2>
+                <ul class="list-disc pr-8 space-y-2 text-gray-700">
+                    <li>ارسال کالاها پس از تأیید سفارش و پرداخت انجام می‌شود</li>
+                    <li>زمان تحویل بسته به موقعیت جغرافیایی متفاوت است</li>
+                    <li>هزینه ارسال بر عهده مشتری می‌باشد (به جز موارد خاص)</li>
+                </ul>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold text-yellow-600 mb-3">۶. حریم خصوصی</h2>
+                <p class="text-gray-700 leading-relaxed">
+                    اطلاعات شخصی کاربران نزد ما محفوظ است و به هیچ وجه در اختیار اشخاص ثالث قرار نخواهد گرفت. 
+                    از اطلاعات شما صرفاً برای پردازش سفارشات و بهبود خدمات استفاده می‌شود.
+                </p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <p class="text-sm text-gray-600">
+                    <i class="fas fa-info-circle ml-2"></i>
+                    آخرین به‌روزرسانی: ۱۴۰۳/۰۱/۱۵
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

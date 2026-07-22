@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}جزئیات مشتری | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="mb-6">
+        <a href="{% url 'employees:manage_customers' %}" class="text-yellow-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست مشتریان
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- اطلاعات اصلی مشتری -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="text-center border-b pb-4 mb-4">
+                    <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-user text-4xl text-yellow-600"></i>
+                    </div>
+                    <h2 class="text-xl font-bold">{{ customer.user.first_name }} {{ customer.user.last_name }}</h2>
+                    <p class="text-gray-500 text-sm">کد ملی: {{ customer.user.national_id }}</p>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">تلفن:</span>
+                        <span class="font-medium">{{ customer.user.phone }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">ایمیل:</span>
+                        <span class="font-medium">{{ customer.user.email|default:"-" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">سطح مشتری:</span>
+                        <span class="font-medium">{{ customer.customer_level.name|default:"عادی" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">درصد تخفیف:</span>
+                        <span class="font-medium text-green-600">{{ customer.customer_level.discount_percent|default:"0" }}%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">تاریخ عضویت:</span>
+                        <span class="font-medium">{{ customer.created_at|to_jalali }}</span>
+                    </div>
+                </div>
+                
+                <!-- بخش بدهی -->
+                <div class="mt-4 pt-4 border-t">
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">بدهی قبل از ۱۴۰۴/۰۲:</span>
+                        <span class="font-bold text-orange-600">{{ customer.debt_before_1404_02|format_price }} ریال</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-red-50 p-2 rounded-lg mt-2">
+                        <span class="text-gray-700 font-bold">مجموع بدهی:</span>
+                        <span class="font-bold text-red-700">{{ customer.debt|format_price }} ریال</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-gray-600">بستانکاری:</span>
+                        <span class="font-bold text-green-600">{{ customer.receivable|format_price }} ریال</span>
+                    </div>
+                </div>
+                
+                <!-- امتیازات -->
+                <div class="mt-4 pt-4 border-t">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">امتیاز کل:</span>
+                        <span class="font-medium">{{ customer.total_points|format_price }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">امتیاز استفاده شده:</span>
+                        <span class="font-medium">{{ customer.used_points|format_price }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">امتیاز قابل استفاده:</span>
+                        <span class="font-medium text-green-600">{{ customer.available_points|format_price }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">تعداد دعوت شده‌ها:</span>
+                        <span class="font-medium">{{ customer.invitations_count }}</span>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex gap-3">
+                    <a href="{% url 'employees:edit_customer' customer.id %}" class="flex-1 bg-yellow-600 text-white text-center py-2 rounded-lg hover:bg-yellow-700">
+                        <i class="fas fa-edit ml-2"></i> ویرایش
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- فاکتورها و پرداخت‌ها -->
+        <div class="lg:col-span-2">
+            <!-- آمار -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-blue-50 rounded-xl p-4">
+                    <p class="text-sm text-blue-600">کل خریدها</p>
+                    <p class="text-2xl font-bold text-blue-700">{{ customer.total_invoices_amount|format_price }} ریال</p>
+                </div>
+                <div class="bg-green-50 rounded-xl p-4">
+                    <p class="text-sm text-green-600">کل پرداخت‌ها</p>
+                    <p class="text-2xl font-bold text-green-700">{{ customer.total_payments|format_price }} ریال</p>
+                </div>
+            </div>
+            
+            <!-- فاکتورهای اخیر -->
+            <div class="bg-white rounded-xl shadow-sm mb-6">
+                <div class="border-b px-6 py-4">
+                    <h3 class="font-bold text-lg">فاکتورهای اخیر</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr class="text-right">
+                                <th class="px-6 py-3 text-sm">شماره فاکتور</th>
+                                <th class="px-6 py-3 text-sm">تاریخ</th>
+                                <th class="px-6 py-3 text-sm">مبلغ</th>
+                                <th class="px-6 py-3 text-sm">وضعیت</th>
+                                <th class="px-6 py-3 text-sm"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in invoices %}
+                            <tr class="border-b">
+                                <td class="px-6 py-3 text-sm font-mono">{{ invoice.invoice_id }}</td>
+                                <td class="px-6 py-3 text-sm">{{ invoice.date|to_jalali }}</td>
+                                <td class="px-6 py-3 text-sm">{{ invoice.total|format_price }}</td>
+                                <td class="px-6 py-3 text-sm">
+                                    {% if invoice.status.code == 'CONFIRMED' %}
+                                        <span class="text-green-600">تایید شده</span>
+                                    {% elif invoice.status.code == 'PENDING' %}
+                                        <span class="text-yellow-600">در انتظار تایید</span>
+                                    {% else %}
+                                        <span class="text-red-600">{{ invoice.status.name }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-3 text-sm">
+                                    <a href="{% url 'employees:invoice_detail_admin' invoice.invoice_id %}" class="text-yellow-600 hover:underline">مشاهده</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                    هیچ فاکتوری ثبت نشده است
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- پرداخت‌های اخیر -->
+            <div class="bg-white rounded-xl shadow-sm">
+                <div class="border-b px-6 py-4">
+                    <h3 class="font-bold text-lg">پرداخت‌های اخیر</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr class="text-right">
+                                <th class="px-6 py-3 text-sm">شماره پرداخت</th>
+                                <th class="px-6 py-3 text-sm">تاریخ</th>
+                                <th class="px-6 py-3 text-sm">مبلغ</th>
+                                <th class="px-6 py-3 text-sm">نوع</th>
+                                <th class="px-6 py-3 text-sm">وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr class="border-b">
+                                <td class="px-6 py-3 text-sm font-mono">{{ payment.payment_id }}</td>
+                                <td class="px-6 py-3 text-sm">{{ payment.date|to_jalali }}</td>
+                                <td class="px-6 py-3 text-sm">{{ payment.amount|format_price }}</td>
+                                <td class="px-6 py-3 text-sm">{{ payment.payment_type.name }}</td>
+                                <td class="px-6 py-3 text-sm">
+                                    {% if payment.is_confirmed %}
+                                        <span class="text-green-600">تایید شده</span>
+                                    {% else %}
+                                        <span class="text-yellow-600">در انتظار تایید</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                    هیچ پرداختی ثبت نشده است
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

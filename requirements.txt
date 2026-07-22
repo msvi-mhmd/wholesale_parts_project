@@ -1,0 +1,16 @@
+Django==4.2.7
+pandas==2.2.3
+openpyxl==3.1.2
+Pillow==10.4.0
+django-crispy-forms==2.1
+crispy-tailwind==0.2.0
+python-dotenv==1.0.0
+python-decouple==3.8
+psycopg2-binary==2.9.9
+redis==5.0.1
+celery==5.3.6
+django-celery-beat==2.6.0
+requests==2.31.0
+jdatetime==4.1.0
+kavenegar==1.1.2
+gunicorn==21.2.0

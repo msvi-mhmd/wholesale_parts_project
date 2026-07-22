@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}داشبورد گزارشات | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <h1 class="text-2xl font-bold mb-6">داشبورد گزارشات</h1>
+    
+    <!-- کارت‌های آمار -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm opacity-90">کل فروش</p>
+                    <p class="text-2xl font-bold">{{ total_sales|format_price }} ریال</p>
+                </div>
+                <i class="fas fa-chart-line text-3xl opacity-50"></i>
+            </div>
+        </div>
+        
+        <div class="stat-card bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm opacity-90">تعداد فاکتورها</p>
+                    <p class="text-2xl font-bold">{{ total_invoices|format_price }}</p>
+                </div>
+                <i class="fas fa-receipt text-3xl opacity-50"></i>
+            </div>
+        </div>
+        
+        <div class="stat-card bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm opacity-90">تعداد مشتریان</p>
+                    <p class="text-2xl font-bold">{{ total_customers|format_price }}</p>
+                </div>
+                <i class="fas fa-users text-3xl opacity-50"></i>
+            </div>
+        </div>
+        
+        <div class="stat-card bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm opacity-90">تعداد محصولات فروخته شده</p>
+                    <p class="text-2xl font-bold">{{ total_products_sold|format_price }}</p>
+                </div>
+                <i class="fas fa-box text-3xl opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نمودار فروش 30 روز اخیر -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h3 class="font-bold text-lg mb-4">نمودار فروش ۳۰ روز اخیر</h3>
+        <canvas id="salesChart" height="100"></canvas>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- پرفروش‌ترین محصولات -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-bold text-lg mb-4">🏆 پرفروش‌ترین محصولات</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr class="text-right">
+                            <th class="px-4 py-2 text-sm">نام محصول</th>
+                            <th class="px-4 py-2 text-sm text-center">تعداد فروش</th>
+                            <th class="px-4 py-2 text-sm text-center">مبلغ کل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in top_products %}
+                        <tr class="border-b">
+                            <td class="px-4 py-2 text-sm">{{ product.product__name|truncatechars:30 }}</td>
+                            <td class="px-4 py-2 text-sm text-center">{{ product.total_quantity|format_price }}</td>
+                            <td class="px-4 py-2 text-sm text-center">{{ product.total_revenue|format_price }} ریال</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-4 py-4 text-center text-gray-500">هیچ داده‌ای وجود ندارد</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- پرفروش‌ترین برندها -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-bold text-lg mb-4">🏷️ پرفروش‌ترین برندها</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr class="text-right">
+                            <th class="px-4 py-2 text-sm">نام برند</th>
+                            <th class="px-4 py-2 text-sm text-center">تعداد فروش</th>
+                            <th class="px-4 py-2 text-sm text-center">مبلغ کل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for brand in top_brands %}
+                        <tr class="border-b">
+                            <td class="px-4 py-2 text-sm">{{ brand.brand_name }}</td>
+                            <td class="px-4 py-2 text-sm text-center">{{ brand.total_quantity|format_price }}</td>
+                            <td class="px-4 py-2 text-sm text-center">{{ brand.total_revenue|format_price }} ریال</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-4 py-4 text-center text-gray-500">هیچ داده‌ای وجود ندارد</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- مشتریان برتر -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mt-8">
+        <h3 class="font-bold text-lg mb-4">👥 مشتریان برتر</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr class="text-right">
+                        <th class="px-4 py-2 text-sm">نام مشتری</th>
+                        <th class="px-4 py-2 text-sm text-center">کل خرید</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in top_customers %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2 text-sm">{{ customer.user.first_name }} {{ customer.user.last_name }}</td>
+                        <td class="px-4 py-2 text-sm text-center">{{ customer.total_purchase|format_price }} ریال</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="px-4 py-4 text-center text-gray-500">هیچ داده‌ای وجود ندارد</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- لینک‌های گزارشات تفصیلی -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        <a href="{% url 'reports:sales_report' %}" class="bg-yellow-50 hover:bg-yellow-100 rounded-xl p-4 text-center transition">
+            <i class="fas fa-chart-line text-2xl text-yellow-600 mb-2"></i>
+            <p class="font-semibold">گزارش فروش</p>
+            <p class="text-sm text-gray-500">مشاهده جزئیات فروش در بازه‌های زمانی</p>
+        </a>
+        <a href="{% url 'reports:payments_report' %}" class="bg-green-50 hover:bg-green-100 rounded-xl p-4 text-center transition">
+            <i class="fas fa-credit-card text-2xl text-green-600 mb-2"></i>
+            <p class="font-semibold">گزارش پرداخت‌ها</p>
+            <p class="text-sm text-gray-500">مشاهده جزئیات پرداخت‌های مشتریان</p>
+        </a>
+        <a href="{% url 'reports:products_report' %}" class="bg-purple-50 hover:bg-purple-100 rounded-xl p-4 text-center transition">
+            <i class="fas fa-boxes text-2xl text-purple-600 mb-2"></i>
+            <p class="font-semibold">گزارش محصولات</p>
+            <p class="text-sm text-gray-500">مشاهده عملکرد محصولات</p>
+        </a>
+    </div>
+</div>
+
+<script>
+    // نمودار فروش 30 روز اخیر
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesData = {{ daily_sales|safe }};
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: salesData.map(item => item.date),
+            datasets: [{
+                label: 'فروش (ریال)',
+                data: salesData.map(item => item.sales),
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            let value = context.raw;
+                            return `${label}: ${value.toLocaleString()} ریال`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' ریال';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

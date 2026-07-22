@@ -1,0 +1,87 @@
+<!-- templates/employees/edit_brand.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ویرایش برند | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="header-primary px-6 py-4">
+                <h1 class="text-2xl font-bold">ویرایش برند</h1>
+                <p class="text-sm opacity-90">{{ brand.name }}</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="p-6">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">نام برند *</label>
+                        <input type="text" name="name" value="{{ brand.name }}" required 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">کشور *</label>
+                        <input type="text" name="country" value="{{ brand.country }}" required 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">شهر *</label>
+                        <input type="text" name="city" value="{{ brand.city }}" required 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">تلفن</label>
+                        <input type="text" name="phone" value="{{ brand.phone|default:'' }}" 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">آدرس</label>
+                        <input type="text" name="street" value="{{ brand.street|default:'' }}" 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">توضیحات</label>
+                        <textarea name="description" rows="4" 
+                                  class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">{{ brand.description|default:'' }}</textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">لوگو فعلی</label>
+                        {% if brand.logo %}
+                            <div class="mt-2">
+                                <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="w-24 h-24 object-cover rounded-lg border">
+                            </div>
+                        {% else %}
+                            <p class="text-gray-400 text-sm">هیچ لوگویی آپلود نشده است</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">تغییر لوگو</label>
+                        <input type="file" name="logo" accept="image/*" 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-400 mt-1">در صورت تمایل لوگوی جدید آپلود کنید</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <a href="{% url 'employees:manage_brands' %}" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                        انصراف
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        ذخیره تغییرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1154 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+{% load settings_extras %}
+
+{% block title %}خانه | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<style>
+
+            @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 100;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Bold.ttf" %}') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Black.ttf" %}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Medium.ttf" %}') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-ExtraBold.ttf" %}') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/peyda-light.ttf" %}') format('truetype');
+            font-weight: 200;
+            font-style: normal;
+            font-display: swap;
+        }
+
+    /* ===== پس‌زمینه ثابت ===== */
+    .landing-fixed-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('{% static "images/hero-bg.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -1;
+    }
+
+    /* ===== محتوای اصلی ===== */
+    .landing-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ===== هدر اصلی ===== */
+    .main-header {
+        width: 100%;
+        min-height: 92vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: rgba(30, 30, 30, 0.55);
+        padding: 2rem;
+    }
+
+    .main-header .logo {
+        width: 200px;
+        height: 200px;
+        margin-bottom: 1.8rem;
+        border-radius: 50%;
+        object-fit: contain;
+        border: 6px solid #c9a84c;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        background: white;
+        padding: 6px;
+    }
+
+    .main-header h1 {
+        font-size: 3.2rem;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .main-header .sub-title {
+        font-size: 1.1rem;
+        color: rgba(255,255,255,0.9);
+        text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.8;
+    }
+
+    .main-header .highlight {
+        color: #c9a84c;
+        font-weight: 600;
+    }
+    .header-logo-bg-div{
+        padding: 1rem;
+        border: 2px solid white;
+        border-radius: 24px;
+        background-color: #1e293bc0;
+    }
+    /* ===== اسلایدر ===== */
+    .slider-section {
+        padding: 3rem 0;
+        background: rgba(245, 245, 245, 0.95);
+    }
+
+    .hero-swiper { 
+        width: 100%;
+        height: 73vh;
+        max-height: 600px;
+        min-height: 350px;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .hero-swiper .swiper-slide {
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+
+    .hero-swiper .slide-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        padding: 2.5rem 2rem;
+        text-align: center;
+    }
+
+    .hero-swiper .slide-content h3 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.3rem;
+    }
+
+    .hero-swiper .slide-content p {
+        color: rgba(255,255,255,0.85);
+        font-size: 0.95rem;
+    }
+
+    .hero-swiper .slide-content .btn-slide {
+        display: inline-block;
+        margin-top: 0.8rem;
+        padding: 0.5rem 1.8rem;
+        background: #c9a84c;
+        color: #fff;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: 0.3s;
+        border: 1px solid transparent;
+    }
+
+    .hero-swiper .slide-content .btn-slide:hover {
+        background: transparent;
+        border-color: #c9a84c;
+        color: #c9a84c;
+    }
+
+    .hero-swiper .swiper-button-next,
+    .hero-swiper .swiper-button-prev {
+        color: #fff;
+        background: rgba(0,0,0,0.3);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+
+    .hero-swiper .swiper-button-next:after,
+    .hero-swiper .swiper-button-prev:after {
+        font-size: 1rem;
+    }
+
+    .hero-swiper .swiper-pagination-bullet {
+        background: #fff;
+        opacity: 0.7;
+    }
+
+    .hero-swiper .swiper-pagination-bullet-active {
+        background: #c9a84c;
+        opacity: 1;
+    }
+
+    /* ===== نوار برندها ===== */
+    .brands-bar {
+        background: #e8e8e8;
+        padding: 0.6rem 0;
+        border-top: 1px solid #d5d5d5;
+        border-bottom: 1px solid #d5d5d5;
+    }
+
+    .brands-scroll {
+        display: flex;
+        overflow-x: auto;
+        gap: 2.2rem;
+        padding: 0.2rem 0;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        align-items: center;
+    }
+
+    .brands-scroll::-webkit-scrollbar {
+        height: 2px;
+    }
+    .brands-scroll::-webkit-scrollbar-thumb {
+        background: #c9a84c;
+        border-radius: 10px;
+    }
+
+    .brand-item {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #444;
+        transition: 0.3s;
+        min-width: 70px;
+    }
+
+    .brand-item:hover {
+        color: #c9a84c;
+        transform: translateY(-2px);
+    }
+
+    .brand-item img {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        border-radius: 50%;
+        border: 1px solid #ccc;
+        padding: 4px;
+        background: white;
+    }
+
+    .brand-item .brand-name {
+        font-size: 1rem;
+        margin-top: 4px;
+        white-space: nowrap;
+        color: #555;
+    }
+
+    /* ===== بخش محصولات ویژه برند ===== */
+    .brand-section {
+        padding: 2.5rem 0;
+        background: #f5f5f5;
+    }
+
+    .brand-box {
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1.5rem 0;
+        background: rgba(240, 240, 240, 0.9);
+        border: 1px solid #e0e0e0;
+    }
+
+    .brand-box.gold {
+        background: rgba(245, 240, 230, 0.9);
+        border-color: #d5c8a8;
+    }
+
+    .brand-box.green {
+        background: rgba(235, 245, 235, 0.9);
+        border-color: #c0d0b8;
+    }
+
+    .brand-box .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+    }
+
+    .brand-box .section-header h2 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .brand-box .section-header a {
+        font-size: 0.8rem;
+        color: #c9a84c;
+        font-weight: 500;
+        text-decoration: none;
+        border-bottom: 1px dashed #c9a84c;
+        padding-bottom: 2px;
+    }
+
+    .brand-box .section-header a:hover {
+        color: #a8893a;
+    }
+
+    /* ===== دسته‌بندی چهارتایی ===== */
+    .categories-grid-section {
+        padding: 3rem 0;
+        background: #f0f0f0;
+    }
+
+    .category-grid-item {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: 0.3s;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        border: 1px solid #e5e5e5;
+    }
+
+    .category-grid-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+        border-color: #c9a84c;
+    }
+
+    .category-grid-item img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .category-grid-item .category-info {
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .category-grid-item .category-info h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.2rem;
+    }
+
+    .category-grid-item .category-info p {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    /* ===== بخش محصولات ===== */
+    .products-section {
+        padding: 2.5rem 0;
+        background: #f5f5f5;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .section-header a {
+        font-size: 0.8rem;
+        color: #c9a84c;
+        font-weight: 500;
+        text-decoration: none;
+        border-bottom: 1px dashed #c9a84c;
+        padding-bottom: 2px;
+    }
+
+    .section-header a:hover {
+        color: #a8893a;
+    }
+
+    .horizontal-scroll-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .horizontal-scroll-wrapper::-webkit-scrollbar {
+        height: 6px;
+    }
+    .horizontal-scroll-wrapper::-webkit-scrollbar-thumb {
+        background: #c9a84c;
+        border-radius: 10px;
+    }
+    .horizontal-scroll-wrapper::-webkit-scrollbar-track {
+        background: #e0e0e0;
+        border-radius: 10px;
+    }
+
+    .horizontal-scroll-container {
+        display: flex;
+        gap: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .horizontal-product-card {
+        flex: 0 0 180px;
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border: 1px solid #ececec;
+    }
+
+    .horizontal-product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.07);
+        border-color: #c9a84c;
+    }
+
+    .horizontal-product-card .product-image {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+    }
+
+    .horizontal-product-card .product-info {
+        padding: 0.7rem;
+    }
+
+    .horizontal-product-card .product-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        height: 2.2rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        color: #1e293b;
+    }
+
+    .horizontal-product-card .product-brand {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        margin-bottom: 0.2rem;
+    }
+
+    .horizontal-product-card .product-price {
+        font-size: 0.85rem;
+        font-family: 'Peyda';
+        font-weight: 600;
+        color: #c9a84c;
+    }
+
+
+    /* ===== مزایا ===== */
+    .benefits-section {
+        padding: 4rem 0;
+        background: #f0f0f0;
+    }
+
+    .benefit-card {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        background: #fff;
+        border-radius: 16px;
+        transition: 0.3s;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        border: 1px solid #e8e8e8;
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+        border-color: #c9a84c;
+    }
+
+    .benefit-icon {
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 1.2rem;
+        background: #ececec;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        color: #c9a84c;
+        border: 1px solid #ddd;
+        transition: 0.3s;
+    }
+
+    .benefit-card:hover .benefit-icon {
+        background: #c9a84c;
+        color: #fff;
+        border-color: #c9a84c;
+    }
+
+    .benefit-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.3rem;
+    }
+
+    .benefit-desc {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        line-height: 1.6;
+    }
+
+    /* ===== بلاگ ===== */
+    .blog-section {
+        padding: 3.5rem 0;
+        background: #f5f5f5;
+        border-top: 1px solid #e8e8e8;
+    }
+
+    .blog-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        border: 1px solid #ececec;
+        height: 100%;
+    }
+
+    .blog-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+        border-color: #c9a84c;
+    }
+
+    .blog-card img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+    }
+
+    .blog-card .blog-body {
+        padding: 1rem;
+    }
+
+    .blog-card .blog-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.6rem;
+        color: #94a3b8;
+        margin-bottom: 0.4rem;
+    }
+
+    .blog-card .blog-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.4rem;
+    }
+
+    .blog-card .blog-summary {
+        font-size: 0.75rem;
+        color: #64748b;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.2rem;
+    }
+
+    .blog-card .blog-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.7rem;
+        padding-top: 0.6rem;
+        border-top: 1px solid #ececec;
+    }
+
+    .blog-card .blog-footer .read-more {
+        font-size: 0.7rem;
+        color: #c9a84c;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .blog-card .blog-footer .read-more:hover {
+        color: #a8893a;
+    }
+
+    .blog-card .blog-footer .views {
+        font-size: 0.6rem;
+        color: #94a3b8;
+    }
+
+    /* ===== عناوین بخش‌ها ===== */
+    .section-title {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .section-title h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .section-title p {
+        color: #94a3b8;
+        font-size: 0.95rem;
+    }
+
+    /* ===== ریسپانسیو ===== */
+    @media (max-width: 768px) {
+        .main-header .logo {
+            width: 130px;
+            height: 130px;
+        }
+        .main-header h1 {
+            font-size: 2rem;
+        }
+        .main-header .sub-title {
+            font-size: 0.95rem;
+        }
+        .hero-swiper {
+            height: 40vh;
+            min-height: 250px;
+        }
+        .hero-swiper .slide-content h3 {
+            font-size: 1.2rem;
+        }
+        .horizontal-product-card {
+            flex: 0 0 150px;
+        }
+        .brand-item img {
+            width: 40px;
+            height: 40px;
+        }
+        .brands-scroll {
+            gap: 1.5rem;
+        }
+        .category-grid-item img {
+            height: 130px;
+        }
+        .blog-card img {
+            height: 130px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="landing-fixed-bg"></div>
+
+<div class="landing-content">
+
+
+
+    <!-- ===== اسلایدر ===== -->
+    <div class="slider-section">
+        <div class="container-custom">
+            <div class="swiper hero-swiper">
+                <div class="swiper-wrapper">
+                    {% for slider in hero_sliders %}
+                    <div class="swiper-slide" style="background-image: url('{{ slider.image.url }}');">
+                        <div class="slide-content">
+                            <h3>{{ slider.title }}</h3>
+                            <p>{{ slider.subtitle }}</p>
+                            {% if slider.link %}
+                            <a href="{{ slider.link }}" class="btn-slide">{{ slider.link_text|default:'مشاهده' }}</a>
+                            {% else %}
+                            <a href="#" class="btn-slide">{{ slider.link_text|default:'مشاهده' }}</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <!-- اسلایدرهای پیش‌فرض (در صورت خالی بودن) -->
+                    <div class="swiper-slide" style="background-image: url('{% static 'images/default-slide.jpg' %}')">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </div>
+
+        <!-- ===== هدر اصلی ===== -->
+    <div class="main-header">
+        <div class="header-logo-bg-div">
+            <img src="{% static 'images/logo.png' %}" alt="لوگو" class="logo mx-auto">
+            <h1>شرکت پخش لوازم یدکی<br><span style="color:#c9a84c;">پرشین گلف</span></h1>
+            <p class="sub-title">
+                تأمین‌کننده تخصصی لوازم یدکی خودرو با <span class="highlight">کیفیت برتر</span> و <span class="highlight">قیمت‌های رقابتی</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== نوار برندها ===== -->
+    <div class="brands-bar">
+        <div class="container-custom">
+            <div class="brands-scroll">
+                {% for brand in top_brands %}
+                
+                <a href="{% url 'products:brand_products' brand.slug %}" class="brand-item">
+                    {% if brand.logo %}
+                        <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
+                    {% else %}
+                        <div style="width:50px;height:50px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#888;">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    {% endif %}
+                    <span class="brand-name">{{ brand.name }}</span>
+                </a>
+                {% empty %}
+                <p class="text-gray-500 text-sm">هیچ برندی موجود نیست</p>
+                
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== برند سبز ===== -->
+    {% if green_brand_products and green_brand %}
+    <div class="brand-section">
+        <div class="container-custom">
+            <div class="brand-box green">
+                <div class="section-header">
+                    <h2>محصولات <span style="color:#2d6a4f;">{{ green_brand.name }}</span></h2>
+                    <a href="{% url 'products:brand_products' green_brand.slug %}">مشاهده همه</a>
+                </div>
+                <div class="horizontal-scroll-wrapper">
+                    <div class="horizontal-scroll-container">
+                        {% for product in green_brand_products %}
+                        <div class="horizontal-product-card">
+                            <a href="{% url 'products:product_detail' product.slug %}" style="text-decoration:none;color:inherit;">
+                                <div style="position:relative;">
+                                    {% if product.off_price %}
+                                    <span class="discount-badge">{{ product.discount_percent }}%</span>
+                                    {% endif %}
+                                    <img src="{% if product.images.first %}{{ product.images.first.thumb.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}"  alt="{{ product.name }}"  class="product-image w-full" loading="lazy">
+                                </div>
+                                <div class="product-info">
+                                    <div style="font-size: 0.9rem; font-weight: 600;">{{ product.name }}</div>
+                                    {% if show_price %}
+                                        {% if product.off_price %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs line-through">{{ product.price|format_price }}</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="product-price">{{ product.off_price|format_price }} ریال</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs ">قیمت :</span>
+                                            </div>
+                                            <div class="product-price">{{ product.price|format_price }} ریال</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-gray-400 text-xs">ورود برای مشاهده قیمت</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== برند زرد ===== -->
+    {% if yellow_brand_products and yellow_brand %}
+    <div class="brand-section">
+        <div class="container-custom">
+            <div class="brand-box gold">
+                <div class="section-header">
+                    <h2>محصولات <span style="color:#b8860b;">{{ yellow_brand.name }}</span></h2>
+                    <a href="{% url 'products:brand_products' yellow_brand.slug %}">مشاهده همه</a>
+                </div>
+                <div class="horizontal-scroll-wrapper">
+                    <div class="horizontal-scroll-container">
+                        {% for product in yellow_brand_products %}
+                        <div class="horizontal-product-card">
+                            <a href="{% url 'products:product_detail' product.slug %}" style="text-decoration:none;color:inherit;">
+                                <div style="position:relative;">
+                                    {% if product.off_price %}
+                                    <span class="discount-badge">{{ product.discount_percent }}%</span>
+                                    {% endif %}
+                                    <!-- استفاده از تصویر کوچک برای کارت محصول -->
+                                <img src="{% if product.images.first %}{{ product.images.first.thumb.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}"  alt="{{ product.name }}"  class="product-image w-full" loading="lazy">
+                                </div>
+                                <div class="product-info">
+                                    <div style="font-size: 0.9rem;">{{ product.name }}</div>
+                                    {% if show_price %}
+                                        {% if product.off_price %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs line-through">{{ product.price|format_price }}</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="product-price">{{ product.off_price|format_price }} ریال</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs ">قیمت :</span>
+                                            </div>
+                                            <div class="product-price">{{ product.price|format_price }} ریال</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-gray-400 text-xs">ورود برای مشاهده قیمت</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== دسته‌بندی چهارتایی ===== -->
+    <div class="categories-grid-section">
+        <div class="container-custom">
+            <div class="section-header" style="margin-bottom:1.5rem;">
+                <h2>دسته‌بندی محصولات</h2>
+                <a href="{% url 'products:product_list' %}">مشاهده همه</a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {% for category in categories_for_grid|slice:":4" %}
+                <a href="{% url 'products:category_products' category.slug %}" class="category-grid-item">
+                    <div>
+                        {% if category.image %}
+                            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                        {% else %}
+                            <div style="width:100%;height:180px;background:linear-gradient(145deg,#e8e8e8,#d5d5d5);display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#c9a84c;">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                        {% endif %}
+                        <div class="category-info">
+                            <h3>{{ category.name }}</h3>
+                            <p>{{ category.subcategories.count }} زیردسته</p>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="col-span-full text-center py-8 text-gray-400">
+                    هیچ دسته‌بندی یافت نشد
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== محصولات ویژه ===== -->
+    {% if featured_products %}
+    <div class="products-section">
+        <div class="container-custom">
+            <div class="section-header">
+                <h2>✨ محصولات ویژه</h2>
+                <a href="{% url 'products:product_list' %}?featured=true">مشاهده همه</a>
+            </div>
+            <div class="horizontal-scroll-wrapper">
+                <div class="horizontal-scroll-container">
+                    {% for product in featured_products %}
+                    <div class="horizontal-product-card">
+                        <a href="{% url 'products:product_detail' product.slug %}" style="text-decoration:none;color:inherit;">
+                            <div style="position:relative;">
+                                {% if product.off_price %}
+                                <span class="discount-badge">{{ product.discount_percent }}%</span>
+                                {% endif %}
+                                <img src="{% if product.images.first %}{{ product.images.first.thumb.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}"  alt="{{ product.name }}"  class="product-image w-full" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <div style="font-size: 0.9rem;">{{ product.name }}</div>
+                                <div class="product-brand">{{ product.brand.name }}</div>
+                                {% if show_price %}
+                                    {% if product.off_price %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs line-through">{{ product.price|format_price }}</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="product-price">{{ product.off_price|format_price }} ریال</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs ">قیمت :</span>
+                                            </div>
+                                            <div class="product-price">{{ product.price|format_price }} ریال</div>
+                                        {% endif %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">ورود برای مشاهده قیمت</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== محصولات تخفیف‌دار ===== -->
+    {% if discounted_products %}
+    <div class="products-section" style="padding-top:0;">
+        <div class="container-custom">
+            <div class="section-header">
+                <h2>🔥 پرتخفیف‌ترین</h2>
+                <a href="{% url 'products:product_list' %}?discount=true">مشاهده همه</a>
+            </div>
+            <div class="horizontal-scroll-wrapper">
+                <div class="horizontal-scroll-container">
+                    {% for product in discounted_products %}
+                    <div class="horizontal-product-card">
+                        <a href="{% url 'products:product_detail' product.slug %}" style="text-decoration:none;color:inherit;">
+                            <div style="position:relative;">
+                                <span class="discount-badge">{{ product.discount_percent }}%</span>
+                                <img src="{% if product.images.first %}{{ product.images.first.thumb.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}"  alt="{{ product.name }}"  class="product-image w-full" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <div style="font-size: 0.9rem;">{{ product.name }}</div>
+                                <div class="product-brand">{{ product.brand.name }}</div>
+                                {% if show_price %}
+                                    {% if product.off_price %}
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-gray-400 text-xs line-through">{{ product.price|format_price }}</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="product-price">{{ product.off_price|format_price }} ریال</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-gray-400 text-xs ">قیمت :</span>
+                                        </div>
+                                        <div class="product-price">{{ product.price|format_price }} ریال</div>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">ورود برای مشاهده قیمت</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== پرفروش‌ترین ===== -->
+    {% if best_sellers %}
+    <div class="products-section" style="padding-top:0;">
+        <div class="container-custom">
+            <div class="section-header">
+                <h2>🏆 پرفروش‌ترین</h2>
+                <a href="{% url 'products:product_list' %}?sort=-sold_number">مشاهده همه</a>
+            </div>
+            <div class="horizontal-scroll-wrapper">
+                <div class="horizontal-scroll-container">
+                    {% for product in best_sellers %}
+                    <div class="horizontal-product-card">
+                        <a href="{% url 'products:product_detail' product.slug %}" style="text-decoration:none;color:inherit;">
+                            <div style="position:relative;">
+                                {% if product.off_price %}
+                                <span class="discount-badge">{{ product.discount_percent }}%</span>
+                                {% endif %}
+                                <img src="{% if product.images.first %}{{ product.images.first.thumb.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}"  alt="{{ product.name }}"  class="product-image w-full" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <div style="font-size: 0.9rem;">{{ product.name }}</div>
+                                <div class="product-brand">{{ product.brand.name }}</div>
+                                
+                                {% if show_price %}
+                                    {% if product.off_price %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs line-through">{{ product.price|format_price }}</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="product-price">{{ product.off_price|format_price }} ریال</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-gray-400 text-xs ">قیمت :</span>
+                                            </div>
+                                            <div class="product-price">{{ product.price|format_price }} ریال</div>
+                                        {% endif %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">ورود برای مشاهده قیمت</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== مزایا ===== -->
+    <div class="benefits-section">
+        <div class="container-custom">
+            <div class="section-title">
+                <h2>چرا ما را انتخاب کنید؟</h2>
+                <p>با بیش از دو دهه تجربه درخشان</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="fas fa-truck"></i></div>
+                    <h3 class="benefit-title">ارسال سریع</h3>
+                    <p class="benefit-desc">ارسال به سراسر کشور در کمترین زمان</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="fas fa-check-circle"></i></div>
+                    <h3 class="benefit-title">ضمانت اصالت</h3>
+                    <p class="benefit-desc">تضمین کیفیت و اصل بودن کالاها</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="fas fa-headset"></i></div>
+                    <h3 class="benefit-title">پشتیبانی ۲۴/۷</h3>
+                    <p class="benefit-desc">مشاوره تخصصی و پاسخگویی همیشگی</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="fas fa-percent"></i></div>
+                    <h3 class="benefit-title">تخفیف ویژه</h3>
+                    <p class="benefit-desc">تخفیف‌های منحصربه‌فرد برای خرید عمده</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== بلاگ ===== -->
+    {% if latest_blog_posts %}
+    <div class="blog-section">
+        <div class="container-custom">
+            <div class="section-header">
+                <div>
+                    <h2 style="font-size:1.3rem;font-weight:600;color:#1e293b;">📝 آخرین مطالب</h2>
+                    <p style="font-size:0.8rem;color:#94a3b8;">جدیدترین مقالات و آموزش‌ها</p>
+                </div>
+                <a href="{% url 'blog:list' %}" style="font-size:0.8rem;color:#c9a84c;font-weight:500;text-decoration:none;border-bottom:1px dashed #c9a84c;padding-bottom:2px;">مشاهده همه</a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {% for post in latest_blog_posts %}
+                <div class="blog-card">
+                    <a href="{% url 'blog:detail' post.slug %}" style="text-decoration:none;color:inherit;">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                        {% else %}
+                            <div style="width:100%;height:160px;background:linear-gradient(145deg,#e8e8e8,#d5d5d5);display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#c9a84c;">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                        {% endif %}
+                        <div class="blog-body">
+                            <div class="blog-meta">
+                                <span><i class="fas fa-user"></i> {{ post.author }}</span>
+                                <span><i class="fas fa-calendar-alt"></i> {{ post.created_at|to_jalali }}</span>
+                            </div>
+                            <div class="blog-title">{{ post.title }}</div>
+                            <div class="blog-summary">{{ post.summary|truncatechars:60 }}</div>
+                            <div class="blog-footer">
+                                <span class="read-more">مطالعه بیشتر</span>
+                                <span class="views"><i class="fas fa-eye"></i> {{ post.view_count }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    var swiper = new Swiper('.hero-swiper', {
+        loop: true,
+        autoplay: { delay: 5000, disableOnInteraction: false },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        effect: 'slide',
+        speed: 700,
+    });
+
+    function formatNumbers() {
+        document.querySelectorAll('.price-number, .product-price').forEach(el => {
+            let text = el.innerText;
+            if (text && /^\d+$/.test(text.trim())) {
+                el.innerText = parseInt(text).toLocaleString('en-US');
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', formatNumbers);
+    setTimeout(formatNumbers, 500);
+</script>
+{% endblock %}

@@ -1,0 +1,54 @@
+<!-- templates/employees/change_username.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تغییر نام کاربری | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8 max-w-2xl">
+    <div class="mb-4">
+        <a href="{% url 'employees:admin_panel' %}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به پنل مدیریت
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-6">
+            <i class="fas fa-user-edit text-2xl text-yellow-600"></i>
+            <h1 class="text-2xl font-bold">تغییر نام کاربری</h1>
+        </div>
+        
+        <div class="bg-blue-50 border-r-4 border-blue-400 p-4 mb-6">
+            <p class="text-sm text-blue-700">
+                <i class="fas fa-info-circle ml-2"></i>
+                نام کاربری فعلی شما: <strong>{{ user.username }}</strong>
+            </p>
+        </div>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">نام کاربری جدید <span class="text-red-500">*</span></label>
+                <input type="text" name="username" value="{{ user.username }}" 
+                       class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                <p class="text-xs text-gray-400 mt-1">نام کاربری باید حداقل ۳ کاراکتر باشد</p>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">رمز عبور فعلی <span class="text-red-500">*</span></label>
+                <input type="password" name="current_password" required
+                       class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                <p class="text-xs text-gray-400 mt-1">برای تایید تغییرات، رمز عبور فعلی را وارد کنید</p>
+            </div>
+            
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <a href="{% url 'employees:admin_panel' %}" class="btn-outline">انصراف</a>
+                <button type="submit" class="btn-primary bg-yellow-600 hover:bg-yellow-700">
+                    <i class="fas fa-save ml-2"></i> تغییر نام کاربری
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

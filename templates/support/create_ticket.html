@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}تیکت جدید{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="header-primary px-6 py-4">
+                <h1 class="text-2xl font-bold">تیکت جدید</h1>
+                <p class="text-sm opacity-90">درخواست پشتیبانی خود را ثبت کنید</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="p-6">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">عنوان *</label>
+                        <input type="text" name="title" required class="w-full border rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">اولویت</label>
+                        <select name="priority" class="w-full border rounded-lg px-4 py-2">
+                            <option value="low">کم</option>
+                            <option value="normal" selected>معمولی</option>
+                            <option value="high">بالا</option>
+                            <option value="urgent">فوری</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">پیام *</label>
+                        <textarea name="message" rows="5" required class="w-full border rounded-lg px-4 py-2"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">پیوست</label>
+                        <input type="file" name="attachment" class="w-full border rounded-lg px-4 py-2">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6 pt-4 border-t">
+                    <a href="{% url 'support:ticket_list' %}" class="flex-1 text-center px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">انصراف</a>
+                    <button type="submit" class="flex-1 px-4 py-2 btn-primary rounded-lg">ثبت تیکت</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

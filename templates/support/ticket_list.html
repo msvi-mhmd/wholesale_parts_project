@@ -1,0 +1,104 @@
+<!-- templates/support/ticket_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}تیکت‌های پشتیبانی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-6">
+    <!-- هدر با دکمه تیکت جدید -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold text-gray-800">تیکت‌های پشتیبانی</h1>
+        <a href="{% url 'support:create_ticket' %}" 
+           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition">
+            <i class="fas fa-plus"></i>
+            تیکت جدید
+        </a>
+    </div>
+    
+    <!-- فیلتر وضعیت (ساده) -->
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+        <a href="{% url 'support:ticket_list' %}" 
+           class="px-3 py-1.5 rounded-full text-xs font-medium {% if not status_filter %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %} transition">
+            همه
+        </a>
+        <a href="?status=open" 
+           class="px-3 py-1.5 rounded-full text-xs font-medium {% if status_filter == 'open' %}bg-yellow-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %} transition">
+            باز
+        </a>
+        <a href="?status=in_progress" 
+           class="px-3 py-1.5 rounded-full text-xs font-medium {% if status_filter == 'in_progress' %}bg-purple-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %} transition">
+            در حال بررسی
+        </a>
+        <a href="?status=answered" 
+           class="px-3 py-1.5 rounded-full text-xs font-medium {% if status_filter == 'answered' %}bg-green-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %} transition">
+            پاسخ داده شده
+        </a>
+        <a href="?status=closed" 
+           class="px-3 py-1.5 rounded-full text-xs font-medium {% if status_filter == 'closed' %}bg-gray-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %} transition">
+            بسته شده
+        </a>
+    </div>
+    
+    <!-- لیست تیکت‌ها -->
+    {% if tickets %}
+    <div class="space-y-3">
+        {% for ticket in tickets %}
+        <a href="{% url 'support:ticket_detail' ticket.ticket_id %}" 
+           class="block bg-white rounded-lg shadow-sm hover:shadow-md transition border border-gray-100 p-4">
+            <div class="flex justify-between items-start">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-medium text-gray-800 text-sm truncate">{{ ticket.title }}</span>
+                        <span class="text-xs text-gray-400 font-mono">#{{ ticket.ticket_id }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-gray-500">
+                        <span>{{ ticket.created_at|to_jalali }}</span>
+                        <span>•</span>
+                        <span>{{ ticket.replies.count }} پاسخ</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0 mr-3">
+                    <span class="px-2 py-0.5 rounded text-xs
+                        {% if ticket.status == 'open' %}bg-yellow-100 text-yellow-800
+                        {% elif ticket.status == 'in_progress' %}bg-purple-100 text-purple-800
+                        {% elif ticket.status == 'answered' %}bg-green-100 text-green-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ ticket.get_status_display }}
+                    </span>
+                    {% if ticket.priority == 'urgent' %}
+                    <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-800">فوری</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    
+    <!-- صفحه‌بندی -->
+    {% if tickets.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if tickets.has_previous %}
+        <a href="?page={{ tickets.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+           class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm transition">قبلی</a>
+        {% endif %}
+        <span class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm">{{ tickets.number }}</span>
+        {% if tickets.has_next %}
+        <a href="?page={{ tickets.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+           class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm transition">بعدی</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="text-center py-16 bg-white rounded-lg shadow-sm border border-gray-100">
+        <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+        <p class="text-gray-400 text-sm">هیچ تیکتی ثبت نکرده‌اید</p>
+        <a href="{% url 'support:create_ticket' %}" class="inline-block mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium">
+            ثبت تیکت جدید
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

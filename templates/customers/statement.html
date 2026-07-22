@@ -1,0 +1,533 @@
+<!-- templates/customers/statement.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}صورتحساب | پنل کاربری{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+<style>
+    .datepicker-here {
+        cursor: pointer;
+        direction: ltr;
+        text-align: center;
+    }
+    .persian-datepicker {
+        z-index: 9999 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        
+        <a href="{% url 'customers:customer_panel' %}" class="text-yellow-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به پنل کاربری
+        </a>
+        <h1 class="text-2xl font-bold">📊 صورتحساب</h1>
+        <button onclick="openPaymentModal('wallet')" class="btn-primary bg-green-600 hover:bg-green-700">
+            <i class="fas fa-plus-circle ml-2"></i> پرداخت جدید
+        </button>
+    </div>
+    
+    <!-- ===== کارت‌های آماری ===== -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-green-100 rounded-xl p-4 border-r-4 border-green-600">
+            <p class="text-sm text-green-600">پرداخت‌های تایید شده</p>
+            <p class="text-2xl font-bold text-green-700">{{ confirmed_payments_count }}</p>
+        </div>
+        <div class="bg-yellow-100 rounded-xl p-4 border-r-4 border-yellow-600">
+            <p class="text-sm text-yellow-600">پرداخت‌های در انتظار</p>
+            <p class="text-2xl font-bold text-yellow-700">{{ pending_payments_count }}</p>
+        </div>
+        <div class="bg-blue-100 rounded-xl p-4 border-r-4 border-blue-600">
+            <p class="text-sm text-blue-600">سفارشات تایید شده</p>
+            <p class="text-2xl font-bold text-blue-700">{{ confirmed_invoices_count }}</p>
+        </div>
+        <div class="bg-orange-100 rounded-xl p-4 border-r-4 border-orange-600">
+            <p class="text-sm text-orange-600">سفارشات در انتظار</p>
+            <p class="text-2xl font-bold text-orange-700">{{ pending_invoices_count }}</p>
+        </div>
+    </div>
+    
+    <!-- ===== کارت‌های مالی ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        
+        <div class="bg-red-50 rounded-xl p-4 border border-red-200">
+            <p class="text-sm text-red-600">💰 بدهی</p>
+            <p class="text-2xl font-bold text-red-700">{{ debt|format_price }} ریال</p>
+        </div>
+
+        <div class="bg-orange-50 rounded-xl p-4 border border-orange-200">
+        <p class="text-sm text-orange-600">📅 بدهی قبل از ۱۴۰۴/۰۲</p>
+        <p class="text-2xl font-bold text-orange-700">{{ customer.debt_before_1404_02|format_price }} ریال</p>
+        </div>
+
+        <div class="bg-green-50 rounded-xl p-4 border border-green-200">
+            <p class="text-sm text-green-600">📈 بستانکاری</p>
+            <p class="text-2xl font-bold text-green-700">{{ receivable|format_price }} ریال</p>
+        </div>
+        
+    </div>
+    
+    <!-- ===== فیلترها ===== -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <select name="type" class="border rounded-lg px-4 py-2">
+                <option value="">همه</option>
+                <option value="invoice" {% if filter_type == 'invoice' %}selected{% endif %}>سفارشات</option>
+                <option value="payment" {% if filter_type == 'payment' %}selected{% endif %}>پرداخت‌ها</option>
+            </select>
+            <input type="text" name="search" value="{{ search }}" placeholder="شماره فاکتور یا پرداخت..." class="border rounded-lg px-4 py-2">
+            <input type="text" id="dateFrom" name="date_from" value="{{ date_from }}" placeholder="از تاریخ" class="border rounded-lg px-4 py-2 datepicker-here" dir="ltr">
+            <input type="text" id="dateTo" name="date_to" value="{{ date_to }}" placeholder="تا تاریخ" class="border rounded-lg px-4 py-2 datepicker-here" dir="ltr">
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">فیلتر</button>
+                {% if filter_type or search or date_from or date_to %}
+                <a href="{% url 'customers:statement' %}" class="btn-outline">حذف فیلترها</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <!-- ===== خلاصه ===== -->
+    <div class="flex justify-between items-center bg-gray-50 rounded-xl p-4 mb-4">
+        <div>
+            <span class="text-gray-600">جمع کل سفارشات:</span>
+            <span class="font-bold text-blue-600">{{ total_invoices|format_price }} ریال</span>
+        </div>
+        <div>
+            <span class="text-gray-600">جمع کل پرداخت‌ها:</span>
+            <span class="font-bold text-green-600">{{ total_payments|format_price }} ریال</span>
+        </div>
+        <div>
+            <span class="text-gray-600">تعداد تراکنش‌ها:</span>
+            <span class="font-bold">{{ transactions|length }}</span>
+        </div>
+    </div>
+    
+    <!-- ===== لیست تراکنش‌ها ===== -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">نوع</th>
+                        <th class="px-6 py-3 text-sm font-semibold">شماره</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تاریخ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مبلغ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            {% if transaction.type == 'invoice' %}
+                                <span class="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">سفارش</span>
+                            {% else %}
+                                <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">پرداخت</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-mono text-sm">{{ transaction.id }}</td>
+                        <td class="px-6 py-4">{{ transaction.date|to_jalali }}</td>
+                        <td class="px-6 py-4 font-bold {% if transaction.type == 'invoice' %}text-blue-600{% else %}text-green-600{% endif %}">
+                            {{ transaction.amount|format_price }} ریال
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if transaction.type == 'invoice' %}
+                                {% if transaction.status == 'CONFIRMED' %}
+                                    <span class="text-green-600">تایید شده</span>
+                                {% elif transaction.status == 'PENDING' %}
+                                    <span class="text-yellow-600">در انتظار تایید</span>
+                                {% else %}
+                                    <span class="text-red-600">{{ transaction.status_display }}</span>
+                                {% endif %}
+                            {% else %}
+                                {% if transaction.status == 'confirmed' %}
+                                    <span class="text-green-600">تایید شده</span>
+                                {% elif transaction.status == 'pending' %}
+                                    <span class="text-yellow-600">در انتظار تایید</span>
+                                {% else %}
+                                    <span class="text-red-600">{{ transaction.status_display }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if transaction.type == 'invoice' %}
+                                <a href="{% url 'customers:invoice_detail' transaction.id %}" class="text-blue-600 hover:underline text-sm">
+                                    <i class="fas fa-eye"></i> مشاهده
+                                </a>
+                            {% else %}
+                                <a href="#" class="text-blue-600 hover:underline text-sm" onclick="showPaymentDetail('{{ transaction.id }}')">
+                                    <i class="fas fa-eye"></i> مشاهده
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            هیچ تراکنشی یافت نشد
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- ===== صفحه‌بندی ===== -->
+        {% if transactions.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if transactions.has_previous %}
+                <a href="?page={{ transactions.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in transactions.paginator.page_range %}
+                    {% if transactions.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > transactions.number|add:'-3' and num < transactions.number|add:'3' %}
+                        <a href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if transactions.has_next %}
+                <a href="?page={{ transactions.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- ===== مودال پرداخت ===== -->
+<div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b px-6 py-4 sticky top-0 bg-white rounded-t-xl">
+            <h3 class="text-xl font-bold" id="paymentModalTitle">پرداخت جدید</h3>
+            <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <form id="paymentForm" class="p-6" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <input type="hidden" id="paymentTypeHidden" name="payment_type_hidden" value="wallet">
+            
+            <div class="space-y-4">
+                <!-- مبلغ -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">مبلغ (ریال) *</label>
+                    <input type="number" id="paymentAmount" name="amount" required min="1000" step="1000"
+                           class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                    <p class="text-xs text-gray-400 mt-1">حداقل مبلغ: ۱۰,۰۰۰ ریال</p>
+                </div>
+                
+                <!-- نوع پرداخت -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">نوع پرداخت *</label>
+                    <select id="paymentTypeSelect" name="payment_type" onchange="togglePaymentFields()" 
+                            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                        <option value="">انتخاب کنید</option>
+                        {% for type in payment_types %}
+                        <option value="{{ type.id }}">{{ type.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- فیلدهای پرداخت غیر آنلاین -->
+                <div id="offlinePaymentFields">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">کد پیگیری</label>
+                        <input type="text" id="confirmationCode" name="confirmation_code" 
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">تصویر رسید</label>
+                        <input type="file" id="receiptImage" name="receipt_image" accept="image/*"
+                               class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">یادداشت</label>
+                        <textarea id="paymentNotes" name="notes" rows="2" 
+                                  class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500"></textarea>
+                    </div>
+                </div>
+                
+                <!-- پیام پرداخت آنلاین -->
+                <div id="onlinePaymentMessage" class="hidden">
+                    <div class="bg-yellow-50 rounded-lg p-4 text-center border border-yellow-200">
+                        <i class="fas fa-credit-card text-3xl text-yellow-600 mb-2 block"></i>
+                        <p class="font-medium text-gray-700">پرداخت آنلاین</p>
+                        <p class="text-sm text-gray-500 mt-1">پس از ثبت، به درگاه پرداخت هدایت می‌شوید</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6 pt-4 border-t">
+                <button type="button" onclick="closePaymentModal()" 
+                        class="flex-1 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                    انصراف
+                </button>
+                <button type="submit" id="submitPaymentBtn" class="btn-primary flex-1 px-4 py-2 rounded-lg">
+                    ادامه
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+<script>
+    // ===== مودال پرداخت =====
+    let paymentType = 'wallet';
+
+    function openPaymentModal(type) {
+        paymentType = type || 'wallet';
+        const modal = document.getElementById('paymentModal');
+        const title = document.getElementById('paymentModalTitle');
+        const hiddenInput = document.getElementById('paymentTypeHidden');
+        const amountInput = document.getElementById('paymentAmount');
+        
+        if (type === 'debt') {
+            title.textContent = 'پرداخت بدهی';
+            hiddenInput.value = 'debt';
+            amountInput.placeholder = 'مبلغ بدهی را وارد کنید';
+        } else {
+            title.textContent = 'پرداخت جدید';
+            hiddenInput.value = 'wallet';
+            amountInput.placeholder = 'مبلغ را وارد کنید';
+        }
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        
+        // ریست کردن فیلدها
+        document.getElementById('paymentTypeSelect').value = '';
+        document.getElementById('offlinePaymentFields').style.display = 'block';
+        document.getElementById('onlinePaymentMessage').classList.add('hidden');
+        document.getElementById('submitPaymentBtn').textContent = 'ثبت درخواست';
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+        document.getElementById('paymentModal').classList.remove('flex');
+        document.body.style.overflow = 'auto';
+        document.getElementById('paymentForm').reset();
+        document.getElementById('offlinePaymentFields').style.display = 'block';
+        document.getElementById('onlinePaymentMessage').classList.add('hidden');
+        document.getElementById('submitPaymentBtn').textContent = 'ثبت درخواست';
+    }
+
+    // ===== تغییر فیلدها بر اساس نوع پرداخت =====
+    function togglePaymentFields() {
+        const select = document.getElementById('paymentTypeSelect');
+        const option = select.options[select.selectedIndex];
+        const isOnline = option && option.text.includes('آنلاین');
+        
+        const offlineFields = document.getElementById('offlinePaymentFields');
+        const onlineMessage = document.getElementById('onlinePaymentMessage');
+        const submitBtn = document.getElementById('submitPaymentBtn');
+        
+        if (isOnline) {
+            offlineFields.style.display = 'none';
+            onlineMessage.classList.remove('hidden');
+            submitBtn.textContent = 'پرداخت';
+        } else {
+            offlineFields.style.display = 'block';
+            onlineMessage.classList.add('hidden');
+            submitBtn.textContent = 'ثبت درخواست';
+        }
+    }
+
+    // ===== ارسال فرم پرداخت =====
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const amount = document.getElementById('paymentAmount').value;
+        const paymentTypeId = document.getElementById('paymentTypeSelect').value;
+        const type = document.getElementById('paymentTypeHidden').value;
+        
+        if (!amount || parseInt(amount) < 1000) {
+            alert('لطفاً مبلغ معتبر (حداقل ۱۰۰۰۰ ریال) وارد کنید');
+            return;
+        }
+        
+        if (!paymentTypeId) {
+            alert('لطفاً نوع پرداخت را انتخاب کنید');
+            return;
+        }
+        
+        const select = document.getElementById('paymentTypeSelect');
+        const option = select.options[select.selectedIndex];
+        const isOnline = option && option.text.includes('آنلاین');
+        
+        if (isOnline) {
+            // ===== پرداخت آنلاین =====
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('payment_type', paymentTypeId);
+            formData.append('payment_type_hidden', type);
+            
+            fetch("{% url 'customers:online_payment' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.payment_url;
+                } else {
+                    alert('خطا: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('خطا در ارتباط با سرور');
+            });
+        } else {
+            // ===== پرداخت غیر آنلاین =====
+            const formData = new FormData(this);
+            formData.append('payment_type_hidden', type);
+            
+            fetch("{% url 'customers:add_payment' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.error) {
+                    alert('خطا: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('خطا در ارتباط با سرور');
+            });
+        }
+    });
+
+    // بستن با کلیک خارج
+    document.getElementById('paymentModal').addEventListener('click', function(e) {
+        if (e.target === this) closePaymentModal();
+    });
+
+    // بستن با ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePaymentModal();
+    });
+
+
+
+    function showPaymentDetail(paymentId) {
+        const modal = document.getElementById('paymentModal');
+        const content = document.getElementById('paymentDetailContent');
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+                <p class="mt-2 text-gray-400">در حال بارگذاری...</p>
+            </div>
+        `;
+        
+        fetch(`/customers/payments/${paymentId}/detail/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    content.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">شماره پرداخت</span>
+                                <span class="font-bold">${data.payment_id}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">مبلغ</span>
+                                <span class="font-bold text-green-600">${data.amount} ریال</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">تاریخ</span>
+                                <span>${data.date}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">نوع پرداخت</span>
+                                <span>${data.payment_type}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">کد پیگیری</span>
+                                <span>${data.confirmation_code || '-'}</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">وضعیت</span>
+                                <span class="${data.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'}">${data.status_text}</span>
+                            </div>
+                            ${data.notes ? `
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-500">یادداشت</span>
+                                <span>${data.notes}</span>
+                            </div>
+                            ` : ''}
+                            ${data.receipt_image ? `
+                            <div class="text-center">
+                                <a href="${data.receipt_image}" target="_blank" class="text-blue-600 hover:underline">
+                                    <i class="fas fa-image ml-2"></i> مشاهده رسید
+                                </a>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div class="text-center py-8 text-red-500">
+                            <i class="fas fa-exclamation-circle text-2xl block mb-2"></i>
+                            <p>خطا در دریافت اطلاعات</p>
+                            <p class="text-sm">${data.error}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                content.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <i class="fas fa-exclamation-circle text-2xl block mb-2"></i>
+                        <p>خطا در ارتباط با سرور</p>
+                    </div>
+                `;
+            });
+    }
+
+
+    document.getElementById('paymentModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePaymentModal();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePaymentModal();
+        }
+    });
+</script>
+{% endblock %}

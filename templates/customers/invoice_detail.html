@@ -1,0 +1,161 @@
+<!-- templates/customers/invoice_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}جزئیات فاکتور {{ invoice.invoice_id }} | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="mb-6">
+        <a href="{% url 'customers:statement' %}" class="text-yellow-600 hover:underline"> 
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست فاکتورها
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <!-- هدر فاکتور -->
+        <div class="bg-gradient-to-r from-yellow-600 to-yellow-800 text-white px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">جزئیات فاکتور</h1>
+                    <p class="text-sm opacity-90">شماره فاکتور: {{ invoice.accounting_invoice_id }}</p>
+                </div>
+                <div class="text-left">
+                    <p class="text-sm">تاریخ ثبت: {{ invoice.date|to_jalali }}</p>
+                    <p class="text-sm">وضعیت: 
+                        {% if invoice.status.code == 'CONFIRMED' %}
+                            <span class="text-green-300">تایید شده</span>
+                        {% elif invoice.status.code == 'PENDING' %}
+                            <span class="text-yellow-300">در انتظار تایید</span>
+                        {% else %}
+                            <span class="text-red-300">{{ invoice.status.name }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اطلاعات مشتری -->
+        <div class="px-6 py-4 border-b bg-gray-50">
+            <h3 class="font-bold text-lg mb-3">اطلاعات مشتری</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p><span class="text-gray-600">نام و نام خانوادگی:</span> {{ invoice.customer.user.first_name }} {{ invoice.customer.user.last_name }}</p>
+                    <p><span class="text-gray-600">شماره تلفن:</span> {{ invoice.customer.user.phone }}</p>
+                </div>
+                <div>
+                    <p><span class="text-gray-600">ایمیل:</span> {{ invoice.customer.user.email|default:"-" }}</p>
+                    <p><span class="text-gray-600">آدرس:</span> {{ invoice.customer.user.address|default:"-" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- لیست محصولات -->
+        <div class="px-6 py-4">
+            <h3 class="font-bold text-lg mb-4">محصولات سفارش</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr class="text-right border-b">
+                            <th class="px-4 py-3">نام محصول</th>
+                            <th class="px-4 py-3 text-center">تعداد</th>
+                            <th class="px-4 py-3 text-center">قیمت واحد</th>
+                            <th class="px-4 py-3 text-center">جمع</th>
+                            <th class="px-4 py-3 text-center">امتیاز</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        {% for item in invoice.invoice_items.all %}
+                        <tr>
+                            <td>
+                                {% with product=item.get_product %}
+                                    {% if product %}
+                                        <a href="{% url 'products:product_detail' product.slug %}" target="_blank">
+                                            {{ product.name }}
+                                        </a>
+                                        <p class="text-xs text-gray-500">{{ product.brand.name }}</p>
+                                    {% else %}
+                                        <span class="text-red-500">محصول با کد {{ item.product_code }} یافت نشد</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-center">{{ item.price|format_price }}</td>
+                            <td class="text-center">{{ item.price|multiply:item.quantity|format_price }}</td>
+                            <td class="text-center">{{ item.points_earned|format_price }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- جمع مبالغ -->
+        <div class="px-6 py-4 border-t bg-gray-50">
+            <div class="flex justify-end">
+                <div class="w-full md:w-1/2 lg:w-1/3">
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">جمع کل:</span>
+                            <span>{{ invoice.subtotal|format_price }} ریال</span>
+                        </div>
+                        {% if invoice.discount > 0 %}
+                        <div class="flex justify-between text-green-600">
+                            <span>تخفیف:</span>
+                            <span>- {{ invoice.discount|format_price }} ریال</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex justify-between font-bold text-lg pt-2 border-t">
+                            <span>مبلغ نهایی:</span>
+                            <span class="text-yellow-600">{{ invoice.total|format_price }} ریال</span>
+                        </div>
+                        {% if invoice.calculate_total_points > 0 %}
+                        <div class="flex justify-between text-purple-600 pt-2">
+                            <span>امتیاز کسب شده:</span>
+                            <span>{{ invoice.calculate_total_points|format_price }} امتیاز</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- یادداشت -->
+        {% if invoice.notes %}
+        <div class="px-6 py-4 border-t">
+            <h3 class="font-bold text-md mb-2">یادداشت</h3>
+            <p class="text-gray-600">{{ invoice.notes }}</p>
+        </div>
+        {% endif %}
+        
+        <!-- اطلاعات تایید -->
+        {% if invoice.confirmed_date %}
+        <div class="px-6 py-4 border-t bg-gray-50 text-sm text-gray-500">
+            <p>تاریخ تایید: {{ invoice.confirmed_date|to_jalali }}</p>
+            {% if invoice.confirmed_by %}
+            <p>تایید کننده: {{ invoice.confirmed_by.get_full_name|default:invoice.confirmed_by.username }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- دکمه‌ها -->
+        <div class="px-6 py-4 border-t flex justify-between">
+            <a href="{% url 'customers:statement' %}" class="btn-outline">بازگشت</a>
+            {% if invoice.status.code == 'PENDING' %}
+            <a href="{% url 'customers:invoice_print' invoice.invoice_id %}" target="_blank" class="btn-primary px-8 py-2 no-print">
+                <i class="fas fa-print ml-2"></i> چاپ فاکتور
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function printInvoice() {
+        window.print();
+    }
+</script>
+{% endblock %}

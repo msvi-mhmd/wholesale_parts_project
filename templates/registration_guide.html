@@ -1,0 +1,114 @@
+<!-- templates/registration_guide.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}شرایط ثبت نام | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-4">
+            <h1 class="text-2xl font-bold">شرایط ثبت نام و آموزش ثبت درخواست</h1>
+            <p class="text-sm opacity-90">راهنمای گام به گام ثبت‌نام در سایت</p>
+        </div>
+        
+        <div class="p-6">
+            <!-- شرایط ثبت نام -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-green-700 mb-4 border-b pb-2">شرایط ثبت نام</h2>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                        <span>دارا بودن کد ملی معتبر</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                        <span>شماره تلفن همراه معتبر و فعال</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                        <span>تکمیل اطلاعات کامل شخصی و آدرس</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                        <span>قبول قوانین و مقررات سایت</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- مراحل ثبت درخواست -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-green-700 mb-4 border-b pb-2">مراحل ثبت درخواست عضویت</h2>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-green-600 font-bold">1</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">ورود به صفحه ثبت درخواست</h3>
+                            <p class="text-gray-600 text-sm">روی لینک <a href="{% url 'accounts:register_request' %}" class="text-yellow-600 hover:underline">"درخواست ثبت نام"</a> در صفحه لاگین کلیک کنید</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-green-600 font-bold">2</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">تکمیل فرم اطلاعات</h3>
+                            <p class="text-gray-600 text-sm">اطلاعات خواسته شده شامل نام، نام خانوادگی، کد ملی، شماره تلفن، آدرس و ... را وارد کنید</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-green-600 font-bold">3</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">ارسال درخواست</h3>
+                            <p class="text-gray-600 text-sm">پس از بررسی و تأیید اطلاعات، روی دکمه "ثبت درخواست" کلیک کنید</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-green-600 font-bold">4</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">انتظار برای تماس کارشناسان</h3>
+                            <p class="text-gray-600 text-sm">کارشناسان ما در اسرع وقت با شما تماس گرفته و مراحل بعدی را راهنمایی می‌کنند</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-green-600 font-bold">5</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">تأیید نهایی و فعالسازی حساب</h3>
+                            <p class="text-gray-600 text-sm">پس از تأیید مدارک توسط ادمین، حساب کاربری شما فعال می‌شود</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- نکات مهم -->
+            <div class="bg-yellow-50 rounded-lg p-4">
+                <h3 class="font-bold text-yellow-800 mb-2">نکات مهم</h3>
+                <ul class="text-sm text-yellow-700 space-y-1">
+                    <li>• اطلاعات وارد شده باید دقیق و مطابق با مدارک هویتی باشد</li>
+                    <li>• در صورت وجود کد معرف، حتماً آن را در فرم وارد کنید</li>
+                    <li>• پس از ثبت درخواست، امکان ویرایش اطلاعات وجود ندارد</li>
+                    <li>• زمان پاسخگویی حداکثر ۴۸ ساعت کاری می‌باشد</li>
+                </ul>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <a href="{% url 'accounts:register_request' %}" class="btn-primary inline-block">
+                    ثبت درخواست عضویت
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,276 @@
+<!-- templates/customers/club.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}باشگاه مشتریان | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block extra_head %}
+<style>
+    .club-header {
+        background: linear-gradient(135deg, #a76f07 0%, #f6b83b 100%);
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+        color: white;
+        margin-bottom: 3rem;
+    }
+    
+    .level-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .level-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -12px rgba(0,0,0,0.15);
+    }
+    
+    .level-bronze {
+        border-top: 4px solid #cd7f32;
+    }
+    
+    .level-silver {
+        border-top: 4px solid #c0c0c0;
+    }
+    
+    .level-gold {
+        border-top: 4px solid #ffd700;
+    }
+    
+    .level-platinum {
+        border-top: 4px solid #e5e4e2;
+    }
+    
+    .benefit-list li, .requirement-list li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .benefit-list li i {
+        color: #10b981;
+        font-size: 0.9rem;
+    }
+    
+    .requirement-list li i {
+        color: #f59e0b;
+        font-size: 0.9rem;
+    }
+    
+    .progress-bar {
+        background-color: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+    
+    .progress-fill {
+        background: linear-gradient(90deg, #3b82f6, #1e40af);
+        height: 10px;
+        border-radius: 10px;
+        width: 0%;
+    }
+    
+    @media (max-width: 768px) {
+        .club-header {
+            padding: 1.5rem;
+        }
+        .club-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <!-- هدر باشگاه مشتریان -->
+    <div class="club-header">
+        <i class="fas fa-crown text-5xl mb-4"></i>
+        <h1 class="text-3xl md:text-4xl font-bold mb-3">باشگاه مشتریان پرشین گلف</h1>
+        <p class="text-lg opacity-90">هرچه بیشتر خرید کنید، مزایای بیشتری دریافت می‌کنید</p>
+        <p class="text-md mt-3">با عضویت در باشگاه مشتریان، از تخفیف‌ها و مزایای ویژه بهره‌مند شوید</p>
+    </div>
+    
+    <!-- سطوح مختلف باشگاه -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {% for level in levels %}
+        <div class="level-card rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition">
+            <div class="p-6 text-center border-b">
+                {% if level.name == 'برنزی' %}
+                <i class="fas fa-medal text-5xl text-amber-600 mb-3"></i>
+                <div class="level-bronze absolute top-0 left-0 right-0 h-1"></div>
+                {% elif level.name == 'نقره‌ای' %}
+                <i class="fas fa-medal text-5xl text-gray-400 mb-3"></i>
+                <div class="level-silver absolute top-0 left-0 right-0 h-1"></div>
+                {% elif level.name == 'طلایی' %}
+                <i class="fas fa-crown text-5xl text-yellow-500 mb-3"></i>
+                <div class="level-gold absolute top-0 left-0 right-0 h-1"></div>
+                {% else %}
+                <i class="fas fa-gem text-5xl text-yellow-300 mb-3"></i>
+                <div class="level-platinum absolute top-0 left-0 right-0 h-1"></div>
+                {% endif %}
+                <h3 class="text-2xl font-bold mt-2">{{ level.name }}</h3>
+                <p class="text-gray-500 text-sm mt-1">سطح {{ level.priority }}</p>
+                <div class="mt-3">
+                    <span class="text-3xl font-bold text-yellow-600">{{ level.discount_percent }}%</span>
+                    <span class="text-gray-500">تخفیف</span>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- مزایا -->
+                <div class="mb-4">
+                    <ul class="benefit-list">
+                        {% for benefit in level.benefits %}
+                        <li><i class="fas fa-check-circle text-green-500"></i> {{ benefit }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- بخش توضیحات اضافی -->
+    <div class="bg-gradient-to-r from-yellow-50 to-indigo-50 rounded-xl p-8 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-xl font-bold text-yellow-800 mb-4">
+                    <i class="fas fa-question-circle ml-2"></i>
+                    چگونه سطح خود را ارتقا دهیم؟
+                </h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-shopping-cart text-yellow-600 mt-1"></i>
+                        <span>افزایش میزان خرید از فروشگاه</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-users text-yellow-600 mt-1"></i>
+                        <span>دعوت از دوستان و آشنایان به سایت</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-calendar-check text-yellow-600 mt-1"></i>
+                        <span>فعالیت مستمر و خریدهای منظم</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-star text-yellow-600 mt-1"></i>
+                        <span>ثبت نظرات و امتیازات برای محصولات</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div>
+                <h3 class="text-xl font-bold text-yellow-800 mb-4">
+                    <i class="fas fa-gift ml-2"></i>
+                    مزایای ویژه باشگاه
+                </h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-truck text-green-600 mt-1"></i>
+                        <span>ارسال رایگان برای اعضای ویژه</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-percent text-green-600 mt-1"></i>
+                        <span>تخفیف‌های انحصاری ماهانه</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-gift text-green-600 mt-1"></i>
+                        <span>هدایای تولد و مناسبت‌ها</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-headset text-green-600 mt-1"></i>
+                        <span>پشتیبانی ویژه و اولویت در پاسخگویی</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- سطح فعلی کاربر (اگر لاگین باشد) -->
+    {% if user.is_authenticated and user.user_type == 'customer' %}
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h3 class="text-xl font-bold mb-4">وضعیت فعلی شما</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <p class="text-gray-500 text-sm">سطح فعلی</p>
+                <p class="text-2xl font-bold text-yellow-600">{{ user.customer_profile.customer_level.name|default:"برنزی" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm">اعتبار شما</p>
+                <p class="text-2xl font-bold text-green-600">{{ user.customer_profile.credit|format_price }} ریال</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm">مجموع خرید</p>
+                <p class="text-2xl font-bold text-purple-600">{{ user.customer_profile.total_purchases|format_price }} ریال</p>
+            </div>
+        </div>
+        
+        <!-- نوار پیشرفت برای سطح بعدی -->
+        {% with next_level=levels|first %}
+        {% if user.customer_profile.customer_level %}
+        {% with current_level=user.customer_profile.customer_level %}
+        {% with next_level_obj=levels|dictsort:"priority" %}
+        {% for level in next_level_obj %}
+        {% if level.priority > current_level.priority %}
+        {% with next=level %}
+        <div class="mt-6 pt-6 border-t">
+            <p class="text-gray-600 mb-2">برای رسیدن به سطح <strong class="text-amber-600">{{ next.name }}</strong> نیاز دارید:</p>
+            <div class="progress-bar">
+                {% with progress=user.customer_profile.total_purchases|default:0 %}
+                {% with target=next.min_credit|default:0 %}
+                {% if target > 0 %}
+                {% with percent=progress|divisibleby:target|add:0 %}
+                <div class="progress-fill" style="width: {% widthratio progress target 100 %}%"></div>
+                {% endwith %}
+                {% endif %}
+                {% endwith %}
+                {% endwith %}
+            </div>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+                <span>{{ user.customer_profile.total_purchases|format_price }} ریال</span>
+                <span>{{ next.min_credit|format_price }} ریال</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">
+                <i class="fas fa-info-circle ml-1"></i>
+                با خرید {{ next.min_credit|add:user.customer_profile.total_purchases|format_price }} ریال دیگر به سطح {{ next.name }} می‌رسید
+            </p>
+        </div>
+        {% endwith %}
+        {% endif %}
+        {% endfor %}
+        {% endwith %}
+        {% endwith %}
+        {% endif %}
+        {% endwith %}
+    </div>
+    {% endif %}
+    
+    <!-- سوالات متداول -->
+    <div class="bg-gray-50 rounded-xl p-6">
+        <h3 class="text-xl font-bold mb-4 text-center">سوالات متداول</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <p class="font-semibold text-gray-800 mb-2">❓ امتیازها چگونه محاسبه می‌شوند؟</p>
+                <p class="text-gray-600 text-sm">هر محصول امتیاز خرید مختص خود را دارد که با خرید آن محصول امتیاز خرید آن به مجموع امتیازات شما اضافه می‌شود</p>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-800 mb-2">❓ تخفیف‌ها چگونه اعمال می‌شوند؟</p>
+                <p class="text-gray-600 text-sm">تخفیف سطح شما به صورت خودکار در هنگام تسویه حساب اعمال می‌شود.</p>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-800 mb-2">❓ آیا سطح من کاهش می‌یابد؟</p>
+                <p class="text-gray-600 text-sm">سطح شما هر ۶ ماه یکبار بر اساس عملکردتان بازبینی می‌شود.</p>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-800 mb-2">❓ چگونه دعوت شده‌های خود را ببینم؟</p>
+                <p class="text-gray-600 text-sm">در پنل کاربری خود می‌توانید تعداد دعوت شدگان را مشاهده کنید.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

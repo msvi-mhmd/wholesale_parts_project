@@ -1,0 +1,184 @@
+<!-- templates/customers/cart.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}سبد خرید | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <a href="{% url 'customers:customer_panel' %}" class="text-yellow-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به پنل کاربری
+    </a>
+    <h1 class="text-2xl font-bold mb-6">سبد خرید</h1>
+    
+    {% if cart_items %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- لیست محصولات -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="hidden md:grid grid-cols-12 gap-4 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-600 border-b">
+                    <div class="col-span-6">محصول</div>
+                    <div class="col-span-2 text-center">قیمت</div>
+                    <div class="col-span-2 text-center">تعداد</div>
+                    <div class="col-span-2 text-center">جمع</div>
+                </div>
+                
+                {% for item in cart_items %}
+                <div class="cart-item grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 border-b" data-product-id="{{ item.product.id }}">
+                    <div class="md:col-span-6 flex gap-4">
+                        <img src="{% if item.product.images.first %}{{ item.product.images.first.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}" 
+                             alt="{{ item.product.name }}" class="w-20 h-20 object-cover rounded">
+                        <div>
+                            <a href="{% url 'products:product_detail' item.product.slug %}" class="font-semibold hover:text-yellow-600">
+                                {{ item.product.name }}
+                            </a>
+                            <p class="text-sm text-gray-500">{{ item.product.brand.name }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2 text-center">
+                        <span class="item-price">{{ item.price|format_price }}</span>
+                        <span class="text-xs text-gray-400">ریال</span>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="updateQuantity({{ item.product.id }}, {{ item.quantity|add:'-1' }})" 
+                                    class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300">-</button>
+                            <input type="number" id="qty-{{ item.product.id }}" value="{{ item.quantity }}" 
+                                   min="1" max="{{ item.product.left_in_stock }}"
+                                   class="w-16 text-center border rounded-lg py-1"
+                                   onchange="updateQuantity({{ item.product.id }}, this.value)">
+                            <button onclick="updateQuantity({{ item.product.id }}, {{ item.quantity|add:'1' }})" 
+                                    class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2 text-center">
+                        <span class="font-bold text-yellow-600 item-total">{{ item.total|format_price }}</span>
+                        <span class="text-xs text-gray-400">ریال</span>
+                        <button onclick="removeFromCart({{ item.product.id }})" class="block text-red-500 text-sm mt-1 hover:underline">
+                            <i class="fas fa-trash-alt"></i> حذف
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- خلاصه سبد خرید -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+                <h3 class="font-bold text-lg mb-4 border-b pb-2">خلاصه سبد خرید</h3>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">جمع کل:</span>
+                        <span id="cart-total">{{ total|format_price }} ریال</span>
+                    </div>
+                    
+                    {% if discount_percent > 0 %}
+                    <div class="flex justify-between text-green-600">
+                        <span>تخفیف {{ discount_percent }}%:</span>
+                        <span id="cart-discount">- {{ discount_amount|format_price }} ریال</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex justify-between font-bold text-lg pt-3 border-t">
+                        <span>مبلغ قابل پرداخت:</span>
+                        <span id="cart-final-total" class="text-yellow-600">{{ final_total|format_price }} ریال</span>
+                    </div>
+                    
+                    <div class="text-sm text-gray-500 pt-2">
+                        <i class="fas fa-info-circle ml-1"></i>
+                        با ثبت سفارش، فاکتور شما در انتظار تایید قرار می‌گیرد.
+                    </div>
+                </div>
+                
+                <a href="{% url 'customers:checkout' %}" class="btn-primary w-full text-center mt-6 block">
+                    ادامه فرآیند خرید
+                </a>
+                
+                <a href="{% url 'products:product_list' %}" class="block text-center text-yellow-600 mt-4 hover:underline">
+                    <i class="fas fa-arrow-right ml-1"></i> ادامه خرید
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+        <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">سبد خرید خالی است</h3>
+        <p class="text-gray-500 mb-6">هنوز محصولی به سبد خرید اضافه نکرده‌اید</p>
+        <a href="{% url 'products:product_list' %}" class="btn-primary inline-block">
+            شروع خرید
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function updateQuantity(productId, quantity) {
+        quantity = parseInt(quantity);
+        if (isNaN(quantity) || quantity < 1) {
+            quantity = 1;
+        }
+        
+        fetch("{% url 'customers:update_cart' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ product_id: productId, quantity: quantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('خطا: ' + data.error);
+            }
+        });
+    }
+    
+    function removeFromCart(productId) {
+        if (confirm('آیا از حذف این محصول از سبد خرید اطمینان دارید؟')) {
+            fetch("{% url 'customers:remove_from_cart' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ product_id: productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('خطا: ' + data.error);
+                }
+            });
+        }
+    }
+    
+    function updateCartCount() {
+        fetch("{% url 'customers:cart_count' %}")
+            .then(response => response.json())
+            .then(data => {
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount && data.count > 0) {
+                    cartCount.textContent = data.count;
+                    cartCount.classList.remove('hidden');
+                } else if (cartCount) {
+                    cartCount.classList.add('hidden');
+                }
+            });
+    }
+    
+    updateCartCount();
+</script>
+{% endblock %}

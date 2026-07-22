@@ -1,0 +1,243 @@
+<!-- templates/customers/pay_invoice.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}پرداخت فاکتور {{ invoice.invoice_id }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+<style>
+    .method-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    .method-card:hover, .method-card.selected {
+        border-color: #c9a84c;
+        background: #fefce8;
+    }
+    .method-card input[type="radio"] {
+        display: none;
+    }
+    .method-card .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    .method-card .name {
+        font-weight: 600;
+    }
+    .method-card .desc {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-blue-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">پرداخت فاکتور</h1>
+                <p class="text-sm opacity-90">شماره فاکتور: {{ invoice.invoice_id }}</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- اطلاعات فاکتور -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">مبلغ فاکتور</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ invoice.total|format_price }} ریال</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">موجودی کیف پول</p>
+                            <p class="text-lg font-bold text-green-600">{{ customer_wallet|format_price }} ریال</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="paymentForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- انتخاب روش پرداخت -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">روش پرداخت</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <label class="method-card" onclick="selectMethod(this, 'wallet')">
+                                <input type="radio" name="method" value="wallet">
+                                <div class="icon">💰</div>
+                                <div class="name">کیف پول</div>
+                                <div class="desc">موجودی: {{ customer_wallet|format_price }} ریال</div>
+                            </label>
+                            
+                            <label class="method-card" onclick="selectMethod(this, 'online')">
+                                <input type="radio" name="method" value="online">
+                                <div class="icon">💳</div>
+                                <div class="name">پرداخت آنلاین</div>
+                                <div class="desc">درگاه بانکی</div>
+                            </label>
+                            
+                            <label class="method-card" onclick="selectMethod(this, 'card_to_card')">
+                                <input type="radio" name="method" value="card_to_card">
+                                <div class="icon">🏦</div>
+                                <div class="name">کارت به کارت</div>
+                                <div class="desc">نیاز به تایید</div>
+                            </label>
+                            
+                            <label class="method-card" onclick="selectMethod(this, 'bank_transfer')">
+                                <input type="radio" name="method" value="bank_transfer">
+                                <div class="icon">🏛️</div>
+                                <div class="name">حواله بانکی</div>
+                                <div class="desc">نیاز به تایید</div>
+                            </label>
+                            
+                            <label class="method-card" onclick="selectMethod(this, 'cheque')">
+                                <input type="radio" name="method" value="cheque">
+                                <div class="icon">📝</div>
+                                <div class="name">ثبت چک</div>
+                                <div class="desc">تماس با پشتیبانی</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- مبلغ -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">مبلغ (ریال)</label>
+                        <input type="number" name="amount" id="amountInput" value="{{ invoice.total }}" 
+                               class="w-full border rounded-lg px-4 py-2" min="1000" max="{{ invoice.total }}">
+                    </div>
+                    
+                    <!-- فیلدهای پرداخت غیر آنلاین -->
+                    <div id="offlineFields" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">حساب مقصد</label>
+                            <select name="bank_account" class="w-full border rounded-lg px-4 py-2">
+                                <option value="">انتخاب کنید</option>
+                                {% for account in bank_accounts %}
+                                <option value="{{ account.id }}">
+                                    {{ account.bank_name }} - {{ account.account_number }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تاریخ پرداخت</label>
+                                <input type="text" id="paymentDate" name="payment_date" class="w-full border rounded-lg px-4 py-2" placeholder="1403-01-01">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">ساعت پرداخت</label>
+                                <input type="time" name="payment_time" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">شماره پیگیری</label>
+                            <input type="text" name="confirmation_code" class="w-full border rounded-lg px-4 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">تصویر رسید</label>
+                            <input type="file" name="receipt_image" accept="image/*" class="w-full border rounded-lg px-4 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">یادداشت</label>
+                            <textarea name="notes" rows="2" class="w-full border rounded-lg px-4 py-2"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- پیام ثبت چک -->
+                    <div id="chequeMessage" class="hidden bg-yellow-50 rounded-lg p-4 mb-4">
+                        <p class="text-yellow-800">
+                            <i class="fas fa-info-circle ml-2"></i>
+                            برای ثبت چک لطفاً با پشتیبانی تماس بگیرید.
+                            <br>
+                            <strong>تلفن: ۰۲۱-۱۲۳۴۵۶۷۸</strong>
+                        </p>
+                    </div>
+                    
+                    <button type="submit" id="payBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition mt-4">
+                        پرداخت
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#paymentDate').persianDatepicker({
+            format: 'YYYY-MM-DD',
+            autoClose: true,
+            calendar: { persian: { locale: 'fa' } }
+        });
+    });
+
+    function selectMethod(el, method) {
+        document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        el.querySelector('input[type="radio"]').checked = true;
+        
+        const offlineFields = document.getElementById('offlineFields');
+        const chequeMessage = document.getElementById('chequeMessage');
+        
+        if (method === 'card_to_card' || method === 'bank_transfer') {
+            offlineFields.classList.remove('hidden');
+            chequeMessage.classList.add('hidden');
+        } else if (method === 'cheque') {
+            offlineFields.classList.add('hidden');
+            chequeMessage.classList.remove('hidden');
+        } else {
+            offlineFields.classList.add('hidden');
+            chequeMessage.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const method = document.querySelector('input[name="method"]:checked');
+        if (!method) {
+            alert('لطفاً روش پرداخت را انتخاب کنید');
+            return;
+        }
+        
+        const formData = new FormData(this);
+        
+        fetch(`/customers/process-invoice-payment/{{ invoice.invoice_id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.message) {
+                    alert(data.message);
+                    window.location.reload();
+                }
+            } else {
+                if (data.show_contact) {
+                    alert('برای ثبت چک لطفاً با پشتیبانی تماس بگیرید: ۰۲۱-۱۲۳۴۵۶۷۸');
+                } else {
+                    alert('خطا: ' + data.error);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در ارتباط با سرور');
+        });
+    });
+</script>
+{% endblock %}

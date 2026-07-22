@@ -1,0 +1,219 @@
+<!-- templates/accounting/sync_prices.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}همگام‌سازی قیمت‌ها | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<style>
+    .search-result {
+        transition: all 0.3s ease;
+    }
+    .search-result:hover {
+        background-color: #f3f4f6;
+    }
+    .price-updated {
+        animation: pulse 0.5s ease;
+    }
+    @keyframes pulse {
+        0% { background-color: #22c55e; color: white; }
+        100% { background-color: transparent; color: inherit; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-yellow-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">همگام‌سازی قیمت‌ها</h1>
+                <p class="text-sm opacity-90">جستجو و به‌روزرسانی قیمت محصولات از سیستم حسابداری</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- بخش جستجوی محصول -->
+                <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-bold text-lg mb-4">🔍 جستجوی محصول</h3>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="searchProductInput" 
+                                   placeholder="جستجو با نام محصول، شماره محصول یا شماره جایگزین..."
+                                   class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                        </div>
+                        <button id="searchProductBtn" class="btn-primary">
+                            <i class="fas fa-search ml-2"></i> جستجو
+                        </button>
+                    </div>
+                    
+                    <!-- نتایج جستجو -->
+                    <div id="searchResults" class="mt-4 hidden">
+                        <h4 class="font-semibold mb-3">نتایج جستجو:</h4>
+                        <div id="resultsList" class="space-y-2 max-h-96 overflow-y-auto">
+                            <!-- نتایج اینجا نمایش داده می‌شوند -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- فرم همگام‌سازی دسته‌جمعی -->
+                <div class="border-t pt-6">
+                    <h3 class="font-bold text-lg mb-4">📦 همگام‌سازی دسته‌جمعی</h3>
+                    <form method="post" id="bulkSyncForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">انتخاب محصولات</label>
+                            <div class="border rounded-lg p-4 max-h-96 overflow-y-auto bg-gray-50">
+                                <div class="flex justify-between mb-3 pb-2 border-b">
+                                    <button type="button" onclick="selectAll()" class="text-blue-600 text-sm hover:underline">انتخاب همه</button>
+                                    <button type="button" onclick="deselectAll()" class="text-red-600 text-sm hover:underline">حذف همه</button>
+                                </div>
+                                {% for product in products %}
+                                <label class="flex items-center gap-2 py-2 border-b hover:bg-white px-2 rounded">
+                                    <input type="checkbox" name="product_ids" value="{{ product.id }}" class="product-checkbox">
+                                    <div class="flex-1">
+                                        <span class="font-medium">{{ product.name }}</span>
+                                        <div class="text-xs text-gray-500">
+                                            شماره: {{ product.product_code|default:"-" }}
+                                            {% if product.alt_code %}
+                                            | شماره جایگزین: {{ product.alt_code }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-sm text-gray-600">قیمت فعلی:</div>
+                                        <div class="font-bold text-yellow-600">{{ product.price|format_price }} ریال</div>
+                                    </div>
+                                </label>
+                                {% empty %}
+                                <p class="text-center text-gray-500 py-4">هیچ محصولی با شماره محصول معتبر وجود ندارد</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-sync ml-2"></i> همگام‌سازی قیمت محصولات انتخاب شده
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-yellow-50 rounded-lg p-4 mt-6">
+            <h3 class="font-bold text-yellow-800 mb-2">نکات مهم:</h3>
+            <ul class="text-sm text-yellow-700 space-y-1">
+                <li>• قیمت محصولات از سیستم حسابداری دریافت می‌شود</li>
+                <li>• محصولاتی که شماره محصول معتبر ندارند قابل همگام‌سازی نیستند</li>
+                <li>• می‌توانید با جستجوی شماره محصول، یک محصول خاص را پیدا کنید</li>
+                <li>• پس از به‌روزرسانی، قیمت جدید بلافاصله در سایت اعمال می‌شود</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // جستجوی محصول
+    const searchInput = document.getElementById('searchProductInput');
+    const searchBtn = document.getElementById('searchProductBtn');
+    const searchResults = document.getElementById('searchResults');
+    const resultsList = document.getElementById('resultsList');
+    
+    function searchProduct() {
+        const query = searchInput.value.trim();
+        if (query.length < 2) {
+            alert('لطفاً حداقل 2 کاراکتر وارد کنید');
+            return;
+        }
+        
+        searchResults.classList.remove('hidden');
+        resultsList.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> در حال جستجو...</div>';
+        
+        fetch(`/products/api/search-suggestions/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.results.length === 0) {
+                    resultsList.innerHTML = '<div class="text-center py-4 text-gray-500">هیچ محصولی یافت نشد</div>';
+                    return;
+                }
+                
+                resultsList.innerHTML = '';
+                data.results.forEach(product => {
+                    const item = document.createElement('div');
+                    item.className = 'search-result p-3 border rounded-lg cursor-pointer';
+                    item.onclick = () => selectProduct(product.id);
+                    item.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${product.name}</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    شماره محصول: ${product.product_code || '-'} | برند: ${product.brand}
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <div class="text-sm text-gray-600">قیمت فعلی:</div>
+                                <div class="font-bold text-yellow-600">${product.price ? Number(product.price).toLocaleString() : 'نامشخص'} ریال</div>
+                            </div>
+                            <button class="btn-primary text-sm py-1 px-3" onclick="event.stopPropagation(); syncSingleProduct(${product.id})">
+                                <i class="fas fa-sync ml-1"></i> همگام‌سازی
+                            </button>
+                        </div>
+                    `;
+                    resultsList.appendChild(item);
+                });
+            })
+            .catch(error => {
+                resultsList.innerHTML = '<div class="text-center py-4 text-red-500">خطا در ارتباط با سرور</div>';
+            });
+    }
+    
+    searchBtn.addEventListener('click', searchProduct);
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') searchProduct();
+    });
+    
+    // همگام‌سازی یک محصول خاص
+    function syncSingleProduct(productId) {
+        if (confirm('آیا از به‌روزرسانی قیمت این محصول اطمینان دارید؟')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'accounting:sync_single_product' %}";
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            form.appendChild(csrfInput);
+            
+            const productInput = document.createElement('input');
+            productInput.type = 'hidden';
+            productInput.name = 'product_id';
+            productInput.value = productId;
+            form.appendChild(productInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    function selectProduct(productId) {
+        const checkbox = document.querySelector(`.product-checkbox[value="${productId}"]`);
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            checkbox.closest('label').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            searchResults.classList.add('hidden');
+            searchInput.value = '';
+        }
+    }
+    
+    function selectAll() {
+        document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = true);
+    }
+    
+    function deselectAll() {
+        document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+    }
+</script>
+{% endblock %}

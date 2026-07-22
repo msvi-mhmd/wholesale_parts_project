@@ -1,0 +1,471 @@
+<!-- templates/employees/invoice_detail_admin.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}جزئیات فاکتور {{ invoice.invoice_id }} | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="mb-6">
+        <a href="{% url 'employees:manage_invoices' %}" class="text-yellow-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست فاکتورها
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <!-- هدر فاکتور -->
+        <div class="bg-gradient-to-r from-yellow-600 to-yellow-800 text-white px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">جزئیات فاکتور</h1>
+                    <p class="text-sm opacity-90">شماره فاکتور: {{ invoice.invoice_id }}</p>
+                    {% if invoice.accounting_invoice_id %}
+                    <p class="text-sm opacity-75">شماره در نیکان: {{ invoice.accounting_invoice_id }}</p>
+                    {% endif %}
+                </div>
+                <div class="text-left">
+                    <p class="text-sm">تاریخ ثبت: {{ invoice.date|to_jalali }}</p>
+                    <p class="text-sm">وضعیت: 
+                        {% if invoice.status.code == 'CONFIRMED' %}
+                            <span class="text-green-300">تایید شده</span>
+                        {% elif invoice.status.code == 'PENDING' %}
+                            <span class="text-yellow-300">در انتظار تایید</span>
+                        {% else %}
+                            <span class="text-red-300">{{ invoice.status.name }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اطلاعات مشتری -->
+        <div class="px-6 py-4 border-b bg-gray-50">
+            <h3 class="font-bold text-lg mb-3">اطلاعات مشتری</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p><span class="text-gray-600">نام و نام خانوادگی:</span> {{ invoice.customer.user.first_name }} {{ invoice.customer.user.last_name }}</p>
+                    <p><span class="text-gray-600">کد ملی:</span> {{ invoice.customer.user.national_id|default:"-" }}</p>
+                    <p><span class="text-gray-600">شماره تلفن:</span> {{ invoice.customer.user.phone }}</p>
+                </div>
+                <div>
+                    <p><span class="text-gray-600">ایمیل:</span> {{ invoice.customer.user.email|default:"-" }}</p>
+                    <p><span class="text-gray-600">اعتبار:</span> {{ invoice.customer.credit|format_price }} ریال</p>
+                    <p><span class="text-gray-600">بدهی:</span> {{ invoice.customer.debt|format_price }} ریال</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- وضعیت پرداخت -->
+        <div class="px-6 py-4 border-b">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">وضعیت پرداخت:</span>
+                {% if invoice.payment_status == 'paid' %}
+                    <span class="text-green-600 font-bold">پرداخت شده</span>
+                {% else %}
+                    <span class="text-red-600 font-bold">پرداخت نشده</span>
+                {% endif %}
+            </div>
+            {% if invoice.status.code == 'PENDING' %}
+            <div class="mt-2 text-sm text-blue-600">
+                <i class="fas fa-info-circle ml-1"></i> 
+                وضعیت: <span class="font-bold">در انتظار تایید</span> - امکان ویرایش آیتم‌ها وجود دارد
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- لیست محصولات -->
+        <div class="px-6 py-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg">محصولات سفارش</h3>
+                {% if invoice.status.code == 'PENDING' %}
+                <button onclick="showAddProductModal()" 
+                        class="btn-primary bg-green-600 hover:bg-green-700 text-sm py-1 px-4">
+                    <i class="fas fa-plus ml-2"></i> اضافه کردن محصول
+                </button>
+                {% endif %}
+            </div>
+            <div class="overflow-x-auto" id="itemsTableContainer">
+                {% include 'employees/_invoice_items_table.html' %}
+            </div>
+        </div>
+        
+        <!-- جمع مبالغ -->
+        <div class="px-6 py-4 border-t bg-gray-50">
+            <div class="flex justify-end">
+                <div class="w-full md:w-1/2 lg:w-1/3">
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">جمع کل:</span>
+                            <span id="subtotalDisplay">{{ invoice.subtotal|format_price }} ریال</span>
+                        </div>
+                        {% if invoice.discount > 0 %}
+                        <div class="flex justify-between text-green-600">
+                            <span>تخفیف:</span>
+                            <span>- {{ invoice.discount|format_price }} ریال</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex justify-between font-bold text-lg pt-2 border-t">
+                            <span>مبلغ نهایی:</span>
+                            <span class="text-yellow-600" id="totalDisplay">{{ invoice.total|format_price }} ریال</span>
+                        </div>
+                        {% if invoice.calculate_total_points > 0 %}
+                        <div class="flex justify-between text-purple-600 pt-2">
+                            <span>امتیاز کسب شده:</span>
+                            <span>{{ invoice.calculate_total_points|format_price }} امتیاز</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- یادداشت -->
+        {% if invoice.notes %}
+        <div class="px-6 py-4 border-t">
+            <h3 class="font-bold text-md mb-2">یادداشت</h3>
+            <p class="text-gray-600">{{ invoice.notes }}</p>
+        </div>
+        {% endif %}
+        
+        <!-- اطلاعات سیستم حسابداری -->
+        <div class="px-6 py-4 border-b bg-blue-50">
+            <h4 class="font-bold text-blue-800 mb-2">اطلاعات سیستم حسابداری</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="text-gray-600">وضعیت ارسال:</span>
+                    {% if invoice.sent_to_accounting %}
+                        <span class="text-green-600">✅ ارسال شده</span>
+                    {% else %}
+                        <span class="text-yellow-600">⏳ ارسال نشده</span>
+                    {% endif %}
+                </div>
+                {% if invoice.accounting_invoice_id %}
+                <div>
+                    <span class="text-gray-600">شماره فاکتور حسابداری:</span>
+                    <span class="font-bold text-blue-600">{{ invoice.accounting_invoice_id }}</span>
+                </div>
+                {% endif %}
+                {% if invoice.sent_to_accounting_at %}
+                <div>
+                    <span class="text-gray-600">تاریخ ارسال:</span>
+                    <span>{{ invoice.sent_to_accounting_at|to_jalali }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- دکمه‌ها -->
+        <div class="px-6 py-4 border-t flex justify-between flex-wrap gap-3">
+            <a href="{% url 'employees:manage_invoices' %}" class="btn-outline">بازگشت</a>
+            
+            <div class="flex gap-3 flex-wrap">
+                <!-- دکمه چاپ پیش فاکتور برای انبار -->
+                <a href="{% url 'employees:print_warehouse_invoice' invoice.id %}" 
+                   class="btn-primary bg-blue-600 hover:bg-blue-700 text-white"
+                   target="_blank">
+                    <i class="fas fa-print ml-2"></i> چاپ پیش فاکتور برای انبار
+                </a>
+
+                {% if invoice.status.code == 'PENDING' %}
+                <a href="{% url 'employees:confirm_invoice' invoice.id %}" 
+                   class="btn-primary bg-green-600 hover:bg-green-700 text-white"
+                   onclick="return confirm('آیا از تایید این فاکتور اطمینان دارید؟')">
+                    <i class="fas fa-check ml-2"></i> تایید فاکتور
+                </a>
+                <button onclick="rejectInvoice({{ invoice.id }})" class="btn-primary bg-red-600 hover:bg-red-700 text-white">
+                    <i class="fas fa-times ml-2"></i> رد فاکتور
+                </button>
+                {% endif %}
+
+                {% if not invoice.sent_to_accounting and invoice.status.code == 'CONFIRMED' %}
+                <a href="{% url 'accounting:send_invoice' invoice.id %}" 
+                class="btn-primary bg-purple-600 hover:bg-purple-700 text-white"
+                onclick="return confirm('آیا از ارسال این فاکتور به سیستم حسابداری اطمینان دارید؟')">
+                    <i class="fas fa-paper-plane ml-2"></i> ارسال به حسابداری
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal اضافه کردن محصول -->
+<div id="addProductModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
+        <div class="p-4 border-b flex justify-between items-center bg-yellow-600 text-white">
+            <h3 class="font-bold text-lg">اضافه کردن محصول به فاکتور</h3>
+            <button onclick="closeModal()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+        </div>
+        <div class="p-4">
+            <!-- جستجو -->
+            <div class="mb-4">
+                <input type="text" id="productSearchInput" placeholder="جستجوی محصول..." 
+                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-500">
+            </div>
+            <!-- نتایج -->
+            <div id="searchResults" class="max-h-96 overflow-y-auto">
+                <div class="text-center text-gray-400 py-8">
+                    <i class="fas fa-search text-3xl block mb-2"></i>
+                    برای جستجو شروع به تایپ کنید
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t bg-gray-50 flex justify-end">
+            <button onclick="closeModal()" class="btn-outline">بستن</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== مدیریت آیتم‌های فاکتور =====
+
+function updateQuantity(itemId, change) {
+    const quantitySpan = document.querySelector(`.item-quantity-${itemId}`);
+    let currentQty = parseInt(quantitySpan.textContent);
+    let newQty = currentQty + change;
+    
+    if (newQty < 1) return;
+    
+    fetch(`/employees/invoices/{{ invoice.id }}/update-item/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            item_id: itemId,
+            quantity: newQty
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            quantitySpan.textContent = newQty;
+            // بروزرسانی جمع آیتم
+            const totalSpan = document.querySelector(`.item-total-${itemId}`);
+            const price = parseInt(totalSpan.textContent.replace(/,/g, '').replace(' ریال', ''));
+            totalSpan.textContent = (price / currentQty * newQty).toLocaleString() + ' ریال';
+            // بروزرسانی امتیاز آیتم
+            const pointsSpan = document.querySelector(`.item-points-${itemId}`);
+            const oldPoints = parseInt(pointsSpan.textContent.replace(/,/g, ''));
+            pointsSpan.textContent = Math.round(oldPoints / currentQty * newQty);
+            // بروزرسانی مجموع کل
+            updateTotals(data);
+        } else {
+            alert(data.error || 'خطا در بروزرسانی');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('خطا در ارتباط با سرور');
+    });
+}
+
+function removeItem(itemId) {
+    if (!confirm('آیا از حذف این آیتم اطمینان دارید؟')) return;
+    
+    fetch(`/employees/invoices/{{ invoice.id }}/update-item/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            item_id: itemId,
+            quantity: 0
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const row = document.getElementById(`item-row-${itemId}`);
+            if (row) row.remove();
+            updateTotals(data);
+        } else {
+            alert(data.error || 'خطا در حذف آیتم');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('خطا در ارتباط با سرور');
+    });
+}
+
+function updateTotals(data) {
+    document.getElementById('subtotalDisplay').textContent = data.subtotal + ' ریال';
+    document.getElementById('totalDisplay').textContent = data.total + ' ریال';
+}
+
+// ===== مدیریت مودال اضافه کردن محصول =====
+
+function showAddProductModal() {
+    document.getElementById('addProductModal').classList.remove('hidden');
+    document.getElementById('productSearchInput').value = '';
+    document.getElementById('searchResults').innerHTML = `
+        <div class="text-center text-gray-400 py-8">
+            <i class="fas fa-search text-3xl block mb-2"></i>
+            برای جستجو شروع به تایپ کنید
+        </div>
+    `;
+    document.getElementById('productSearchInput').focus();
+}
+
+function closeModal() {
+    document.getElementById('addProductModal').classList.add('hidden');
+}
+
+// جستجوی محصولات
+let searchTimeout;
+document.getElementById('productSearchInput').addEventListener('input', function() {
+    const query = this.value.trim();
+    const resultsContainer = document.getElementById('searchResults');
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        resultsContainer.innerHTML = `
+            <div class="text-center text-gray-400 py-8">
+                <i class="fas fa-search text-3xl block mb-2"></i>
+                برای جستجو شروع به تایپ کنید
+            </div>
+        `;
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        fetch(`/employees/invoices/search-products/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.results.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="text-center text-gray-400 py-8">
+                            <i class="fas fa-box-open text-3xl block mb-2"></i>
+                            محصولی یافت نشد
+                        </div>
+                    `;
+                    return;
+                }
+                
+                resultsContainer.innerHTML = data.results.map(product => `
+                    <div class="flex items-center justify-between p-3 border-b hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gray-100 rounded overflow-hidden">
+                                <img src="${product.image || '/static/images/no-image.png'}" 
+                                     alt="${product.name}" 
+                                     class="w-full h-full object-cover"
+                                     onerror="this.src='/static/images/no-image.png'">
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">${product.name}</p>
+                                <p class="text-sm text-gray-500">${product.brand}</p>
+                                <p class="text-xs text-gray-400">کد: ${product.product_code || '---'} | موجودی: ${product.stock} | قیمت: ${product.price} ریال</p>
+                            </div>
+                        </div>
+                        <button onclick="addProductToInvoice(${product.id})" 
+                                class="btn-primary bg-green-600 hover:bg-green-700 text-sm py-1 px-3">
+                            <i class="fas fa-plus ml-1"></i> اضافه
+                        </button>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultsContainer.innerHTML = `
+                    <div class="text-center text-red-500 py-8">
+                        <i class="fas fa-exclamation-circle text-3xl block mb-2"></i>
+                        خطا در جستجو
+                    </div>
+                `;
+            });
+    }, 300);
+});
+
+function addProductToInvoice(productId) {
+    if (!confirm('آیا از اضافه کردن این محصول به فاکتور اطمینان دارید؟')) return;
+    
+    fetch(`/employees/invoices/{{ invoice.id }}/add-item/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('itemsTableContainer').innerHTML = data.items_html;
+            updateTotals(data);
+            closeModal();
+            showToast('محصول با موفقیت اضافه شد', 'success');
+        } else {
+            alert(data.error || 'خطا در اضافه کردن محصول');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('خطا در ارتباط با سرور');
+    });
+}
+
+// بستن مودال با کلیک خارج از آن
+document.getElementById('addProductModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// بستن مودال با کلید ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// ===== توابع کمکی =====
+
+function showToast(message, type = 'success') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ===== رد فاکتور =====
+function rejectInvoice(invoiceId) {
+    let reason = prompt('لطفا دلیل رد فاکتور را وارد کنید:');
+    if (reason) {
+        fetch(`/employees/invoices/${invoiceId}/reject/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `reason=${encodeURIComponent(reason)}`
+        }).then(response => {
+            if (response.ok) {
+                location.href = "{% url 'employees:manage_invoices' %}";
+            } else {
+                alert('خطا در رد فاکتور');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

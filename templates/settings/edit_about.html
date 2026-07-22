@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load settings_extras %} 
+ 
+{% block title %}ویرایش درباره ما{% endblock %}
+
+{% block extra_head %}
+<style>
+    .section-box {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        background: #fafafa;
+    }
+    .section-box h3 {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        color: #1e293b;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
+    .form-group input, .form-group textarea {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+        outline: none;
+        border-color: #c9a84c;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+    }
+    .image-preview {
+        max-width: 200px;
+        max-height: 150px;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        border: 1px solid #e5e7eb;
+    }
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+    }
+    @media (max-width: 768px) {
+        .grid-2, .grid-3 {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="mb-4">
+        <a href="{% url 'settings:settings_dashboard' %}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به تنظیمات
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h1 class="text-2xl font-bold mb-6">📝 ویرایش درباره ما</h1>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- ===== هدر ===== -->
+            <div class="section-box">
+                <h3>🖼️ هدر صفحه</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>عنوان هدر</label>
+                        <input type="text" name="about_header_title" value="{{ settings.about_header_title }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>زیرنویس هدر</label>
+                        <input type="text" name="about_header_subtitle" value="{{ settings.about_header_subtitle }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>تصویر هدر</label>
+                        {% if settings.about_header_image %}
+                            <img src="{{ settings.about_header_image }}" class="image-preview">
+                        {% endif %}
+                        <input type="file" name="about_header_image" accept="image/*" class="w-full border rounded px-3 py-2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== تاریخچه ===== -->
+            <div class="section-box">
+                <h3>📜 تاریخچه شرکت</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>عنوان تاریخچه</label>
+                        <input type="text" name="about_history_title" value="{{ settings.about_history_title }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>تصویر تاریخچه</label>
+                        {% if settings.about_history_image %}
+                            <img src="{{ settings.about_history_image }}" class="image-preview">
+                        {% endif %}
+                        <input type="file" name="about_history_image" accept="image/*" class="w-full border rounded px-3 py-2">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>متن تاریخچه</label>
+                    <textarea name="about_history_text" rows="6" class="w-full border rounded px-3 py-2">{{ settings.about_history_text }}</textarea>
+                </div>
+            </div>
+
+            <!-- ===== چرا ما را انتخاب کنید ===== -->
+            <div class="section-box">
+                <h3>❓ چرا ما را انتخاب کنید؟</h3>
+                <div class="form-group">
+                    <label>عنوان بخش</label>
+                    <input type="text" name="about_why_title" value="{{ settings.about_why_title }}" class="w-full border rounded px-3 py-2">
+                </div>
+                <div class="grid-3">
+                    {% for i in "123" %}
+                    <div class="border rounded-lg p-3 bg-white">
+                        <h4 class="font-semibold mb-2">کارت {{ forloop.counter }}</h4>
+                        <div class="form-group">
+                            <label>عنوان</label>
+                            <input type="text" name="about_why_card{{ forloop.counter }}_title" value="{% with key='about_why_card'|add:forloop.counter|add:'_title' %}{{ settings|get_item:key }}{% endwith %}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div class="form-group">
+                            <label>متن</label>
+                            <input type="text" name="about_why_card{{ forloop.counter }}_text" value="{% with key='about_why_card'|add:forloop.counter|add:'_text' %}{{ settings|get_item:key }}{% endwith %}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div class="form-group">
+                            <label>تصویر</label>
+                            {% with key='about_why_card'|add:forloop.counter|add:'_image' %}
+                            {% with img=settings|get_item:key %}
+                            {% if img %}
+                                <img src="{{ img }}" class="image-preview">
+                            {% endif %}
+                            {% endwith %}
+                            {% endwith %}
+                            <input type="file" name="about_why_card{{ forloop.counter }}_image" accept="image/*" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== آمار ===== -->
+            <div class="section-box">
+                <h3>📊 آمار</h3>
+                <div class="form-group">
+                    <label>عنوان بخش آمار</label>
+                    <input type="text" name="about_stats_title" value="{{ settings.about_stats_title }}" class="w-full border rounded px-3 py-2">
+                </div>
+                <div class="form-group">
+                    <label>تصویر پس‌زمینه آمار</label>
+                    {% if settings.about_stats_bg_image %}
+                        <img src="{{ settings.about_stats_bg_image }}" class="image-preview">
+                    {% endif %}
+                    <input type="file" name="about_stats_bg_image" accept="image/*" class="w-full border rounded px-3 py-2">
+                </div>
+                <div class="grid-2">
+                    {% for i in "1234" %}
+                    <div class="border rounded-lg p-3 bg-white">
+                        <h4 class="font-semibold mb-2">آمار {{ forloop.counter }}</h4>
+                        <div class="form-group">
+                            <label>عدد</label>
+                            <input type="text" name="about_stat{{ forloop.counter }}_number" value="{% with key='about_stat'|add:forloop.counter|add:'_number' %}{{ settings|get_item:key }}{% endwith %}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div class="form-group">
+                            <label>برچسب</label>
+                            <input type="text" name="about_stat{{ forloop.counter }}_label" value="{% with key='about_stat'|add:forloop.counter|add:'_label' %}{{ settings|get_item:key }}{% endwith %}" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== تیم ما ===== -->
+            <div class="section-box">
+                <h3>👥 تیم ما</h3>
+                <div class="form-group">
+                    <label>عنوان بخش تیم</label>
+                    <input type="text" name="about_team_title" value="{{ settings.about_team_title }}" class="w-full border rounded px-3 py-2">
+                </div>
+                <div class="grid-3">
+                    {% for i in "123" %}
+                    <div class="border rounded-lg p-3 bg-white text-center">
+                        <h4 class="font-semibold mb-2">عضو {{ forloop.counter }}</h4>
+                        <div class="form-group">
+                            <label>نام</label>
+                            <input type="text" name="about_team{{ forloop.counter }}_name" value="{% with key='about_team'|add:forloop.counter|add:'_name' %}{{ settings|get_item:key }}{% endwith %}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div class="form-group">
+                            <label>سمت</label>
+                            <input type="text" name="about_team{{ forloop.counter }}_position" value="{% with key='about_team'|add:forloop.counter|add:'_position' %}{{ settings|get_item:key }}{% endwith %}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div class="form-group">
+                            <label>تصویر</label>
+                            {% with key='about_team'|add:forloop.counter|add:'_image' %}
+                            {% with img=settings|get_item:key %}
+                            {% if img %}
+                                <img src="{{ img }}" class="image-preview" style="border-radius:50%; width:100px; height:100px; object-fit:cover; margin:0 auto;">
+                            {% endif %}
+                            {% endwith %}
+                            {% endwith %}
+                            <input type="file" name="about_team{{ forloop.counter }}_image" accept="image/*" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== اطلاعات تماس ===== -->
+            <div class="section-box">
+                <h3>📞 اطلاعات تماس</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>عنوان تماس</label>
+                        <input type="text" name="about_contact_title" value="{{ settings.about_contact_title }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>آدرس</label>
+                        <input type="text" name="about_contact_address" value="{{ settings.about_contact_address }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>تلفن‌ها</label>
+                        <input type="text" name="about_contact_phones" value="{{ settings.about_contact_phones }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>ایمیل‌ها</label>
+                        <input type="text" name="about_contact_emails" value="{{ settings.about_contact_emails }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>ساعت کاری</label>
+                        <input type="text" name="about_contact_hours" value="{{ settings.about_contact_hours }}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="form-group">
+                        <label>لینک نقشه گوگل</label>
+                        <input type="text" name="about_contact_map_url" value="{{ settings.about_contact_map_url }}" class="w-full border rounded px-3 py-2" placeholder="https://www.google.com/maps/embed?pb=...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== شبکه‌های اجتماعی ===== -->
+            <div class="section-box">
+                <h3>🌐 شبکه‌های اجتماعی</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>اینستاگرام</label>
+                        <input type="text" name="about_social_instagram" value="{{ settings.about_social_instagram }}" class="w-full border rounded px-3 py-2" placeholder="https://instagram.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>تلگرام</label>
+                        <input type="text" name="about_social_telegram" value="{{ settings.about_social_telegram }}" class="w-full border rounded px-3 py-2" placeholder="https://t.me/...">
+                    </div>
+                    <div class="form-group">
+                        <label>لینکدین</label>
+                        <input type="text" name="about_social_linkedin" value="{{ settings.about_social_linkedin }}" class="w-full border rounded px-3 py-2" placeholder="https://linkedin.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>یوتیوب</label>
+                        <input type="text" name="about_social_youtube" value="{{ settings.about_social_youtube }}" class="w-full border rounded px-3 py-2" placeholder="https://youtube.com/...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                <a href="{% url 'settings:settings_dashboard' %}" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                    انصراف
+                </a>
+                <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
+                    ذخیره همه تغییرات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

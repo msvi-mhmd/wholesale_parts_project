@@ -1,0 +1,313 @@
+<!-- templates/employees/add_product.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}افزودن محصول جدید | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .image-preview {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    .image-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+    }
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .remove-image {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-green-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">افزودن محصول جدید</h1>
+                <p class="text-sm opacity-90">اطلاعات محصول را وارد کنید</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="p-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                    <label class="form-label">شماره محصول</label>
+                    <input type="text" name="product_code" class="form-input" placeholder="مثال: 12345" maxlength="20">
+                    <p class="text-xs text-gray-500 mt-1">در صورت خالی ماندن خودکار تولید می‌شود</p>
+                </div>
+
+                <div>
+                    <label class="form-label">شماره جایگزین</label>
+                    <input type="text" name="alt_code" class="form-input" placeholder="مثال: 789" maxlength="20">
+                    <p class="text-xs text-gray-500 mt-1">شماره دیگری که این محصول با آن شناخته می‌شود (اختیاری)</p>
+                </div>
+                    <!-- نام محصول -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">نام محصول *</label>
+                        <input type="text" name="name" required class="form-input" placeholder="مثال: لنت ترمز جلو پژو 206">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="form-label">اسلاگ (آدرس یکتا)</label>
+                        <input type="text" name="slug" class="form-input" placeholder="در صورت خالی ماندن خودکار ساخته می‌شود">
+                        <p class="text-xs text-gray-500 mt-1">فقط حروف انگلیسی، اعداد و خط تیره (مثال: brake-pad-peugeot-206)</p>
+                    </div>
+                    <!-- دسته اصلی -->
+                    <div>
+                        <label class="form-label">دسته اصلی *</label>
+                        <select name="main_category" id="main_category" required class="form-select">
+                            <option value="">انتخاب کنید</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- زیردسته -->
+                    <div>
+                        <label class="form-label">زیردسته *</label>
+                        <select name="sub_category" id="sub_category" required class="form-select">
+                            <option value="">ابتدا دسته اصلی را انتخاب کنید</option>
+                        </select>
+                    </div>
+                    
+                    <!-- برند -->
+                    <div>
+                        <label class="form-label">برند *</label>
+                        <select name="brand" required class="form-select">
+                            <option value="">انتخاب کنید</option>
+                            {% for brand in brands %}
+                            <option value="{{ brand.id }}">{{ brand.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- قیمت -->
+                    <div>
+                        <label class="form-label">قیمت (ریال) *</label>
+                        <input type="number" name="price" required class="form-input" placeholder="مثال: 450000">
+                    </div>
+                    
+                    <!-- قیمت تخفیف‌خورده -->
+                    <div>
+                        <label class="form-label">قیمت تخفیف‌خورده</label>
+                        <input type="number" name="off_price" class="form-input" placeholder="اختیاری">
+                    </div>
+                    
+                    <!-- موجودی -->
+                    <div>
+                        <label class="form-label">موجودی انبار *</label>
+                        <input type="number" name="left_in_stock" value="0" required class="form-input">
+                    </div>
+                    
+                    <!-- امتیاز خرید -->
+                    <div>
+                        <label class="form-label">امتیاز خرید</label>
+                        <input type="number" name="point_of_buy" value="0" class="form-input">
+                        <p class="text-xs text-gray-500 mt-1">مشتری با خرید این محصول چند امتیاز می‌گیرد؟</p>
+                    </div>
+                    
+                    <!-- تخصص/نوع -->
+                    <div>
+                        <label class="form-label">تخصص/نوع محصول</label>
+                        <input type="text" name="specialty" class="form-input" placeholder="مثال: اورجینال، متفرقه">
+                    </div>
+                    
+                    <!-- خودروهای مناسب -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">خودروهای مناسب</label>
+                        <select name="suitable_cars" multiple class="form-select" style="height: 100px;">
+                            {% for car in cars %}
+                            <option value="{{ car.id }}">{{ car.car_brand.name }} {{ car.name }} ({{ car.model }})</option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">برای انتخاب چند مورد، کلید Ctrl را نگه دارید</p>
+                    </div>
+                    
+                    <!-- توضیح مختصر -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">توضیح مختصر</label>
+                        <textarea name="short_description" rows="2" class="form-textarea" placeholder="توضیح کوتاه در مورد محصول..."></textarea>
+                    </div>
+                    
+                    <!-- توضیحات کامل -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">توضیحات کامل</label>
+                        <textarea name="full_description" rows="5" class="form-textarea" placeholder="توضیحات کامل محصول..."></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="form-label">نام‌های جایگزین (برای جستجو)</label>
+                        <div id="aliasesContainer">
+                            <div class="flex gap-2 mb-2 alias-input">
+                                <input type="text" name="aliases" class="form-input flex-1" placeholder="مثال: لنت ترمز 206">
+                                <button type="button" class="remove-alias bg-red-500 text-white px-3 rounded-lg">×</button>
+                            </div>
+                        </div>
+                        <button type="button" id="addAlias" class="text-yellow-600 text-sm mt-1">
+                            <i class="fas fa-plus ml-1"></i> افزودن نام جایگزین دیگر
+                        </button>
+                        <p class="text-xs text-gray-500 mt-1">با این نام‌ها نیز محصول در نتایج جستجو نمایش داده می‌شود</p>
+                    </div>
+                    <!-- تصاویر محصول -->
+                    <!-- بخش آپلود تصاویر -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">تصاویر محصول</label>
+                        <input type="file" name="images" multiple accept="image/*" class="form-input" id="imageInput">
+                        <p class="text-xs text-gray-500 mt-1">
+                            می‌توانید چند تصویر را همزمان انتخاب کنید (حداکثر ۵ تصویر)
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            تصاویر به صورت خودکار به 600x600 پیکسل تبدیل شده و با فرمت WebP ذخیره می‌شوند
+                        </p>
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                    
+                    <!-- وضعیت -->
+                    <div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="is_active" checked>
+                            <span class="text-sm">فعال</span>
+                        </label>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="is_featured">
+                            <span class="text-sm">محصول ویژه (نمایش در صفحه اصلی)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <a href="{% url 'employees:manage_products' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        انصراف
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        ثبت محصول
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تغییر زیردسته بر اساس دسته اصلی
+    const subCategories = {
+        {% for cat in categories %}
+        {{ cat.id }}: [
+            {% for sub in cat.subcategories.all %}
+            {id: {{ sub.id }}, name: "{{ sub.name }}"},
+            {% endfor %}
+        ],
+        {% endfor %}
+    };
+    
+    document.getElementById('main_category').addEventListener('change', function() {
+        const catId = this.value;
+        const subSelect = document.getElementById('sub_category');
+        subSelect.innerHTML = '<option value="">انتخاب کنید</option>';
+        
+        if (catId && subCategories[catId]) {
+            subCategories[catId].forEach(function(sub) {
+                const option = document.createElement('option');
+                option.value = sub.id;
+                option.textContent = sub.name;
+                subSelect.appendChild(option);
+            });
+        }
+    });
+    
+    // پیش‌نمایش تصاویر
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        
+        const files = Array.from(e.target.files);
+        files.forEach(function(file, index) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="پیش‌نمایش">
+                    <span class="remove-image" onclick="this.parentElement.remove()">×</span>
+                `;
+                preview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    // اضافه کردن نام‌های جایگزین
+    document.getElementById('addAlias')?.addEventListener('click', function() {
+        const container = document.getElementById('aliasesContainer');
+        const newInput = document.createElement('div');
+        newInput.className = 'flex gap-2 mb-2 alias-input';
+        newInput.innerHTML = `
+            <input type="text" name="aliases" class="form-input flex-1" placeholder="مثال: لنت ترمز 206">
+            <button type="button" class="remove-alias bg-red-500 text-white px-3 rounded-lg">×</button>
+        `;
+        container.appendChild(newInput);
+        
+        newInput.querySelector('.remove-alias').addEventListener('click', function() {
+            newInput.remove();
+        });
+    });
+    
+    // حذف نام‌های جایگزین
+    document.querySelectorAll('.remove-alias').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.alias-input').remove();
+        });
+    });
+</script>
+{% endblock %}

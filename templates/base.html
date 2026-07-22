@@ -1,0 +1,1510 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>{% block title %}پرشین گلف{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Swiper JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 100;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Bold.ttf" %}') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Black.ttf" %}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Medium.ttf" %}') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-ExtraBold.ttf" %}') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/peyda-light.ttf" %}') format('truetype');
+            font-weight: 200;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            font-family: 'Peyda', sans-serif;
+        }
+        
+        body {
+            background-color: #dbdbdb;
+        }
+        header{
+            background-color: #2d3748;
+        }
+
+
+        .container-custom {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding:0 1rem;
+        }
+        .nav-buttons{
+            color: rgb(200, 200, 200);
+        }
+        .nav-buttons:hover{
+            color: #c9a84c;
+        }
+
+
+
+        nav {
+            display: block;
+        }
+
+        @media (max-width: 1024px) {
+            .hamburger-btn {
+                display: block;
+            }
+            nav {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .hamburger-btn {
+                display: none !important;
+            }
+            nav {
+                display: block !important;
+            }
+        }
+        
+        @media (min-width: 640px) {
+            .container-custom {
+                padding:0 1.5rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container-custom {
+                padding:0 2rem;
+            }
+        }
+        
+        /* اسکرول افقی برای محصولات مشابه */
+        .similar-scroll {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 1rem;
+            padding: 1rem 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .similar-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .similar-scroll::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        
+        .similar-scroll::-webkit-scrollbar-thumb {
+            background: #c9a84c;
+            border-radius: 10px;
+        }
+        
+        .similar-card {
+            flex: 0 0 200px;
+        }
+        
+        @media (min-width: 640px) {
+            .similar-card {
+                flex: 0 0 220px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .similar-card {
+                flex: 0 0 240px;
+            }
+        }
+        
+        /* محصول grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        @media (min-width: 640px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+        
+        /* محصول کارت */
+        .product-card {
+            background: rgb(250, 250, 250);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        
+        .product-image {
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+        
+        .discount-badge{
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: #c9a84c;
+            color: #fff;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        /* دکمه‌ها */
+        .btn-primary {
+            background-color: #c9a84c;
+            color: #2d3748;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2d3748;
+            color: #c9a84c;
+        }
+        
+        .header-primary {
+            background-color: #2d3748;
+            color: #c9a84c;
+        }
+        .btn-outline {
+            border: 1px solid #c9a84c;
+            color: #c9a84c;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .btn-outline:hover {
+            background-color: #c9a84c;
+            color: #1e293b;
+        }
+        
+        /* پنل دسته‌بندی */
+        #categoriesPanel {
+            transition: all 0.3s ease;
+        }
+        
+        .category-column h3 {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c9a84c;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .category-column ul li a {
+            display: block;
+            padding: 0.4rem 0;
+            color: #4b5563;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .category-column ul li a:hover {
+            color: #c9a84c;
+            padding-right: 0.5rem;
+        }
+        
+        /* اسکرول نوار نویگیشن */
+        .overflow-x-auto {
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 10px;
+        }
+        
+        /* استایل فوتر جدید - رنگ ثابت */
+        .footer {
+            margin: 0;
+            box-sizing: border-box;
+            background: #2d3748;
+            padding: 80px 40px 40px;
+            border-top: 1px solid #1a1a1a;
+            width: 100%;
+        }
+        
+        .footer-container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr;
+            gap: 60px 40px;
+        }
+        
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #c9a84c;
+            text-decoration: none;
+        }
+        
+        .logo #footer_logo_img {
+            max-width: 15rem;
+        }
+        
+        .brand-desc {
+            font-size: 1.05rem;
+            max-width: 380px;
+            color: #e2e8f0;
+            text-align: center;
+        }
+        
+        .column h3 {
+            font-size: 1.18rem;
+            font-weight: 600;
+            color: #c9a84c;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .column ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 0;
+        }
+        
+        .column a {
+            color: #cbd5e0;
+            text-decoration: none;
+            font-size: 0.98rem;
+            transition: color 0.25s;
+        }
+        
+        .column a:hover {
+            color: #c9a84c;
+        }
+        
+        .contact {
+            margin-top: 40px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 0.98rem;
+            color: #cbd5e0;
+            text-decoration: none;
+        }
+        
+        .contact-item i {
+            font-size: 1.3rem;
+            color: #c9a84c;
+            min-width: 28px;
+            text-decoration: none;
+        }
+        
+        .license-section {
+            background: #1a202c;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-radius: 15px;
+        }
+        
+        .license-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 0 40px;
+        }
+        
+        .license-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #cbd5e0;
+            font-size: 0.9rem;
+        }
+        
+        .license-item i {
+            font-size: 2rem;
+            color: #c9a84c;
+        }
+        
+        .license-item a {
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: color 0.25s;
+        }
+        
+        .license-item a:hover {
+            color: #c9a84c;
+        }
+        
+        .bottom {
+            max-width: 1150px;
+            margin: 40px auto 0;
+            padding-top: 30px;
+            border-top: 1px solid #4a5568;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.92rem;
+            color: #a0aec0;
+        }
+        
+        #rights-reserved {
+            color: #a0aec0;
+            text-decoration: none;
+            margin: 0 12px;
+        }
+        
+        #rights-reserved:hover {
+            color: #ffc800;
+        }
+        
+        .legal-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            margin: 0 12px;
+        }
+        
+        .legal-links a:hover {
+            color: #ffc800;
+        }
+        
+        .social {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .social a {
+            color: #cbd5e0;
+            font-size: 1.4rem;
+            transition: color 0.25s;
+        }
+        
+        .social a:hover {
+            color: #ffc800;
+        }
+        
+        @media (min-width: 1200px) {
+            .footer {
+                box-shadow: 0px 20px 40px rgba(0,0,0,0.3);
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .footer-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+            .bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+            .license-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* ===== استایل سایدبار موبایل ===== */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 320px;
+            height: 100vh;
+            background: white;
+            z-index: 9999;
+            transition: right 0.3s ease;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+            overflow-y: auto;
+        }
+        
+        .mobile-sidebar.open {
+            right: 0;
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+            display: none;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2d3748;
+            color: #c9a84c;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .sidebar-header .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .sidebar-item {
+            display: block;
+            padding: 0.8rem 1.2rem;
+            color: #374151;
+            text-decoration: none;
+            border-bottom: 1px solid #f3f4f6;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-item:hover {
+            background: #f3f4f6;
+            color: #c9a84c;
+        }
+        
+        .sidebar-item i {
+            width: 24px;
+            margin-left: 10px;
+            color: #6b7280;
+        }
+        
+        .sidebar-item:hover i {
+            color: #c9a84c;
+        }
+        
+        .sidebar-category {
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .sidebar-category-btn {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            text-align: right;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #374151;
+            transition: 0.2s;
+        }
+        
+        .sidebar-category-btn:hover {
+            background: #f3f4f6;
+            color: #c9a84c;
+        }
+        
+        .sidebar-category-btn i {
+            transition: transform 0.3s;
+        }
+        
+        .sidebar-category-btn .rotate {
+            transform: rotate(90deg);
+        }
+        
+        .sidebar-sub-items {
+            display: none;
+            background: #f9fafb;
+        }
+        
+        .sidebar-sub-items.open {
+            display: block;
+        }
+        
+        .sidebar-sub-items a {
+            display: block;
+            padding: 0.6rem 2rem;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        
+        .sidebar-sub-items a:hover {
+            background: #e5e7eb;
+            color: #c9a84c;
+        }
+        
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 1rem;
+        }
+        
+        .sidebar-footer a {
+            display: block;
+            padding: 0.6rem 1.2rem;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        
+        .sidebar-footer a:hover {
+            background: #f3f4f6;
+        }
+        
+        .sidebar-footer .logout-btn {
+            color: #dc2626;
+        }
+        
+        .sidebar-footer .logout-btn:hover {
+            background: #fef2f2;
+        }
+        
+        /* ===== دکمه همبرگر ===== */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .hamburger-btn {
+                display: block;
+            }
+            .desktop-nav {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            .hamburger-btn {
+                display: none !important;
+            }
+        }
+        /* ===== استایل زیردسته‌های سایدبار ===== */
+.sidebar-sub-category {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.sidebar-sub-category-btn {
+    width: 100%;
+    padding: 0.6rem 1.2rem;
+    padding-right: 2rem;
+    text-align: right;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #6b7280;
+    transition: 0.2s;
+}
+
+.sidebar-sub-category-btn:hover {
+    background: #f3f4f6;
+    color: #c9a84c;
+}
+
+.sidebar-sub-category-btn i {
+    transition: transform 0.3s;
+}
+
+.sidebar-sub-category-btn .rotate {
+    transform: rotate(90deg);
+}
+
+.sidebar-sub-sub-items {
+    display: none;
+    background: #f3f4f6;
+}
+
+.sidebar-sub-sub-items.open {
+    display: block;
+}
+
+.sidebar-sub-sub-items a {
+    display: block;
+    padding: 0.5rem 2.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: 0.2s;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-sub-sub-items a:hover {
+    background: #e5e7eb;
+    color: #c9a84c;
+}
+/* ===== منوی کشویی دو ستونی ===== */
+#categoriesDropdown {
+    padding-right: 20px;
+    width: 30dvw;
+    height: 85dvh;
+    right: 0;
+    left: auto;
+    transition: transform 1s;
+}
+
+.flex{
+    height: 100%;
+}
+
+.category-main-btn{
+    border-radius: 5px;
+}
+
+.category-main-btn:hover{
+    border-radius: 5px;
+    background-color: #2d3748;
+    color: #c9a84c;
+}
+
+
+#categoriesDropdown .category-main-btn i {
+    transition: transform 0.2s;
+}
+
+#categoriesDropdown .category-main-btn.active {
+    background-color: #2d3748;
+    color: #c9a84c;
+    border-right: 3px solid #c9a84c;
+}
+
+#categoriesDropdown .category-main-btn.active i {
+    transform: rotate(180deg);
+}
+
+#subcategoriesContainer .sub-item {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    transition: 0.2s;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+#subcategoriesContainer .sub-item:hover {
+    background: #e5e7eb;
+    color: #c9a84c;
+}
+
+#subcategoriesContainer .sub-item i {
+    margin-left: 8px;
+    font-size: 0.7rem;
+    color: #9ca3af;
+}
+
+#subcategoriesContainer .no-sub {
+    padding: 0.5rem 0.75rem;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+/* اسکرول‌ها */
+.max-h-70vh {
+    max-height: 70vh;
+}
+
+.max-h-70vh::-webkit-scrollbar {
+    width: 4px;
+}
+
+.max-h-70vh::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.max-h-70vh::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+@media (max-width: 1024px) {
+    #categoriesDropdown {
+        min-width: 90%;
+        max-width: 90%;
+        left: 5%;
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    #categoriesDropdown {
+        min-width: 95%;
+        max-width: 95%;
+        left: 2.5%;
+        transform: translateX(0);
+    }
+    #categoriesDropdown .flex {
+        flex-direction: column;
+    }
+    #categoriesDropdown .w-1\/2 {
+        width: 100%;
+    }
+    #categoriesDropdown .border-l {
+        border-left: none;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    #categoriesDropdown .max-h-70vh {
+        max-height: 40vh;
+    }
+}
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class=" shadow-md sticky top-0 z-50">
+        <div class="container-custom py-4">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <!-- دکمه همبرگر (موبایل) -->
+                <button class="hamburger-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'home' %}" class="flex items-center gap-2">
+                        <img src="{% static 'images/logo.png' %}" alt="لوگو" class="h-12 w-auto">
+                        <span class="text-xl font-bold text-white hidden md:inline">پرشین گلف</span>
+                    </a>
+                </div>
+                
+                <!-- بخش سرچ بار در هدر -->
+                <form action="{% url 'products:product_list' %}" method="get" class="flex-1 max-w-xl relative" id="searchForm">
+                    
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" 
+                            id="searchInput" 
+                            name="q" 
+                            placeholder="جستجو..." 
+                            autocomplete="off"
+                            class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <!-- لیست پیشنهادات جستجو -->
+                    <div id="suggestionsDropdown" class="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-50 hidden">
+                        <div id="suggestionsList" class="max-h-96 overflow-y-auto">
+                            <!-- نتایج اینجا نمایش داده می‌شوند -->
+                        </div>
+                        <div id="viewAllButton" class="border-t p-2 hidden">
+                            <a href="#" id="viewAllLink" class="block text-center text-blue-600 hover:text-blue-800 py-2">
+                                مشاهده همه نتایج <i class="fas fa-arrow-left mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Header Actions -->
+                <div class="flex items-center gap-4">
+                    {% if user.is_authenticated %}
+                        {% if user.user_type == 'customer' %}
+                            <a href="{% url 'customers:cart' %}" class="relative">
+                                <i class="fas fa-shopping-cart text-2xl text-white"></i>
+                                <span class="cart-count absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    0
+                                </span>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'accounts:dashboard_redirect' %}" class="flex items-center gap-2">
+                            <i class="fas fa-user-circle text-2xl text-white"></i>
+                            <span class="hidden md:inline" style="color: white;">{{ user.get_full_name|default:user.username }}</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn-primary">ورود / ثبت‌نام</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class=" relative" style="background: #1a202c;">
+            <div class="container-custom">
+                <div class="flex overflow-x-auto py-3 gap-6 whitespace-nowrap">
+                    <a href="{% url 'home' %}" class="nav-buttons">خانه</a>
+                    <a href="{% url 'products:product_list' %}" class="nav-buttons">همه محصولات</a>
+                    
+                    <!-- دکمه دسته‌بندی -->
+                    <button id="categoriesBtn" class="nav-buttons flex items-center gap-1">
+                        دسته‌بندی
+                        <i id="categoriesIcon" class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </button>
+                    
+                    <a href="{% url 'products:brand_list' %}" class="nav-buttons">برندها</a>
+                    <a href="{% url 'about' %}" class="nav-buttons">درباره ما</a>
+                    <a href="{% url 'customers:club' %}" class="nav-buttons">باشگاه مشتریان</a>
+                </div>
+            </div>
+            
+            <!-- پنل دسته‌بندی (زیر نویگیشن) -->
+            <!-- ===== منوی کشویی دسته‌بندی (دسکتاپ) - دو ستونی ===== -->
+            <div id="categoriesDropdown" class="absolute bg-gray-300 shadow-lg rounded-b-lg z-50 hidden border-t">
+                <div class="flex">
+                    <!-- ستون راست: دسته‌بندی‌های اصلی -->
+                    <div class="w-1/2 border-l border-gray-400 py-3 overflow-y-auto">
+                        <div class="px-3 pb-2 border-b border-gray-200">
+                            <h4 class="font-bold text-gray-700 text-sm">دسته‌بندی‌ها</h4>
+                        </div>
+                        {% if all_categories %}
+                            {% for category in all_categories %}
+                            <div class="category-parent" data-category-id="{{ category.id }}">
+                                <button class="category-main-btn w-full text-right px-4 py-2.5 text-gray-800 flex justify-between items-center transition text-sm border-b border-gray-300">
+                                    <span>{{ category.name }}</span>
+                                    {% if category.subcategories.all %}
+                                    <i class="fas fa-chevron-left text-xs text-gray-400"></i>
+                                    {% endif %}
+                                </button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="px-4 py-8 text-center text-gray-500 text-sm">
+                                هیچ دسته‌بندی یافت نشد
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- ستون چپ: زیردسته‌ها -->
+                    <div class="w-1/2 py-3 overflow-y-auto bg-gray-50">
+                        <div class="px-3 pb-2 border-b border-gray-200">
+                            <h4 class="font-bold text-gray-700 text-sm" id="subcategoryTitle">زیردسته‌ها</h4>
+                        </div>
+                        <div id="subcategoriesContainer" class="px-2">
+                            <div class="text-center py-8 text-gray-400 text-sm">
+                                <i class="fas fa-arrow-left text-2xl block mb-2"></i>
+                                یک دسته را انتخاب کنید
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    
+        <!-- ===== سایدبار موبایل ===== -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <div class="mobile-sidebar" id="mobileSidebar">
+            <div class="sidebar-header">
+                <span class="font-bold">منو</span>
+                <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+            </div>
+            
+            <div class="py-2">
+                <a href="{% url 'home' %}" class="sidebar-item">
+                    <i class="fas fa-home"></i> خانه
+                </a>
+                <a href="{% url 'products:product_list' %}" class="sidebar-item">
+                    <i class="fas fa-th-list"></i> همه محصولات
+                </a>
+                
+                <!-- ===== دسته‌بندی‌ها با زیردسته‌ها در سایدبار ===== -->
+                <div class="sidebar-category">
+                    <button class="sidebar-category-btn" onclick="toggleSubMenu(this)">
+                        <span><i class="fas fa-tags"></i> دسته‌بندی</span>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="sidebar-sub-items">
+                        {% for category in all_categories %}
+                            <div class="sidebar-sub-category">
+                                <button class="sidebar-sub-category-btn" onclick="toggleSubSubMenu(this)">
+                                    <span>{{ category.name }}</span>
+                                    {% if category.subcategories.all %}
+                                        <i class="fas fa-chevron-left text-xs"></i>
+                                    {% endif %}
+                                </button>
+                                {% if category.subcategories.all %}
+                                <div class="sidebar-sub-sub-items">
+                                    {% for sub in category.subcategories.all %}
+                                    <a href="{% url 'products:category_products' sub.slug %}">{{ sub.name }}</a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <a href="{% url 'products:brand_list' %}" class="sidebar-item">
+                    <i class="fas fa-building"></i> برندها
+                </a>
+                <a href="{% url 'customers:club' %}" class="sidebar-item">
+                    <i class="fas fa-crown"></i> باشگاه مشتریان
+                </a>
+                <a href="{% url 'about' %}" class="sidebar-item">
+                    <i class="fas fa-info-circle"></i> درباره ما
+                </a>
+            </div>
+            
+            <div class="sidebar-footer">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:dashboard_redirect' %}" class="sidebar-item">
+                        <i class="fas fa-user"></i> پنل کاربری
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="sidebar-item logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> خروج
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="sidebar-item">
+                        <i class="fas fa-sign-in-alt"></i> ورود
+                    </a>
+                    <a href="{% url 'accounts:register_request' %}" class="sidebar-item">
+                        <i class="fas fa-user-plus"></i> ثبت‌نام
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        {% if messages %}
+        <div class="container-custom mt-4">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer جدید با رنگ ثابت و بخش مجوزها -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="brand">
+                <a href="{% url 'home' %}" class="logo">
+                    <img src="{% static 'images/logo.png' %}" alt="logo" id="footer_logo_img">
+                </a>
+                <p class="brand-desc">
+                    مرکز فروش عمده لوازم یدکی خودرو با بهترین قیمت‌ها و کیفیت تضمینی
+                </p>
+                <div class="contact">
+                    <a href="tel:+989123456789" class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        ۰۹۱۲۳۴۵۶۷۸۹
+                    </a>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>بندرعباس ،بلوار علی ابن ابی طالب ، رو به روی خانه شیوا ، شرکت بخش لوازم یدکی پرشین گلف </span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>info@example.com</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="column">
+                <h3>شرکت پرشین گلف</h3>
+                <ul>
+                    <li><a href="{% url 'about' %}">درباره ما</a></li>
+                    <li><a href="{% url 'registration_guide' %}">شرایط ثبت نام</a></li>
+                    <li><a href="{% url 'terms' %}">قوانین و مقررات</a></li>
+                    <li><a href="{% url 'support:ticket_list' %}">پشتیبانی</a></li>
+                </ul>
+            </div>
+            
+            <div class="column">
+                <h3>محصولات</h3>
+                <ul>
+                    <li><a href="{% url 'products:category_products' 'globnd-o-frmn' %}">جلوبندی و فرمان</a></li>
+                    <li><a href="{% url 'products:category_products' 'brk-o-ltromn' %}">برق و الکترومکانیک</a></li>
+                    <li><a href="{% url 'products:category_products' 'tzn-o-bdnh' %}">تزئینی و بدنه</a></li>
+                    <li><a href="{% url 'products:category_products' 'motor' %}">موتور</a></li>
+                </ul>
+            </div>
+            <div class="column">
+                <h3>باشگاه مشتریان</h3>
+                <ul>
+                    <li><a href="{% url 'customers:club' %}">مزایا و پلن‌ها</a></li>
+                    <li><a href="{% url 'faq' %}">سوالات متداول</a></li>
+                    <li><a href="#">قوانین باشگاه</a></li>
+                </ul>
+            </div>
+
+        </div>
+        
+        <!-- بخش مجوزها -->
+        <div class="license-section">
+            <div class="license-container">
+                <div class="license-item">
+                    <i class="fas fa-certificate"></i>
+                    <div>
+                        <strong>اینماد</strong>
+                        <p><a href="#">نماد اعتماد الکترونیکی</a></p>
+                    </div>
+                </div>
+
+                <div class="license-item">
+                    <i class="fas fa-certificate"></i>
+                    <div>
+                        <strong>زرین پال</strong>
+                        <p><a href="#">پرداخت امن</a></p>
+                    </div>
+                </div>
+
+                <div class="license-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>SSL</strong>
+                        <p><a href="#">گواهی امنیت SSL</a></p>
+                    </div>
+                </div>
+                
+                <div class="license-item">
+                    <i class="fas fa-truck"></i>
+                    <div>
+                        <strong>ارسال اکسپرس</strong>
+                        <p><a href="#">تحویل سریع و به موقع</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom">
+            <div>
+                © تمام حقوق این صفحه وب برای شرکت 
+                <a id="rights-reserved" href="{% url 'home' %}">پخش لوازم یدکی پرشین گلف</a> 
+                محفوظ است.
+            </div>
+            <div class="legal-links">
+                طراحی و اجرای این صفحه توسط 
+                <a href="#">سیدمحمد موسوی</a> 
+                انجام شده است.
+            </div>
+            <div class="social">
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-telegram"></i></a>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : 'auto';
+        }
+        
+        // ===== زیرمنوهای سطح اول (دسته‌بندی اصلی) =====
+        function toggleSubMenu(btn) {
+            const subItems = btn.nextElementSibling;
+            const icon = btn.querySelector('i:last-child');
+            
+            subItems.classList.toggle('open');
+            icon.classList.toggle('rotate');
+        }
+
+        // ===== زیرمنوهای سطح دوم (زیردسته‌ها) =====
+        function toggleSubSubMenu(btn) {
+            const subItems = btn.nextElementSibling;
+            const icon = btn.querySelector('i:last-child');
+            
+            if (subItems) {
+                subItems.classList.toggle('open');
+                icon.classList.toggle('rotate');
+            }
+        }
+
+        // ===== بستن سایدبار با کلیک روی لینک‌ها =====
+        document.querySelectorAll('.sidebar-item, .sidebar-sub-sub-items a, .sidebar-sub-items a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 1024) {
+                    toggleSidebar();
+                }
+            });
+        });
+        // به‌روزرسانی تعداد سبد خرید
+        function updateCartCount() {
+            fetch("{% url 'customers:cart_count' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const cartCount = document.querySelector('.cart-count');
+                    if (cartCount && data.count > 0) {
+                        cartCount.textContent = data.count;
+                        cartCount.classList.remove('hidden');
+                    } else if (cartCount) {
+                        cartCount.classList.add('hidden');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+
+        // ===== منوی کشویی دسته‌بندی دو ستونی =====
+        const categoriesBtn = document.getElementById('categoriesBtn');
+        const categoriesDropdown = document.getElementById('categoriesDropdown');
+        const categoriesIcon = document.getElementById('categoriesIcon');
+        
+        // داده‌های دسته‌بندی‌ها (از تمپلیت)
+        const categoriesData = {
+            {% for category in all_categories %}
+            {{ category.id }}: {
+                name: "{{ category.name }}",
+                subcategories: [
+                    {% for sub in category.subcategories.all %}
+                    { id: {{ sub.id }}, name: "{{ sub.name }}", slug: "{{ sub.slug }}" },
+                    {% endfor %}
+                ]
+            },
+            {% endfor %}
+        };
+        
+        // باز/بسته کردن منو
+        if (categoriesBtn) {
+            categoriesBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                categoriesDropdown.classList.toggle('hidden');
+                categoriesIcon.classList.toggle('rotate-180');
+                
+                // اگر منو باز شد، اولین دسته را فعال کن
+                if (!categoriesDropdown.classList.contains('hidden')) {
+                    const firstCategory = document.querySelector('.category-main-btn');
+                    if (firstCategory) {
+                        firstCategory.click();
+                    }
+                }
+            });
+        }
+        
+        // کلیک روی دسته‌بندی اصلی
+        document.querySelectorAll('.category-main-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // حذف کلاس active از همه
+                document.querySelectorAll('.category-main-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // دریافت زیردسته‌ها
+                const parent = this.closest('.category-parent');
+                const categoryId = parent.dataset.categoryId;
+                const categoryData = categoriesData[categoryId];
+                
+                const container = document.getElementById('subcategoriesContainer');
+                const title = document.getElementById('subcategoryTitle');
+                
+                if (categoryData && categoryData.subcategories.length > 0) {
+                    title.textContent = `زیردسته‌های ${categoryData.name}`;
+                    container.innerHTML = categoryData.subcategories.map(sub => `
+                        <a href="/products/category/${sub.slug}/" class="sub-item">
+                            <i class="fas fa-chevron-left"></i> ${sub.name}
+                        </a>
+                    `).join('');
+                } else {
+                    title.textContent = categoryData ? categoryData.name : 'زیردسته‌ها';
+                    container.innerHTML = `
+                        <div class="no-sub">
+                            <i class="fas fa-minus-circle ml-1"></i>
+                            این دسته زیرمجموعه‌ای ندارد
+                        </div>
+                    `;
+                }
+            });
+        });
+        
+        // بستن منو با کلیک بیرون
+        document.addEventListener('click', function(event) {
+            if (categoriesBtn && categoriesDropdown && 
+                !categoriesBtn.contains(event.target) && 
+                !categoriesDropdown.contains(event.target)) {
+                categoriesDropdown.classList.add('hidden');
+                categoriesIcon.classList.remove('rotate-180');
+            }
+        });
+        
+        // بستن با کلید ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                categoriesDropdown.classList.add('hidden');
+                categoriesIcon.classList.remove('rotate-180');
+            }
+        });
+
+        
+        /* {% if user.is_authenticated %} */
+        updateCartCount();
+        /*  {% endif %} */
+
+        // جستجوی لحظه‌ای
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsDropdown = document.getElementById('suggestionsDropdown');
+        const suggestionsList = document.getElementById('suggestionsList');
+        const viewAllButton = document.getElementById('viewAllButton');
+        const viewAllLink = document.getElementById('viewAllLink');
+        const searchForm = document.getElementById('searchForm');
+        
+        let searchTimeout;
+        let currentQuery = '';
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                currentQuery = query;
+                
+                // پاک کردن تایمر قبلی
+                clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    suggestionsDropdown.classList.add('hidden');
+                    return;
+                }
+                
+                // تاخیر برای جلوگیری از درخواست‌های زیاد
+                searchTimeout = setTimeout(() => {
+                    fetchSuggestions(query);
+                }, 300);
+            });
+            
+            // جستجو با کلید Enter
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    if (currentQuery.length >= 2) {
+                        searchForm.submit();
+                    }
+                }
+            });
+            
+            // بستن با کلید ESC
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    suggestionsDropdown.classList.add('hidden');
+                }
+            });
+        }
+        
+        function fetchSuggestions(query) {
+            fetch(`/products/api/search-suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySuggestions(data.results, data.query);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    suggestionsDropdown.classList.add('hidden');
+                });
+        }
+        
+        function displaySuggestions(products, query) {
+            suggestionsList.innerHTML = '';
+            
+            if (products.length === 0) {
+                suggestionsList.innerHTML = `
+                    <div class="p-4 text-center text-gray-500">
+                        <i class="fas fa-box-open text-2xl mb-2 block"></i>
+                        <p>هیچ محصولی یافت نشد</p>
+                    </div>
+                `;
+                viewAllButton.classList.add('hidden');
+            } else {
+                // نمایش محصولات
+                products.forEach(product => {
+                    const item = document.createElement('a');
+                    item.href = product.url || `/products/${product.slug}/`;
+                    item.className = 'flex items-center gap-3 p-3 hover:bg-gray-50 border-b transition';
+                    item.innerHTML = `
+                        <div class="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                            <img src="${product.image || '/static/images/no-image.png'}" 
+                                alt="${product.name}" 
+                                class="w-full h-full object-cover"
+                                onerror="this.src='/static/images/no-image.png'">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium text-gray-800 truncate">${product.name}</p>
+                                    <p class="text-xs text-gray-500">${product.brand || ''}</p>
+                                    ${product.product_code ? `<p class="text-xs text-gray-400">کد: ${product.product_code}</p>` : ''}
+                                </div>
+                                ${product.has_price && product.price ? `
+                                    <div class="text-left">
+                                        <p class="text-blue-600 font-bold text-sm">${Number(product.price).toLocaleString()}</p>
+                                        <p class="text-gray-400 text-xs">ریال</p>
+                                    </div>
+                                ` : `
+                                    <div class="text-left">
+                                        <p class="text-gray-400 text-xs">ورود برای مشاهده قیمت</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                    suggestionsList.appendChild(item);
+                });
+                
+                // نمایش دکمه مشاهده همه
+                viewAllLink.href = `/products/?q=${encodeURIComponent(query)}`;
+                viewAllButton.classList.remove('hidden');
+            }
+            
+            suggestionsDropdown.classList.remove('hidden');
+        }
+        
+        // بستن dropdown با کلیک خارج از آن
+        document.addEventListener('click', function(e) {
+            if (searchInput && suggestionsDropdown && 
+                !searchInput.contains(e.target) && 
+                !suggestionsDropdown.contains(e.target)) {
+                suggestionsDropdown.classList.add('hidden');
+            }
+        });
+        
+        // جلوگیری از بسته شدن dropdown با کلیک روی خود dropdown
+        if (suggestionsDropdown) {
+            suggestionsDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

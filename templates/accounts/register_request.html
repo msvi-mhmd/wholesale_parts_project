@@ -1,0 +1,562 @@
+<!-- templates/accounts/register_request.html -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>درخواست ثبت‌نام | پرشین گلف</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda.ttf" %}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Bold.ttf" %}') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Black.ttf" %}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-Medium.ttf" %}') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/Peyda-ExtraBold.ttf" %}') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Peyda';
+            src: url('{% static "fonts/peyda-light.ttf" %}') format('truetype');
+            font-weight: 200;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100dvw;
+            height: auto;
+            direction: rtl;
+        }
+
+        body {
+            text-align: center;
+            align-items: center;
+            font-family: 'Peyda', sans-serif;
+            background: linear-gradient(270deg, #2d3748, #4a5568, #2d3748);
+        }
+
+        .container {
+            width: 100dvw;
+            height: 100dvh;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .half {
+            width: 50dvw;
+            align-items: center;
+        }
+
+        #right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* دکمه بازگشت به خانه */
+        .return-home {
+            display: flex;
+            align-self: flex-start;
+            font-family: 'Peyda';
+            font-weight: 500;
+            text-decoration: none;
+            color: #cbd5e0;
+            margin: 0 0 15px 0;
+            padding: 8px 16px;
+            border: 1px solid #4a5568;
+            border-radius: 999px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            align-items: center;
+            gap: 8px;
+        }
+        .return-home:hover {
+            color: #c9a84c;
+            border-color: #c9a84c;
+            background: rgba(201, 168, 76, 0.1);
+        }
+        .return-home i {
+            font-size: 0.9rem;
+        }
+
+        .title {
+            width: 70%;
+            color: #c9a84c;
+            text-align: center;
+            align-items: center;
+            margin: 0 auto 1rem;
+            font-family: 'Peyda';
+            font-weight: 700;
+            text-shadow: 0px 0px 20px rgba(0, 0, 0, 0.7);
+        }
+        .title h1 {
+            font-size: 2.2rem;
+        }
+        .title p {
+            font-size: 0.9rem;
+            font-weight: 300;
+            margin-top: 0.3rem;
+            color: #cbd5e0;
+        }
+
+        .row {
+            width: 70%;
+            min-height: 45px;
+            color: gray;
+            text-align: center;
+            align-items: center;
+            padding: 0;
+            border-radius: 999px;
+            margin: 10px auto;
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+        }
+
+        .form-img {
+            width: 45px;
+            min-width: 45px;
+            height: 45px;
+            min-height: 45px;
+            margin: 0;
+            background-color: rgb(199, 199, 199);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3748;
+            font-size: 1.2rem;
+        }
+
+        .form-inp, .form-textarea {
+            width: 100%;
+            min-height: 45px;
+            height: 100%;
+            margin: 0;
+            border: none;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            font-size: 1rem;
+            text-align: center;
+            padding: 0 1rem;
+            font-family: 'Peyda';
+            transition: all 0.3s ease;
+        }
+        .form-textarea {
+            border-radius: 20px;
+            min-height: 60px;
+            padding: 0.8rem 1rem;
+            text-align: right;
+            resize: vertical;
+        }
+        .form-inp:focus, .form-textarea:focus {
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0px 0px 20px rgba(201, 168, 76, 0.4);
+        }
+
+        .register-button {
+            width: 35%;
+            min-height: 40px;
+            font-size: 1.1rem;
+            font-family: 'Peyda';
+            font-weight: 800;
+            border-radius: 999px;
+            color: #2d3748;
+            background: #c9a84c;
+            border: none;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+            margin: 15px auto;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+
+        .register-button:hover {
+            background: #ffc800;
+            color: #1a202c;
+            transform: scale(1.02);
+        }
+
+        .login-link {
+            margin-top: 15px;
+            color: #cbd5e0;
+            font-family: 'Peyda';
+            font-weight: 400;
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .login-link:hover {
+            color: #c9a84c;
+        }
+        .login-link a {
+            text-decoration: none;
+            color: #c9a84c;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .login-link a:hover {
+            color: #ffc800;
+            text-decoration: underline;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: auto;
+            border-radius: 0 20px 20px 0;
+        }
+
+        /* پیام‌های خطا */
+        .messages {
+            width: 70%;
+            margin: 0 auto 0.5rem;
+        }
+        .message {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Peyda';
+        }
+        .message.error {
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+        .message.success {
+            background: rgba(0, 200, 0, 0.15);
+            color: #51cf66;
+            border: 1px solid #51cf66;
+        }
+        .message.info {
+            background: rgba(0, 100, 200, 0.15);
+            color: #5c7cfa;
+            border: 1px solid #5c7cfa;
+        }
+
+        /* یادداشت */
+        .info-note {
+            width: 70%;
+            background: rgba(201, 168, 76, 0.15);
+            border: 1px solid #c9a84c;
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .info-note p {
+            color: #cbd5e0;
+            font-size: 0.8rem;
+            font-family: 'Peyda';
+        }
+        .info-note i {
+            color: #c9a84c;
+            margin-left: 0.5rem;
+        }
+
+        .row-invite {
+            width: 70%;
+            margin: 10px auto;
+        }
+
+        /* ===== تبلت و موبایل: حذف تصویر چپ ===== */
+        @media (max-width: 1024px) {
+            #left {
+                display: none !important;
+                width: 0 !important;
+            }
+            #right {
+                width: 100dvw !important;
+                padding: 1.5rem;
+            }
+            .container {
+                justify-content: center;
+            }
+            .row, .title, .messages, .info-note, .row-invite {
+                width: 75%;
+            }
+            .title h1 {
+                font-size: 2rem;
+            }
+            .register-button {
+                width: 45%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #right {
+                padding: 1.5rem;
+            }
+            .row, .title, .messages, .info-note, .row-invite {
+                width: 85%;
+            }
+            .title h1 {
+                font-size: 1.8rem;
+            }
+            .register-button {
+                width: 55%;
+                font-size: 1rem;
+            }
+            .return-home {
+                font-size: 0.8rem;
+                padding: 5px 12px;
+            }
+            .form-img {
+                width: 35px;
+                height: 35px;
+                min-width: 35px;
+                min-height: 35px;
+                font-size: 1rem;
+            }
+            .form-inp, .form-textarea {
+                min-height: 40px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #right {
+                padding: 1rem;
+            }
+            .row, .title, .messages, .info-note, .row-invite {
+                width: 95%;
+            }
+            .title h1 {
+                font-size: 1.4rem;
+            }
+            .title p {
+                font-size: 0.8rem;
+            }
+            .register-button {
+                width: 65%;
+                font-size: 0.9rem;
+                min-height: 35px;
+            }
+            .form-img {
+                width: 30px;
+                height: 30px;
+                min-width: 30px;
+                min-height: 30px;
+                font-size: 0.8rem;
+            }
+            .form-inp, .form-textarea {
+                min-height: 35px;
+                font-size: 0.8rem;
+                padding: 0 0.8rem;
+            }
+            .form-textarea {
+                min-height: 50px;
+            }
+            .return-home {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+            .return-home i {
+                font-size: 0.7rem;
+            }
+            .info-note p {
+                font-size: 0.7rem;
+            }
+            .login-link {
+                font-size: 0.85rem;
+            }
+            .messages {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- تصویر سمت راست -->
+        <div class="half" id="left">
+            <a href="{% url 'home' %}">
+                <img class="cover-image" src="{% static 'images/login-cover.png' %}" alt="ثبت‌نام">
+            </a>
+        </div>
+        <!-- فرم درخواست ثبت‌نام (راست) -->
+        <div class="half" id="right">
+            <!-- دکمه بازگشت به خانه -->
+            <a class="return-home" href="{% url 'home' %}">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت به خانه
+            </a>
+
+            <div class="title">
+                <h1>درخواست ثبت‌نام</h1>
+                <p>پرشین گلف</p>
+            </div>
+
+            <!-- پیام‌ها -->
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input class="form-inp" id="first_name" name="first_name" type="text" 
+                           placeholder="نام" required>
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input class="form-inp" id="last_name" name="last_name" type="text" 
+                           placeholder="نام خانوادگی" required>
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <input class="form-inp" id="national_id" name="national_id" type="text" 
+                           placeholder="کد ملی (۱۰ رقم)" maxlength="10" required>
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <input class="form-inp" id="phone" name="phone" type="tel" 
+                           placeholder="شماره تلفن (۱۱ رقم)" maxlength="11" required>
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <input class="form-inp" id="email" name="email" type="email" 
+                           placeholder="ایمیل (اختیاری)">
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <input class="form-inp" id="city" name="city" type="text" 
+                           placeholder="شهر">
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-road"></i>
+                    </div>
+                    <input class="form-inp" id="street" name="street" type="text" 
+                           placeholder="خیابان">
+                </div>
+
+                <div class="row">
+                    <div class="form-img">
+                        <i class="fas fa-map-pin"></i>
+                    </div>
+                    <textarea class="form-textarea" id="address" name="address" 
+                              placeholder="آدرس دقیق" rows="2"></textarea>
+                </div>
+
+                <div class="row row-invite">
+                    <div class="form-img">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <input class="form-inp" id="invitation_code" name="invitation_code" type="text" 
+                           placeholder="شماره تلفن معرف ( در صورت داشتن )">
+                </div>
+
+                <button type="submit" class="register-button">ثبت درخواست</button>
+
+                <p class="login-link">
+                    قبلاً ثبت‌نام کرده‌اید؟ 
+                    <a href="{% url 'accounts:login' %}">وارد شوید</a>
+                </p>
+
+                <div class="info-note">
+                    <p>
+                        <i class="fas fa-info-circle"></i>
+                        پس از ثبت درخواست، همکاران ما با شما تماس خواهند گرفت.
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        
+    </div>
+
+    <script>
+        // ارسال فرم با Enter
+        document.querySelectorAll('.form-inp, .form-textarea').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.querySelector('.register-button').click();
+                }
+            });
+        });
+
+        // اعتبارسنجی ساده کد ملی
+        document.getElementById('national_id').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+
+        // اعتبارسنجی ساده شماره تلفن
+        document.getElementById('phone').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 11);
+        });
+    </script>
+</body>
+
+</html>

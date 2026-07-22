@@ -1,0 +1,272 @@
+<!-- templates/employees/manage_brands.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}مدیریت برندها | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت برندها</h1>
+        <button onclick="openAddModal()" 
+                class="btn-primary  px-4 py-2 rounded-lg">
+            <i class="fas fa-plus ml-2"></i> افزودن برند جدید
+        </button>
+    </div>
+    
+    <!-- لیست برندها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">لوگو</th>
+                        <th class="px-6 py-3 text-sm font-semibold">نام برند</th>
+                        <th class="px-6 py-3 text-sm font-semibold">کشور</th>
+                        <th class="px-6 py-3 text-sm font-semibold">شهر</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تلفن</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for brand in brands %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            {% if brand.logo %}
+                                <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="w-12 ">
+                            {% else %}
+                                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-building text-gray-500"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-medium">{{ brand.name }}</td>
+                        <td class="px-6 py-4">{{ brand.country }}</td>
+                        <td class="px-6 py-4">{{ brand.city }}</td>
+                        <td class="px-6 py-4">{{ brand.phone|default:"-" }}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="openEditModal({{ brand.id }}, '{{ brand.name|escapejs }}', '{{ brand.country|escapejs }}', '{{ brand.city|escapejs }}', '{{ brand.phone|default:""|escapejs }}', '{{ brand.street|default:""|escapejs }}', '{{ brand.description|default:""|escapejs }}', '{% if brand.logo %}{{ brand.logo.url }}{% endif %}')" 
+                                    class="text-blue-600 hover:underline ml-3">
+                                <i class="fas fa-edit"></i> ویرایش
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            هیچ برندی یافت نشد
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== مودال افزودن برند ===== -->
+<div id="addBrandModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b px-6 py-4 sticky top-0 bg-white rounded-t-xl">
+            <h3 class="text-xl font-bold">افزودن برند جدید</h3>
+            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="p-6" id="addBrandForm">
+            {% csrf_token %}
+            <input type="hidden" name="add_brand" value="1">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">نام برند *</label>
+                    <input type="text" name="name" required class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">کشور *</label>
+                    <input type="text" name="country" required class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">شهر *</label>
+                    <input type="text" name="city" required class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">تلفن</label>
+                    <input type="text" name="phone" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">آدرس</label>
+                    <input type="text" name="street" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">توضیحات</label>
+                    <textarea name="description" rows="3" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">لوگو</label>
+                    <input type="file" name="logo" accept="image/*" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6 pt-4 border-t">
+                <button type="button" onclick="closeAddModal()" class="flex-1 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                    انصراف
+                </button>
+                <button type="submit" class="btn-primary flex-1 px-4 py-2 bg- rounded-lg">
+                    افزودن برند
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== مودال ویرایش برند ===== -->
+<div id="editBrandModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b px-6 py-4 sticky top-0 bg-white rounded-t-xl">
+            <h3 class="text-xl font-bold">ویرایش برند</h3>
+            <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="p-6" id="editBrandForm">
+            {% csrf_token %}
+            <input type="hidden" name="edit_brand" value="1">
+            <input type="hidden" name="brand_id" id="edit_brand_id">
+            
+            <div class="space-y-4">
+                <!-- لوگوی فعلی -->
+                <div id="edit_current_logo" class="text-center">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">لوگوی فعلی</label>
+                    <img id="edit_logo_preview" src="" alt="لوگو" class="w-24  border mx-auto">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">نام برند *</label>
+                    <input type="text" name="name" id="edit_name" required 
+                           class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">کشور *</label>
+                    <input type="text" name="country" id="edit_country" required 
+                           class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">شهر *</label>
+                    <input type="text" name="city" id="edit_city" required 
+                           class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">تلفن</label>
+                    <input type="text" name="phone" id="edit_phone" 
+                           class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">آدرس</label>
+                    <input type="text" name="street" id="edit_street" 
+                           class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">توضیحات</label>
+                    <textarea name="description" id="edit_description" rows="3" 
+                              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">تغییر لوگو</label>
+                    <input type="file" name="logo" id="edit_logo" accept="image/*" 
+                           class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500"
+                           onchange="previewEditLogo(this)">
+                    <p class="text-xs text-gray-400 mt-1">در صورت تمایل لوگوی جدید آپلود کنید</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6 pt-4 border-t">
+                <button type="button" onclick="closeEditModal()" class="flex-1 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                    انصراف
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2 btn-primary  rounded-lg ">
+                    ذخیره تغییرات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ===== توابع مودال افزودن =====
+    function openAddModal() {
+        document.getElementById('addBrandModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAddModal() {
+        document.getElementById('addBrandModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        document.getElementById('addBrandForm').reset();
+    }
+    
+    // ===== توابع مودال ویرایش =====
+    function openEditModal(id, name, country, city, phone, street, description, logoUrl) {
+        console.log('openEditModal called with:', id, name, country, city);
+        
+        document.getElementById('edit_brand_id').value = id;
+        document.getElementById('edit_name').value = name || '';
+        document.getElementById('edit_country').value = country || '';
+        document.getElementById('edit_city').value = city || '';
+        document.getElementById('edit_phone').value = phone || '';
+        document.getElementById('edit_street').value = street || '';
+        document.getElementById('edit_description').value = description || '';
+        
+        // نمایش لوگوی فعلی
+        const logoPreview = document.getElementById('edit_logo_preview');
+        const currentLogoDiv = document.getElementById('edit_current_logo');
+        
+        if (logoUrl && logoUrl !== 'None') {
+            logoPreview.src = logoUrl;
+            currentLogoDiv.style.display = 'block';
+        } else {
+            currentLogoDiv.style.display = 'none';
+        }
+        
+        document.getElementById('editBrandModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeEditModal() {
+        document.getElementById('editBrandModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        document.getElementById('editBrandForm').reset();
+    }
+    
+    function previewEditLogo(input) {
+        const preview = document.getElementById('edit_logo_preview');
+        const currentLogoDiv = document.getElementById('edit_current_logo');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                currentLogoDiv.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    // بستن مودال با کلیک روی پس‌زمینه
+    document.getElementById('addBrandModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAddModal();
+        }
+    });
+    
+    document.getElementById('editBrandModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEditModal();
+        }
+    });
+    
+    // بستن با کلید ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAddModal();
+            closeEditModal();
+        }
+    });
+</script>
+{% endblock %}

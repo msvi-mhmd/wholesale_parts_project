@@ -1,0 +1,60 @@
+<!-- templates/employees/confirmed_invoices.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}فاکتورهای تایید شده | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">فاکتورهای تایید شده</h1>
+        <a href="{% url 'employees:manage_invoices' %}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست فاکتورها
+        </a>
+    </div>
+    
+    <!-- لیست فاکتورها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">شماره فاکتور</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مشتری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تاریخ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مبلغ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-mono text-sm">{{ invoice.invoice_id }}</td>
+                        <td class="px-6 py-4">{{ invoice.customer.user.first_name }} {{ invoice.customer.user.last_name }}</td>
+                        <td class="px-6 py-4">{{ invoice.date|to_jalali }}</td>
+                        <td class="px-6 py-4">{{ invoice.total|format_price }} ریال</td>
+                        <td class="px-6 py-4">
+                            <span class="text-green-600">تایید شده</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'employees:invoice_detail_admin' invoice.invoice_id %}" class="text-blue-600 hover:underline">
+                                <i class="fas fa-eye"></i> مشاهده
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            هیچ فاکتور تایید شده‌ای یافت نشد
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

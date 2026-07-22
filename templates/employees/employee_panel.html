@@ -1,0 +1,210 @@
+<!-- templates/employees/employee_panel.html -->
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}پنل کارمند | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- سایدبار -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+                <div class="text-center border-b pb-4 mb-4">
+                    <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-user-tie text-3xl text-yellow-600"></i>
+                    </div>
+                    <h3 class="font-bold">{{ user.get_full_name }}</h3>
+                    <p class="text-gray-500 text-sm">{{ employee.position }}</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <!-- مدیریت مشتریان -->
+                    {% if employee.access_customers %}
+                    <a href="{% url 'employees:manage_customers' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 relative">
+                        <i class="fas fa-users w-5"></i>
+                        <span>مشتریان</span>
+                        {% if pending_requests_count > 0 %}
+                        <span class="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center ml-auto">
+                            {{ pending_requests_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    
+                    <!-- مدیریت محصولات -->
+                    {% if employee.access_products %}
+                    <a href="{% url 'employees:manage_products' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                        <i class="fas fa-boxes w-5"></i>
+                        <span>  محصولات</span>
+                    </a>
+                    {% endif %}
+                    
+                    <!-- مدیریت فاکتورها -->
+                    {% if employee.access_invoices %}
+                    <a href="{% url 'employees:manage_invoices' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                        <i class="fas fa-receipt w-5"></i>
+                        <span>  فاکتورها</span>
+                        {% if pending_invoices_count > 0 %}
+                        <span class="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center ml-auto">
+                            {{ pending_invoices_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    
+                    <!-- مدیریت پرداخت‌ها -->
+                    {% if employee.access_payments %}
+                    <a href="{% url 'employees:manage_payments' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                        <i class="fas fa-credit-card w-5"></i>
+                        <span>پرداخت‌ها</span>
+                        {% if pending_payments_count > 0 %}
+                        <span class="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center ml-auto">
+                            {{ pending_payments_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+
+                    {% if employee.access_payments %}
+                    <a href="{% url 'employees:manage_invoice_payments' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                        <i class="fas fa-credit-card w-5"></i>
+                        <span>پرداخت‌های نیازمند تایید</span>
+                        {% if pending_payments_count > 0 %}
+                        <span class="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center ml-auto">
+                            {{ pending_payments_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                  
+                    <!-- مدیریت کارمندان -->
+                    {% if employee.access_employees %}
+                    <a href="{% url 'employees:manage_employees' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                        <i class="fas fa-user-tie w-5"></i>
+                        <span>  کارمندان</span>
+                    </a>
+                    {% endif %}
+                    
+                    <!-- گزارشات -->
+                    {% if employee.access_reports %}
+                    <a href="{% url 'reports:index' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                        <i class="fas fa-chart-bar w-5"></i>
+                        <span>گزارشات</span>
+                    </a>
+                    {% endif %}
+                    
+                    <!-- همگام‌سازی قیمت‌ها -->
+                    {% if employee.access_sync %}
+                    <!-- همگام‌سازی با سیستم حسابداری -->
+                    <a href="{% url 'accounting:sync_dashboard' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                        <i class="fas fa-sync-alt w-5"></i>
+                        <span>همگام‌سازی با حسابداری</span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if employee.access_brands_categories %}
+                    <a href="{% url 'employees:manage_brands' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                        <i class="fas fa-tag w-5"></i>
+                        <span>  برندها</span>
+                    </a>
+                    <a href="{% url 'employees:manage_categories' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                        <i class="fas fa-sitemap w-5"></i>
+                        <span>  دسته‌بندی</span>
+                    </a>
+                    <a href="{% url 'employees:manage_cars' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                        <i class="fas fa-car w-5"></i>
+                        <span>  خودروها</span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if employee.access_website %}
+                    <div class="border-t pt-2 mt-2">
+                        <p class="text-xs text-gray-400 px-3 pb-2">مدیریت وبسایت</p>
+                        <a href="{% url 'sliders:slider_list' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                            <i class="fas fa-globe w-5 text-purple-600"></i>
+                            <span>مدیریت اسلاید ها</span>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- در templates/employees/employee_panel.html -->
+                    <a href="{% url 'support:admin_ticket_list' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 relative">
+                        <i class="fas fa-headset w-5"></i>
+                        <span>پشتیبانی</span>
+                        {% if stats.open > 0 %}
+                        <span class="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center ml-auto">
+                            {{ stats.open }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    <!-- ===== مدیریت نظرات ===== -->
+                     
+
+                    {% if employee.access_comments %}
+                    <a href="{% url 'employees:manage_comments' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 relative">
+                        <i class="fas fa-comment w-5"></i>
+                        <span>مدیریت نظرات</span>
+                        {% if pending_comments_count > 0 %}
+                        <span class="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center ml-auto">
+                            {{ pending_comments_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    
+                    <!-- مدیریت محتوا (بلاگ) -->
+                    {% if employee.access_blog %}
+                    <a href="{% url 'blog:list' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 transition">
+                        <i class="fas fa-newspaper w-5"></i>
+                        <span>مدیریت محتوا</span>
+                    </a>
+                    {% endif %}
+                    </div>
+                    
+                    <a href="{% url 'employees:change_username' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-user-edit w-5"></i>
+                            <span>تغییر نام کاربری</span>
+                        </a>
+                        
+                        <a href="{% url 'employees:change_password' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-key w-5"></i>
+                            <span>تغییر رمز عبور</span>
+                    </a>
+
+                <!-- خط جداکننده -->
+                <div class="border-t mt-4 pt-4">
+                    <a href="{% url 'accounts:logout' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-red-600 transition">
+                        <i class="fas fa-sign-out-alt w-5"></i>
+                        <span>خروج از حساب</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- محتوای اصلی -->
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-bold mb-4">خوش آمدید {{ user.get_full_name }}</h2>
+                <p class="text-gray-600">شما به عنوان <strong>{{ employee.position }}</strong> وارد سیستم شده‌اید.</p>
+                
+                <!-- آمار سریع -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <div class="bg-blue-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-blue-600">{{ total_customers|default:"0" }}</p>
+                        <p class="text-sm text-gray-500">تعداد مشتریان</p>
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-green-600">{{ total_products|default:"0" }}</p>
+                        <p class="text-sm text-gray-500">تعداد محصولات</p>
+                    </div>
+                    <div class="bg-yellow-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-yellow-600">{{ pending_invoices|default:"0" }}</p>
+                        <p class="text-sm text-gray-500">فاکتورهای در انتظار تایید</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

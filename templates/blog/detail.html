@@ -1,0 +1,70 @@
+<!-- templates/blog/detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}{{ post.title }} | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <!-- تصویر شاخص -->
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-80 object-cover">
+            {% else %}
+                <div class="w-full h-80 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-6xl">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+            {% endif %}
+            
+            <div class="p-6 md:p-8">
+                <!-- اطلاعات پست -->
+                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+                    <span><i class="fas fa-user"></i> {{ post.author }}</span>
+                    <span><i class="fas fa-calendar-alt"></i> {{ post.created_at|to_jalali }}</span>
+                    <span><i class="fas fa-folder"></i> {{ post.category.name }}</span>
+                    <span><i class="fas fa-eye"></i> {{ post.view_count }} بازدید</span>
+                </div>
+                
+                <h1 class="text-2xl md:text-3xl font-bold mb-4">{{ post.title }}</h1>
+                
+                {% if post.summary %}
+                <div class="bg-blue-50 border-r-4 border-blue-500 p-4 mb-6 rounded">
+                    <p class="text-gray-700 text-lg">{{ post.summary }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    {{ post.content|linebreaks }}
+                </div>
+                
+                <!-- پست‌های مرتبط -->
+                {% if related_posts %}
+                <div class="border-t pt-6 mt-8">
+                    <h3 class="text-xl font-bold mb-4">📚 مطالب مرتبط</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {% for related in related_posts %}
+                        <a href="{% url 'blog:detail' related.slug %}" class="bg-gray-50 rounded-lg p-4 hover:bg-blue-50 transition border border-gray-100">
+                            <h4 class="font-semibold text-sm">{{ related.title }}</h4>
+                            <p class="text-xs text-gray-500 mt-1">{{ related.created_at|to_jalali }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- دکمه بازگشت -->
+                <div class="mt-8 flex gap-3">
+                    <a href="{% url 'blog:list' %}" class="btn-outline">
+                        <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست مطالب
+                    </a>
+                    <a href="{% url 'home' %}" class="text-blue-600 hover:underline">
+                        <i class="fas fa-home ml-2"></i> صفحه اصلی
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

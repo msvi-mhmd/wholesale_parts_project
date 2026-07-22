@@ -1,0 +1,230 @@
+<!-- templates/support/ticket_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}تیکت {{ ticket.ticket_id }}{% endblock %}
+
+{% block content %}
+<div class="container-custom py-6 max-w-3xl">
+    <div class="mb-4">
+        <!-- دکمه بازگشت بر اساس نقش -->
+        {% if is_admin_or_employee %}
+            <a href="{% url 'support:admin_ticket_list' %}" class="text-gray-600 hover:text-gray-800 text-sm">
+                <i class="fas fa-arrow-right ml-1"></i> بازگشت به لیست تیکت‌ها
+            </a>
+        {% else %}
+            <a href="{% url 'support:ticket_list' %}" class="text-gray-600 hover:text-gray-800 text-sm">
+                <i class="fas fa-arrow-right ml-1"></i> بازگشت به لیست تیکت‌ها
+            </a>
+        {% endif %}
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- هدر تیکت -->
+        <div class="px-6 py-4 border-b flex justify-between items-start">
+            <div>
+                <h1 class="text-lg font-bold text-gray-800">{{ ticket.title }}</h1>
+                <span class="text-xs text-gray-400 font-mono">#{{ ticket.ticket_id }}</span>
+                <span class="text-xs text-gray-400 mr-2">•</span>
+                <span class="text-xs text-gray-400">{{ ticket.created_at|to_jalali }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-xs
+                    {% if ticket.status == 'open' %}bg-yellow-100 text-yellow-800
+                    {% elif ticket.status == 'in_progress' %}bg-purple-100 text-purple-800
+                    {% elif ticket.status == 'answered' %}bg-green-100 text-green-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ ticket.get_status_display }}
+                </span>
+                {% if ticket.priority == 'urgent' %}
+                <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-800">فوری</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- اطلاعات کاربر (فقط برای ادمین/کارمند) -->
+        {% if is_admin_or_employee %}
+        <div class="px-6 py-3 border-b bg-gray-50 flex justify-between items-center text-sm">
+            <div>
+                <span class="text-gray-500">کاربر:</span>
+                <span class="font-medium">{{ ticket.user.get_full_name|default:ticket.user.username }}</span>
+                <span class="text-gray-400 mr-2">|</span>
+                <span class="text-gray-500">{{ ticket.user.phone }}</span>
+            </div>
+            <div>
+                <span class="text-gray-500">پاسخ‌ها:</span>
+                <span class="font-medium">{{ ticket.replies.count }}</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- پیام اصلی -->
+        <div class="px-6 py-4 border-b bg-gray-50">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-sm font-medium text-gray-700">{{ ticket.user.get_full_name|default:ticket.user.username }}</span>
+                <span class="text-xs text-gray-400">{{ ticket.created_at|to_jalali_datetime }}</span>
+            </div>
+            <p class="text-gray-700 text-sm whitespace-pre-line">{{ ticket.message }}</p>
+            {% if ticket.attachment %}
+            <a href="{{ ticket.attachment.url }}" target="_blank" class="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm">
+                <i class="fas fa-paperclip ml-1"></i> پیوست
+            </a>
+            {% endif %}
+        </div>
+        
+        <!-- پاسخ‌ها -->
+        <div class="px-6 py-4 border-b">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm font-medium text-gray-700">پاسخ‌ها</span>
+            </div>
+            
+            {% for reply in ticket.replies.all %}
+            <div class="{% if reply.is_internal %}bg-yellow-50 border-r-2 border-yellow-400{% else %}bg-gray-50{% endif %} rounded-lg p-3 mb-2">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">{{ reply.user.get_full_name|default:reply.user.username }}</span>
+                        {% if reply.is_internal %}
+                        <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded mr-1">داخلی</span>
+                        {% endif %}
+                    </div>
+                    <span class="text-xs text-gray-400">{{ reply.created_at|to_jalali_datetime }}</span>
+                </div>
+                <p class="text-gray-700 text-sm whitespace-pre-line mt-1">{{ reply.message }}</p>
+                {% if reply.attachment %}
+                <a href="{{ reply.attachment.url }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs">
+                    <i class="fas fa-paperclip ml-1"></i> پیوست
+                </a>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-sm text-center py-4">پاسخی ثبت نشده است</p>
+            {% endfor %}
+        </div>
+        
+        <!-- فرم پاسخ -->
+        {% if ticket.status != 'closed' %}
+        <div class="px-6 py-4">
+            <form method="post" action="{% url 'support:ticket_reply' ticket.ticket_id %}" enctype="multipart/form-data" class="space-y-3">
+                {% csrf_token %}
+                <textarea name="message" rows="3" required 
+                          class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition" 
+                          placeholder="پاسخ خود را بنویسید..."></textarea>
+                <div class="flex flex-wrap justify-between items-center gap-3">
+                    <div class="flex items-center gap-3">
+                        پیوست
+                        <input type="file" name="attachment" class="text-sm text-gray-500" alt="پیوست">
+                    </div>
+                    <button type="submit" class="btn-primary px-5 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                        <i class="fas fa-paper-plane"></i>
+                        ارسال پاسخ
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="px-6 py-4 bg-gray-50 text-center text-gray-400 text-sm">
+            <i class="fas fa-lock ml-2"></i> این تیکت بسته شده است
+        </div>
+        {% endif %}
+        
+        <!-- ===== دکمه‌های پایین ===== -->
+        <div class="px-6 py-3 border-t bg-gray-50 flex justify-between flex-wrap gap-2">
+            <!-- دکمه‌های سمت چپ (فقط برای ادمین/کارمند) -->
+            <div class="flex flex-wrap gap-2">
+                {% if is_admin_or_employee %}
+                    <!-- تغییر وضعیت (ادمین/کارمند) -->
+                    {% if ticket.status != 'closed' %}
+                    <button onclick="showStatusModal('{{ ticket.ticket_id }}')" 
+                            class="text-purple-600 hover:text-purple-800 text-sm transition">
+                        <i class="fas fa-edit ml-1"></i> تغییر وضعیت
+                    </button>
+                    {% endif %}
+                    
+                    <!-- حذف (فقط ادمین) -->
+                    {% if request.user.user_type == 'admin' %}
+                    <a href="{% url 'support:admin_ticket_delete' ticket.ticket_id %}" 
+                       class="text-red-600 hover:text-red-800 text-sm transition"
+                       onclick="return confirm('آیا از حذف این تیکت اطمینان دارید؟')">
+                        <i class="fas fa-trash ml-1"></i> حذف
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <!-- دکمه‌های سمت راست (بستن تیکت - هم برای مشتری و هم برای ادمین) -->
+            <div>
+                {% if ticket.status != 'closed' %}
+                    {% if is_admin_or_employee or ticket.user == request.user %}
+                    <a href="{% url 'support:ticket_close' ticket.ticket_id %}" 
+                       class="text-gray-500 hover:text-red-600 text-sm transition"
+                       onclick="return confirm('آیا از بستن این تیکت اطمینان دارید؟')">
+                        <i class="fas fa-times ml-1"></i> بستن تیکت
+                    </a>
+                    {% endif %}
+                {% else %}
+                    <span class="text-gray-400 text-sm">
+                        <i class="fas fa-check-circle ml-1 text-green-500"></i> بسته شده
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== مودال تغییر وضعیت (فقط برای ادمین/کارمند) ===== -->
+{% if is_admin_or_employee %}
+<div id="statusModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold">تغییر وضعیت تیکت</h3>
+            <button onclick="closeStatusModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <form id="statusForm" method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">وضعیت جدید</label>
+                <select name="status" id="statusSelect" class="w-full border rounded-lg px-4 py-2">
+                    <option value="open" {% if ticket.status == 'open' %}selected{% endif %}>باز</option>
+                    <option value="in_progress" {% if ticket.status == 'in_progress' %}selected{% endif %}>در حال بررسی</option>
+                    <option value="answered" {% if ticket.status == 'answered' %}selected{% endif %}>پاسخ داده شده</option>
+                    <option value="closed" {% if ticket.status == 'closed' %}selected{% endif %}>بسته شده</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeStatusModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">انصراف</button>
+                <button type="submit" class="btn-primary px-5 py-2 rounded-lg text-sm transition">
+                    تغییر وضعیت
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showStatusModal(ticketId) {
+    document.getElementById('statusModal').classList.remove('hidden');
+    document.getElementById('statusForm').action = `/support/admin/${ticketId}/status/`;
+}
+
+function closeStatusModal() {
+    document.getElementById('statusModal').classList.add('hidden');
+}
+
+// بستن مودال با کلیک خارج از آن
+document.getElementById('statusModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeStatusModal();
+    }
+});
+
+// بستن مودال با کلید ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeStatusModal();
+    }
+});
+</script>
+{% endif %}
+
+{% endblock %}

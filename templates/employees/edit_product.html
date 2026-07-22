@@ -1,0 +1,396 @@
+<!-- templates/employees/edit_product.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}ویرایش محصول | پنل مدیریت{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .image-preview {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    .image-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+    }
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .remove-image {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    .existing-image {
+        position: relative;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-yellow-600 text-white px-6 py-4">
+                <h1 class="text-2xl font-bold">ویرایش محصول</h1>
+                <p class="text-sm opacity-90">{{ product.name }}</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="p-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- نام محصول -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">نام محصول *</label>
+                        <input type="text" name="name" value="{{ product.name }}" required class="form-input">
+                    </div>
+                    
+                    <!-- دسته اصلی -->
+                    <div>
+                        <label class="form-label">دسته اصلی *</label>
+                        <select name="main_category" id="main_category" required class="form-select">
+                            <option value="">انتخاب کنید</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if product.main_category.id == cat.id %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- زیردسته -->
+                    <div>
+                        <label class="form-label">زیردسته *</label>
+                        <select name="sub_category" id="sub_category" required class="form-select">
+                            <option value="">انتخاب کنید</option>
+                            {% for sub in product.main_category.subcategories.all %}
+                            <option value="{{ sub.id }}" {% if product.sub_category.id == sub.id %}selected{% endif %}>
+                                {{ sub.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- برند -->
+                    <div>
+                        <label class="form-label">برند *</label>
+                        <select name="brand" required class="form-select">
+                            <option value="">انتخاب کنید</option>
+                            {% for brand in brands %}
+                            <option value="{{ brand.id }}" {% if product.brand.id == brand.id %}selected{% endif %}>
+                                {{ brand.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- قیمت -->
+                    <div>
+                        <label class="form-label">قیمت (ریال) *</label>
+                        <input type="number" name="price" value="{{ product.price }}" required class="form-input">
+                    </div>
+                    
+                    <!-- قیمت تخفیف‌خورده -->
+                    <div>
+                        <label class="form-label">قیمت تخفیف‌خورده</label>
+                        <input type="number" name="off_price" value="{{ product.off_price|default:'' }}" class="form-input">
+                    </div>
+                    
+                    <!-- موجودی -->
+                    <div>
+                        <label class="form-label">موجودی انبار *</label>
+                        <input type="number" name="left_in_stock" value="{{ product.left_in_stock }}" required class="form-input">
+                    </div>
+                    
+                    <!-- امتیاز خرید -->
+                    <div>
+                        <label class="form-label">امتیاز خرید</label>
+                        <input type="number" name="point_of_buy" value="{{ product.point_of_buy }}" class="form-input">
+                    </div>
+                    
+                    <!-- تخصص/نوع -->
+                    <div>
+                        <label class="form-label">تخصص/نوع محصول</label>
+                        <input type="text" name="specialty" value="{{ product.specialty|default:'' }}" class="form-input">
+                    </div>
+                    
+                    <!-- خودروهای مناسب -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">خودروهای مناسب</label>
+                        <select name="suitable_cars" multiple class="form-select" style="height: 100px;">
+                            {% for car in cars %}
+                            <option value="{{ car.id }}" {% if car in product.suitable_car.all %}selected{% endif %}>
+                                {{ car.car_brand.name }} {{ car.name }} ({{ car.model }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">برای انتخاب چند مورد، کلید Ctrl را نگه دارید</p>
+                    </div>
+                    
+                    <!-- بخش نام‌های جایگزین - کد صحیح -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">نام‌های جایگزین (برای جستجو)</label>
+                        <div id="aliasesContainer">
+                            {% for alias in product.aliases.all %}
+                            <div class="flex gap-2 mb-2 alias-input" data-alias-id="{{ alias.id }}">
+                                <input type="text" name="aliases" value="{{ alias.name }}" class="form-input flex-1">
+                                <input type="hidden" name="alias_ids" value="{{ alias.id }}">
+                                <button type="button" class="remove-alias bg-red-500 text-white px-3 rounded-lg" data-alias-id="{{ alias.id }}">×</button>
+                            </div>
+                            {% endfor %}
+                            <!-- یک ردیف خالی برای اضافه کردن نام جدید -->
+                            <div class="flex gap-2 mb-2 alias-input new-alias">
+                                <input type="text" name="aliases" class="form-input flex-1" placeholder="نام جایگزین جدید">
+                                <input type="hidden" name="alias_ids" value="">
+                                <button type="button" class="remove-alias bg-red-500 text-white px-3 rounded-lg" style="opacity: 0.5; cursor: not-allowed;" disabled>×</button>
+                            </div>
+                        </div>
+                        <button type="button" id="addAlias" class="text-yellow-600 text-sm mt-1">
+                            <i class="fas fa-plus ml-1"></i> افزودن نام جایگزین دیگر
+                        </button>
+                    </div>
+
+                    <!-- فیلد مخفی برای ذخیره aliasهای حذف شده -->
+                    <input type="hidden" name="deleted_aliases" id="deletedAliases" value="">
+                    
+                    <!-- توضیح مختصر -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">توضیح مختصر</label>
+                        <textarea name="short_description" rows="2" class="form-textarea">{{ product.short_description|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- توضیحات کامل -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">توضیحات کامل</label>
+                        <textarea name="full_description" rows="5" class="form-textarea">{{ product.full_description|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- تصاویر موجود -->
+                    {% if product.images.all %}
+                    <div class="md:col-span-2">
+                        <label class="form-label">تصاویر موجود</label>
+                        <div class="image-preview">
+                            {% for img in product.images.all %}
+                            <div class="image-preview-item existing-image">
+                                <img src="{{ img.image.url }}" alt="{{ product.name }}">
+                                <label class="remove-image" style="background: orange;">
+                                    <input type="checkbox" name="delete_images" value="{{ img.id }}" style="display: none;">
+                                    ✕
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">برای حذف تصویر، روی علامت ✕ کلیک کنید</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- تصاویر جدید -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">افزودن تصاویر جدید</label>
+                        <input type="file" name="new_images" multiple accept="image/*" class="form-input" id="imageInput">
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                    
+                    <!-- وضعیت -->
+                    <div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="is_active" {% if product.is_active %}checked{% endif %}>
+                            <span class="text-sm">فعال</span>
+                        </label>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="is_featured" {% if product.is_featured %}checked{% endif %}>
+                            <span class="text-sm">محصول ویژه (نمایش در صفحه اصلی)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <a href="{% url 'employees:manage_products' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        انصراف
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
+                        ذخیره تغییرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تغییر زیردسته بر اساس دسته اصلی
+    const subCategories = {
+        {% for cat in categories %}
+        {{ cat.id }}: [
+            {% for sub in cat.subcategories.all %}
+            {id: {{ sub.id }}, name: "{{ sub.name }}"},
+            {% endfor %}
+        ],
+        {% endfor %}
+    };
+    
+    document.getElementById('main_category').addEventListener('change', function() {
+        const catId = this.value;
+        const subSelect = document.getElementById('sub_category');
+        subSelect.innerHTML = '<option value="">انتخاب کنید</option>';
+        
+        if (catId && subCategories[catId]) {
+            subCategories[catId].forEach(function(sub) {
+                const option = document.createElement('option');
+                option.value = sub.id;
+                option.textContent = sub.name;
+                subSelect.appendChild(option);
+            });
+        }
+    });
+    
+    // حذف تصاویر موجود
+    document.querySelectorAll('.existing-image .remove-image').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const checkbox = this.querySelector('input');
+            if (checkbox) {
+                checkbox.checked = true;
+                this.closest('.image-preview-item').style.opacity = '0.5';
+                this.closest('.image-preview-item').style.filter = 'grayscale(1)';
+            }
+        });
+    });
+    
+    // پیش‌نمایش تصاویر جدید
+    document.getElementById('imageInput')?.addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        
+        const files = Array.from(e.target.files);
+        files.forEach(function(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="پیش‌نمایش">
+                    <span class="remove-image" onclick="this.parentElement.remove()">×</span>
+                `;
+                preview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+    
+    // ... اسکریپت‌های قبلی ...
+    
+    // مدیریت نام‌های جایگزین
+    let deletedAliasesList = [];
+    
+    function updateDeletedAliasesInput() {
+        document.getElementById('deletedAliases').value = deletedAliasesList.join(',');
+    }
+    
+    function setupAliasRemove(btn, aliasRow) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const aliasId = btn.getAttribute('data-alias-id');
+            
+            if (aliasId && aliasId !== '') {
+                // اگر alias قبلاً ذخیره شده بود، به لیست حذف اضافه کن
+                if (!deletedAliasesList.includes(aliasId)) {
+                    deletedAliasesList.push(aliasId);
+                    updateDeletedAliasesInput();
+                    console.log('Alias added to delete list:', aliasId, deletedAliasesList);
+                }
+            }
+            
+            // حذف ردیف از صفحه
+            if (aliasRow) {
+                aliasRow.remove();
+            } else {
+                const row = btn.closest('.alias-input');
+                if (row) row.remove();
+            }
+        });
+    }
+    
+    // اعمال به دکمه‌های حذف موجود
+    document.querySelectorAll('.alias-input .remove-alias').forEach(btn => {
+        const row = btn.closest('.alias-input');
+        const aliasId = btn.getAttribute('data-alias-id');
+        if (aliasId && aliasId !== '') {
+            setupAliasRemove(btn, row);
+        } else {
+            // برای ردیف‌های جدید که هنوز ذخیره نشده‌اند
+            btn.addEventListener('click', function() {
+                this.closest('.alias-input').remove();
+            });
+        }
+    });
+    
+    // اضافه کردن نام جایگزین جدید
+    document.getElementById('addAlias')?.addEventListener('click', function() {
+        const container = document.getElementById('aliasesContainer');
+        const newInput = document.createElement('div');
+        newInput.className = 'flex gap-2 mb-2 alias-input';
+        newInput.innerHTML = `
+            <input type="text" name="aliases" class="form-input flex-1" placeholder="نام جایگزین جدید">
+            <input type="hidden" name="alias_ids" value="">
+            <button type="button" class="remove-alias bg-red-500 text-white px-3 rounded-lg">×</button>
+        `;
+        container.appendChild(newInput);
+        
+        const removeBtn = newInput.querySelector('.remove-alias');
+        removeBtn.addEventListener('click', function() {
+            newInput.remove();
+        });
+    });
+    
+    // قبل از submit، چاپ کن ببینیم چه چیزی ارسال میشه
+    document.querySelector('form').addEventListener('submit', function() {
+        console.log('Deleted aliases:', document.getElementById('deletedAliases').value);
+    });
+
+</script>
+{% endblock %}

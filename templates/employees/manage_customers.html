@@ -1,0 +1,128 @@
+<!-- templates/employees/manage_customers.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}مدیریت مشتریان | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت مشتریان</h1>
+        <a href="{% url 'employees:add_customer' %}" class="btn-primary">
+            <i class="fas fa-plus ml-2"></i> افزودن مشتری جدید
+        </a>
+    </div>
+    
+
+
+    <div class="bg-yellow-50 border-r-4 border-yellow-500 rounded-lg p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-user-plus text-yellow-600 text-xl"></i>
+                <div>
+                    <p class="font-semibold text-yellow-800">درخواست‌های ثبت‌نام جدید</p>
+                    <p class="text-sm text-yellow-700">
+                        {% if pending_requests_count > 0 %}
+                        {{ pending_requests_count }} درخواست جدید برای ثبت‌نام وجود دارد
+                        {% else %}
+                        درخواست جدیدی برای ثبت نام وجود ندارد
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <a href="{% url 'employees:manage_registration_requests' %}" 
+               class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition text-sm">
+                مشاهده درخواست‌ها <i class="fas fa-arrow-left mr-1"></i>
+            </a>
+        </div>
+    </div>
+    
+
+    
+    <!-- جستجو -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="flex gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" value="{{ search }}" 
+                       placeholder="جستجو بر اساس نام، کد ملی یا تلفن..."
+                       class="w-full border rounded-lg px-4 py-2">
+            </div>
+            <button type="submit" class="btn-primary">جستجو</button>
+            {% if search %}
+            <a href="{% url 'employees:manage_customers' %}" class="btn-outline">حذف فیلتر</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <!-- لیست مشتریان -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">نام و نام خانوادگی</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تلفن</th>
+                        <th class="px-6 py-3 text-sm font-semibold">بدهی</th>
+                        <th class="px-6 py-3 text-sm font-semibold">سطح</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4">{{ customer.user.first_name }} {{ customer.user.last_name }}</td>
+                        <td class="px-6 py-4">{{ customer.user.phone }}</td>
+                        <td class="px-6 py-4 {% if customerdebt > 0 %}text-red-600 font-bold{% endif %}">
+                            {{ customer.debt|format_price }}
+                        </td>
+                        <td class="px-6 py-4">{{ customer.customer_level.name|default:"عادی" }}</td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'employees:customer_detail' customer.id %}" class="text-blue-600 hover:underline ml-3">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'employees:edit_customer' customer.id %}" class="text-yellow-600 hover:underline">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            هیچ مشتریی یافت نشد
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if customers.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if customers.has_previous %}
+                <a href="?page={{ customers.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in customers.paginator.page_range %}
+                    {% if customers.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > customers.number|add:'-3' and num < customers.number|add:'3' %}
+                        <a href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if customers.has_next %}
+                <a href="?page={{ customers.next_page_number }}{% if search %}&search={{ search }}{% endif %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

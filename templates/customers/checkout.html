@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}تسویه حساب | عمده‌فروشی لوازم یدکی{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <h1 class="text-2xl font-bold mb-6">تسویه حساب</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- فرم تسویه حساب -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="font-bold text-lg mb-4 border-b pb-2">اطلاعات سفارش</h3>
+                
+                <form method="post" action="{% url 'customers:confirm_order' %}">
+                    {% csrf_token %}
+                    
+                    <!-- لیست محصولات -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold mb-3">محصولات سفارش</h4>
+                        {% for item in cart_items %}
+                        <div class="flex justify-between items-center py-2 border-b">
+                            <div>
+                                <span class="font-medium">{{ item.product.name }}</span>
+                                <span class="text-gray-500 text-sm"> x {{ item.quantity }}</span>
+                            </div>
+                            <span>{{ item.total|format_price }} ریال</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- استفاده از امتیاز (هر ۱ امتیاز = ۱ ریال) -->
+                    {% if available_points > 0 %}
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="use_points" id="usePointsCheckbox" onchange="togglePoints()">
+                            <span class="font-semibold">استفاده از امتیاز باشگاه مشتریان</span>
+                        </label>
+                        <div id="pointsSection" class="hidden mt-3">
+                            <p class="text-sm text-gray-600 mb-2">
+                                امتیاز قابل استفاده: <strong>{{ available_points|format_price }}</strong> امتیاز
+                            </p>
+                            <p class="text-sm text-gray-500 mb-2">
+                                هر ۱ امتیاز = ۱ ریال تخفیف
+                            </p>
+                            <div class="flex gap-3">
+                                <input type="range" id="pointsRange" min="0" max="{{ available_points }}" step="1" value="0" class="flex-1" oninput="updatePoints()">
+                                <input type="number" name="points_to_use" id="pointsToUse" value="0" class="w-32 border rounded px-2 py-1 text-center" oninput="updatePointsRange()">
+                            </div>
+                            <p class="text-sm text-green-600 mt-2">
+                                تخفیف از امتیاز: <span id="pointsDiscountValue">0</span> ریال
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- یادداشت -->
+                    <div class="mb-6">
+                        <label class="block font-semibold mb-2">یادداشت (اختیاری)</label>
+                        <textarea name="notes" rows="3" class="w-full border rounded-lg px-4 py-2" placeholder="در صورت وجود توضیحات خاص، اینجا بنویسید..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full btn-primary py-3 text-lg {% if not can_purchase %}opacity-50 cursor-not-allowed{% endif %}" 
+                            {% if not can_purchase %}disabled{% endif %}>
+                        ثبت سفارش
+                    </button>
+                    
+                    {% if not can_purchase %}
+                    <p class="text-red-500 text-sm mt-2 text-center">
+                        <i class="fas fa-exclamation-triangle ml-1"></i>
+                        اعتبار شما کافی نیست. لطفاً ابتدا اعتبار خود را افزایش دهید.
+                    </p>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        
+        <!-- خلاصه سفارش -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+                <h3 class="font-bold text-lg mb-4 border-b pb-2">خلاصه سفارش</h3>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">جمع کل:</span>
+                        <span>{{ total|format_price }} ریال</span>
+                    </div>
+                    
+                    {% if discount_percent > 0 %}
+                    <div class="flex justify-between text-green-600">
+                        <span>تخفیف {{ discount_percent }}%:</span>
+                        <span>- {{ discount_amount|format_price }} ریال</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex justify-between font-bold text-lg pt-3 border-t">
+                        <span>مبلغ قابل پرداخت:</span>
+                        <span class="text-yellow-600" id="finalTotal">{{ final_total|format_price }} ریال</span>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-3 mt-4">
+                        <p class="text-sm text-gray-600 flex items-center gap-2">
+                            <i class="fas fa-credit-card"></i>
+                            <span>اعتبار قابل استفاده شما: <strong>{{ customer_credit|format_price }} ریال</strong></span>
+                        </p>
+                        <p class="text-sm text-gray-600 flex items-center gap-2 mt-2">
+                            <i class="fas fa-chart-line"></i>
+                            <span>امتیاز این خرید: <strong>{{ total_points|format_price }} امتیاز</strong></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePoints() {
+        const checked = document.getElementById('usePointsCheckbox').checked;
+        document.getElementById('pointsSection').classList.toggle('hidden', !checked);
+        if (!checked) {
+            document.getElementById('pointsToUse').value = 0;
+            document.getElementById('pointsRange').value = 0;
+            updateFinalTotal(0);
+        }
+    }
+    
+    function updatePoints() {
+        const range = document.getElementById('pointsRange');
+        const input = document.getElementById('pointsToUse');
+        const value = parseInt(range.value) || 0;
+        
+        input.value = value;
+        document.getElementById('pointsDiscountValue').textContent = value.toLocaleString();
+        updateFinalTotal(value);
+    }
+    
+    function updatePointsRange() {
+        const input = document.getElementById('pointsToUse');
+        const range = document.getElementById('pointsRange');
+        let value = parseInt(input.value) || 0;
+        const maxPoints = {{ available_points|default:0 }};
+        
+        if (value > maxPoints) value = maxPoints;
+        if (value < 0) value = 0;
+        
+        input.value = value;
+        range.value = value;
+        
+        document.getElementById('pointsDiscountValue').textContent = value.toLocaleString();
+        updateFinalTotal(value);
+    }
+    
+    function updateFinalTotal(pointsUsed) {
+        const originalFinalTotal = {{ final_total|default:0 }};
+        let discountAmount = pointsUsed;  // هر ۱ امتیاز = ۱ ریال
+        let newFinalTotal = originalFinalTotal - discountAmount;
+        if (newFinalTotal < 0) newFinalTotal = 0;
+        document.getElementById('finalTotal').textContent = newFinalTotal.toLocaleString() + ' ریال';
+    }
+</script>
+{% endblock %}

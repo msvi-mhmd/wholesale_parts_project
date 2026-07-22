@@ -1,0 +1,90 @@
+<!-- templates/employees/pending_payments.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load product_extras %}
+
+{% block title %}پرداخت‌های در انتظار تایید | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">پرداخت‌های در انتظار تایید</h1>
+        <a href="{% url 'employees:manage_payments' %}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست پرداخت‌ها
+        </a>
+    </div>
+    
+    <!-- لیست پرداخت‌ها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-6 py-3 text-sm font-semibold">شماره پرداخت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مشتری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">تاریخ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">مبلغ</th>
+                        <th class="px-6 py-3 text-sm font-semibold">نوع پرداخت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">کد پیگیری</th>
+                        <th class="px-6 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-6 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-mono text-sm">{{ payment.payment_id }}</td>
+                        <td class="px-6 py-4">{{ payment.customer.user.first_name }} {{ payment.customer.user.last_name }}</td>
+                        <td class="px-6 py-4">{{ payment.date|to_jalali }}</td>
+                        <td class="px-6 py-4">{{ payment.amount|format_price }} ریال</td>
+                        <td class="px-6 py-4">{{ payment.payment_type.name }}</td>
+                        <td class="px-6 py-4">{{ payment.confirmation_code|default:"-" }}</td>
+                        <td class="px-6 py-4">
+                            <span class="text-yellow-600">در انتظار تایید</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'employees:confirm_payment' payment.id %}" 
+                               class="text-green-600 hover:underline ml-3"
+                               onclick="return confirm('آیا از تایید این پرداخت اطمینان دارید؟')">
+                                <i class="fas fa-check"></i> تایید
+                            </a>
+                            <button onclick="rejectPayment({{ payment.id }})" class="text-red-600 hover:underline">
+                                <i class="fas fa-times"></i> رد
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-check-circle text-4xl text-green-500 mb-2 block"></i>
+                            هیچ پرداختی در انتظار تایید نیست
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function rejectPayment(paymentId) {
+        if (confirm('آیا از رد این پرداخت اطمینان دارید؟')) {
+            fetch(`/employees/payments/${paymentId}/reject/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: ''
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('خطا در رد پرداخت');
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

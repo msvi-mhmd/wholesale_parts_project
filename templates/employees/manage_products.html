@@ -1,0 +1,138 @@
+<!-- templates/employees/manage_products.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load product_extras %}
+
+{% block title %}مدیریت محصولات | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت محصولات</h1>
+        
+    </div>
+    
+    <!-- فیلترها -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" name="search" value="{{ search }}" placeholder="جستجو..." class="border rounded-lg px-4 py-2">
+            <select name="category" class="border rounded-lg px-4 py-2">
+                <option value="">همه دسته‌ها</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <select name="brand" class="border rounded-lg px-4 py-2">
+                <option value="">همه برندها</option>
+                {% for brand in brands %}
+                <option value="{{ brand.id }}" {% if request.GET.brand == brand.id|stringformat:"s" %}selected{% endif %}>
+                    {{ brand.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <select name="status" class="border rounded-lg px-4 py-2">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>فعال</option>
+                <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>غیرفعال</option>
+                <option value="out_of_stock" {% if request.GET.status == 'out_of_stock' %}selected{% endif %}>ناموجود</option>
+            </select>
+            <button type="submit" class="btn-primary">اعمال فیلتر</button>
+        </form>
+    </div>
+    
+    <!-- لیست محصولات -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-4 py-3 text-sm font-semibold">شماره محصول</th>
+                        <th class="px-4 py-3 text-sm font-semibold">تصویر</th>
+                        <th class="px-4 py-3 text-sm font-semibold">نام محصول</th>
+                        <th class="px-4 py-3 text-sm font-semibold">نام‌های جایگزین</th>
+                        <th class="px-4 py-3 text-sm font-semibold">برند</th>
+                        <th class="px-4 py-3 text-sm font-semibold">دسته</th>
+                        <th class="px-4 py-3 text-sm font-semibold">قیمت</th>
+                        <th class="px-4 py-3 text-sm font-semibold">موجودی</th>
+                        <th class="px-4 py-3 text-sm font-semibold">وضعیت</th>
+                        <th class="px-4 py-3 text-sm font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-3">{{ product.product_code }}</td>
+                        <td class="px-4 py-3">
+                            <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}" 
+                                 class="w-12 h-12 object-cover rounded">
+                        </td>
+                        <td class="px-4 py-3">{{ product.name|truncatechars:40 }}</td>
+                        <td class="px-4 py-3">
+                            {% for alias in product.aliases.all|slice:":2" %}
+                                <span class="text-xs bg-gray-100 px-1 rounded">{{ alias.name }}</span>
+                            {% endfor %}
+                            {% if product.aliases.count > 2 %}
+                                <span class="text-xs text-gray-500">+{{ product.aliases.count|add:"-2" }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">{{ product.brand.name }}</td>
+                        <td class="px-4 py-3">{{ product.sub_category.name }}</td>
+                        <td class="px-4 py-3">{{ product.final_price|format_price }}</td>
+                        <td class="px-4 py-3 {% if product.left_in_stock == 0 %}text-red-600{% endif %}">
+                            {{ product.left_in_stock }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if product.is_active %}
+                                <span class="text-green-600">فعال</span>
+                            {% else %}
+                                <span class="text-red-600">غیرفعال</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'employees:edit_product' product.id %}" class="text-yellow-600 hover:underline">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                            هیچ محصولی یافت نشد
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if products.has_other_pages %}
+        <div class="px-6 py-4 border-t">
+            <div class="flex justify-center gap-2">
+                {% if products.has_previous %}
+                <a href="?page={{ products.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">قبلی</a>
+                {% endif %}
+                
+                {% for num in products.paginator.page_range %}
+                    {% if products.number == num %}
+                        <span class="px-3 py-1 bg-yellow-600 text-white rounded">{{ num }}</span>
+                    {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                        <a href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                           class="px-3 py-1 border rounded hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if products.has_next %}
+                <a href="?page={{ products.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="px-3 py-1 border rounded hover:bg-gray-50">بعدی</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

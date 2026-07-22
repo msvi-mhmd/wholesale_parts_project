@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ویرایش تصویر هیرو | پنل مدیریت{% endblock %}
+
+{% block content %}
+<div class="container-custom py-8 max-w-2xl">
+    <div class="mb-4">
+        <a href="{% url 'settings:settings_dashboard' %}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-right ml-2"></i> بازگشت به تنظیمات
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h1 class="text-2xl font-bold mb-6">🖼️ تغییر تصویر هیرو</h1>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">تصویر پس‌زمینه هیرو</label>
+                <img src="{% static 'images/hero-bg.jpg' %}" alt="">
+                
+                <input type="file" name="hero_bg_image" accept="image/*" 
+                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                <p class="text-xs text-gray-400 mt-1">اندازه توصیه شده: 1920x600 پیکسل</p>
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                <a href="{% url 'settings:settings_dashboard' %}" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                    انصراف
+                </a>
+                <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
+                    <i class="fas fa-save ml-2"></i> ذخیره
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
