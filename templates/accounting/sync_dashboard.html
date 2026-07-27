@@ -8,7 +8,7 @@
 <div class="container-custom py-8">
     <h1 class="text-2xl font-bold mb-6">📊 داشبورد همگام‌سازی با سیستم حسابداری</h1>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h3 class="font-bold text-lg mb-4">👥 مشتریان</h3>
             <p class="text-3xl font-bold text-blue-600">{{ customers_count }}</p>
@@ -16,7 +16,9 @@
             {% if last_customer_sync %}
             <p class="text-xs text-gray-400 mt-2">آخرین همگام‌سازی: {{ last_customer_sync.completed_at|to_jalali}}</p>
             {% endif %}
-            <a href="{% url 'accounting:sync_customers' %}" class="btn-primary inline-block mt-4">همگام‌سازی مشتریان</a>
+            <a href="{% url 'accounting:sync_customers' %}" class="btn-primary inline-block mt-4">
+                 <i class="fas fa-sync-alt ml-2"></i> همگام‌سازی مشتریان
+            </a>
         </div>
         
         <div class="bg-white rounded-xl shadow-sm p-6">
@@ -26,7 +28,9 @@
             {% if last_product_sync %}
             <p class="text-xs text-gray-400 mt-2">آخرین همگام‌سازی: {{ last_product_sync.completed_at|to_jalali}}</p>
             {% endif %}
-            <a href="{% url 'accounting:sync_products' %}" class="btn-primary inline-block mt-4">همگام‌سازی محصولات</a>
+            <a href="{% url 'accounting:sync_products' %}" class="btn-primary inline-block mt-4"> 
+                <i class="fas fa-sync-alt ml-2"></i> همگام‌سازی محصولات
+            </a>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm p-6">
@@ -37,7 +41,7 @@
             <p class="text-xs text-gray-400 mt-2">آخرین همگام‌سازی: {{ last_invoice_sync.completed_at|to_jalali}}</p>
             {% endif %}
             <a href="{% url 'accounting:sync_invoices' %}" class="btn-primary inline-block mt-4">
-                همگام‌سازی فاکتورها
+                 <i class="fas fa-sync-alt ml-2"></i> همگام‌سازی فاکتورها
             </a>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6">

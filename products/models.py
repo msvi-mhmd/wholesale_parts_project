@@ -42,8 +42,8 @@ class MainCategory(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            from django.utils.text import slugify
-            self.slug = slugify(self.name)
+            import uuid
+            self.slug = f"cat-{uuid.uuid4().hex[:8]}"
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -60,8 +60,8 @@ class SubCategory(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            from django.utils.text import slugify
-            self.slug = slugify(self.name)
+            import uuid
+            self.slug = f"sub-{uuid.uuid4().hex[:8]}"
         super().save(*args, **kwargs)
     
     def __str__(self):
