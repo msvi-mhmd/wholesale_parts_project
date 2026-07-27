@@ -1,9 +1,9 @@
-<!-- templates/employees/warehouse_invoice_print.html -->
 {% load static %}
 {% load product_extras %}
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
+    <meta name="robots" content="noindex, nofollow">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پیش فاکتور انبار - {{ invoice.invoice_id }}</title>
@@ -37,11 +37,38 @@
             border-bottom: 2px solid #c9a84c;
             padding-bottom: 15px;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
-        .header h1 {
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-logo {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .header-text {
+            text-align: right;
+        }
+        
+        .header-text h1 {
             color: #c9a84c;
             font-size: 1.8rem;
+            margin: 0;
+        }
+        
+        .header-text .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
         }
         
         .header .subtitle {
@@ -175,6 +202,19 @@
             .signature-box .sign-item .line {
                 width: 100%;
             }
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .header-left {
+                flex-direction: column;
+            }
+            .header-text {
+                text-align: center;
+            }
+            .header-logo {
+                height: 50px;
+            }
         }
     </style>
 </head>
@@ -182,11 +222,19 @@
     <div class="watermark">پرشین گلف</div>
     
     <div class="invoice-container">
-        <!-- هدر -->
+        <!-- هدر با لوگو -->
         <div class="header">
-            <h1>🏭 پیش فاکتور انبار</h1>
-            <div class="subtitle">{{ company_name }}</div>
-            <div class="subtitle" style="font-size:0.75rem;">{{ company_address }} | {{ company_phone }}</div>
+            <div class="header-left">
+                <img src="{% static 'images/logo.png' %}" alt="لوگو" class="header-logo">
+                <div class="header-text">
+                    <h1>پیش فاکتور انبار</h1>
+                    <div class="subtitle">{{ company_name }}</div>
+                </div>
+            </div>
+            <div style="text-align:left; font-size:0.75rem; color:#64748b;">
+                {{ company_address }}<br>
+                {{ company_phone }}
+            </div>
         </div>
         
         <!-- اطلاعات -->
@@ -237,43 +285,41 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- templates/employees/warehouse_invoice_print.html -->
-
-            {% for item in invoice.invoice_items.all %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td style="text-align:right;">
-                    {% with product=item.get_product %}
-                        {% if product %}
-                            {{ product.name }}
-                        {% else %}
-                            {{ item.product_code }}
-                        {% endif %}
-                    {% endwith %}
-                </td>
-                <td>
-                    {% with product=item.get_product %}
-                        {% if product %}
-                            {{ product.brand.name }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    {% endwith %}
-                </td>
-                <td>{{ item.quantity }}</td>
-                <td>
-                    {% with product=item.get_product %}
-                        {% if product and product.left_in_stock >= item.quantity %}
-                            <span style="color:#16a34a;">موجود</span>
-                        {% elif product %}
-                            <span style="color:#dc2626;">کمبود موجودی ({{ product.left_in_stock }})</span>
-                        {% else %}
-                            <span style="color:#dc2626;">نامشخص</span>
-                        {% endif %}
-                    {% endwith %}
-                </td>
-            </tr>
-            {% endfor %}
+                {% for item in invoice.invoice_items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td style="text-align:right;">
+                        {% with product=item.get_product %}
+                            {% if product %}
+                                {{ product.name }}
+                            {% else %}
+                                {{ item.product_code }}
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with product=item.get_product %}
+                            {% if product %}
+                                {{ product.brand.name }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>
+                        {% with product=item.get_product %}
+                            {% if product and product.left_in_stock >= item.quantity %}
+                                <span style="color:#16a34a;">موجود</span>
+                            {% elif product %}
+                                <span style="color:#dc2626;">کمبود موجودی ({{ product.left_in_stock }})</span>
+                            {% else %}
+                                <span style="color:#dc2626;">نامشخص</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
         

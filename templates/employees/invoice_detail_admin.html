@@ -4,7 +4,9 @@
 {% load product_extras %}
 
 {% block title %}جزئیات فاکتور {{ invoice.invoice_id }} | پنل مدیریت{% endblock %}
-
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
 <div class="container-custom py-8">
     <div class="mb-6">
@@ -89,7 +91,17 @@
                 {% include 'employees/_invoice_items_table.html' %}
             </div>
         </div>
-        
+        {% if invoice.status.code == 'PENDING' %}
+        <div class="mt-4 p-4 bg-yellow-50 border rounded-lg">
+            <h4 class="font-bold text-yellow-800 mb-2">افزودن تخفیف دستی</h4>
+            <form method="post" action="{% url 'employees:add_manual_discount' invoice.id %}" class="flex gap-3">
+                {% csrf_token %}
+                <input type="number" name="discount_amount" placeholder="مبلغ تخفیف (ریال)" 
+                    class="border rounded px-3 py-2 w-48">
+                <button type="submit" class="btn-primary">اعمال تخفیف</button>
+            </form>
+        </div>
+        {% endif %}
         <!-- جمع مبالغ -->
         <div class="px-6 py-4 border-t bg-gray-50">
             <div class="flex justify-end">
@@ -135,7 +147,7 @@
                 <div>
                     <span class="text-gray-600">وضعیت ارسال:</span>
                     {% if invoice.sent_to_accounting %}
-                        <span class="text-green-600">✅ ارسال شده</span>
+                        <span class="text-green-600">  ارسال شده</span>
                     {% else %}
                         <span class="text-yellow-600">⏳ ارسال نشده</span>
                     {% endif %}
@@ -449,15 +461,14 @@ function showToast(message, type = 'success') {
 
 // ===== رد فاکتور =====
 function rejectInvoice(invoiceId) {
-    let reason = prompt('لطفا دلیل رد فاکتور را وارد کنید:');
-    if (reason) {
+    if (confirm('آیا از رد این فاکتور اطمینان دارید؟')) {
         fetch(`/employees/invoices/${invoiceId}/reject/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: `reason=${encodeURIComponent(reason)}`
+            body: `reason=`
         }).then(response => {
             if (response.ok) {
                 location.href = "{% url 'employees:manage_invoices' %}";

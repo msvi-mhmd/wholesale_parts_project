@@ -17,6 +17,9 @@
         z-index: 9999 !important;
     }
 </style>
+
+<meta name="robots" content="noindex, nofollow">
+
 {% endblock %}
 
 {% block content %}
@@ -26,7 +29,7 @@
         <a href="{% url 'customers:customer_panel' %}" class="text-yellow-600 hover:underline">
             <i class="fas fa-arrow-right ml-2"></i> بازگشت به پنل کاربری
         </a>
-        <h1 class="text-2xl font-bold">📊 صورتحساب</h1>
+        <h1 class="text-2xl font-bold">  صورتحساب</h1>
         <button onclick="openPaymentModal('wallet')" class="btn-primary bg-green-600 hover:bg-green-700">
             <i class="fas fa-plus-circle ml-2"></i> پرداخت جدید
         </button>

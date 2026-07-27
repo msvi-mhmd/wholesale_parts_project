@@ -185,7 +185,7 @@ def register_request(request):
             
             messages.success(
                 request, 
-                '✅ درخواست شما با موفقیت ثبت شد. همکاران ما به زودی با شما تماس خواهند گرفت.'
+                '  درخواست شما با موفقیت ثبت شد. همکاران ما به زودی با شما تماس خواهند گرفت.'
             )
             return redirect('accounts:login')
             

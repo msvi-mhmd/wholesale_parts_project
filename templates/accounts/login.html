@@ -866,7 +866,7 @@
                     <i class="fas fa-phone"></i>
                 </div>
                 <input class="form-inp" id="otpPhoneInput" type="tel" 
-                       placeholder="شماره تلفن (۰۹۱۲۳۴۵۶۷۸۹)" maxlength="11" dir="ltr">
+                       placeholder="شماره تلفن ( ۰۹۱۷۵۹۲۷۲۶۲)" maxlength="11" dir="ltr">
             </div>
             
             <div class="error-msg" id="phoneError">لطفاً شماره تلفن معتبر وارد کنید</div>
@@ -1070,7 +1070,7 @@
             })
             .then(data => {
                 if (data && data.success) {
-                    successEl.textContent = '✅ کد تایید صحیح است. در حال ورود...';
+                    successEl.textContent = '  کد تایید صحیح است. در حال ورود...';
                     successEl.classList.add('show');
                     setTimeout(() => {
                         window.location.href = "{% url 'accounts:dashboard_redirect' %}";
@@ -1116,7 +1116,7 @@
                     document.getElementById('resendBtn').disabled = false;
                     document.getElementById('resendBtn').innerHTML = '<i class="fas fa-redo ml-1"></i> ارسال مجدد کد';
                     document.getElementById('verifyError').classList.remove('show');
-                    document.getElementById('verifySuccess').textContent = '✅ کد جدید ارسال شد';
+                    document.getElementById('verifySuccess').textContent = '  کد جدید ارسال شد';
                     document.getElementById('verifySuccess').classList.add('show');
                     setTimeout(() => {
                         document.getElementById('verifySuccess').classList.remove('show');

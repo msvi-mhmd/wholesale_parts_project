@@ -5,7 +5,9 @@
 {% load product_extras %}
 
 {% block title %}پنل کاربری | عمده‌فروشی لوازم یدکی{% endblock %}
-
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
 <div class="container-custom py-8">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -59,7 +61,7 @@
         <!-- محتوای اصلی -->
         <div class="lg:col-span-3">
             <!-- ===== کارت‌های اطلاعاتی ===== -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
                 <!-- بدهی -->
                 <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-4 text-white">
                     <p class="text-sm opacity-90">بدهی</p>
@@ -78,6 +80,9 @@
                     <p class="text-2xl font-bold">{{ receivable|format_price }}</p>
                     <p class="text-xs opacity-75">ریال</p>
                 </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
+                
                 
                 {% if customer.debt_before_1404_02 > 0 %}
                 <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
@@ -92,10 +97,7 @@
                     <p class="text-2xl font-bold">{{ total_invoices|format_price }}</p>
                     <p class="text-xs opacity-75">ریال</p>
                 </div>
-            </div>
-            
-            <!-- ===== کارت جمع کل پرداخت‌ها ===== -->
-            <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">
+                <!-- ===== کارت جمع کل پرداخت‌ها ===== -->
                 <div class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-4 text-white">
                     <p class="text-sm opacity-90">کل پرداخت‌ها</p>
                     <p class="text-2xl font-bold">{{ total_payments|format_price }}</p>
@@ -105,6 +107,8 @@
                     </button>
                 </div>
             </div>
+            
+            
             
             <!-- ===== امتیاز و سطح مشتری ===== -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

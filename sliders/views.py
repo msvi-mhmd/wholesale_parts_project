@@ -39,13 +39,13 @@ def slider_create(request):
         form = SliderForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, '✅ اسلایدر با موفقیت ایجاد شد')
+            messages.success(request, '  اسلایدر با موفقیت ایجاد شد')
             return redirect('sliders:slider_list')
         else:
             # نمایش خطاهای فرم به صورت پیام
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f'❌ {field}: {error}')
+                    messages.error(request, f'  {field}: {error}')
     else:
         form = SliderForm()
     
@@ -65,14 +65,14 @@ def slider_edit(request, slider_id):
         form = SliderForm(request.POST, request.FILES, instance=slider)
         if form.is_valid():
             form.save()
-            messages.success(request, '✅ اسلایدر با موفقیت ویرایش شد')
+            messages.success(request, '  اسلایدر با موفقیت ویرایش شد')
             return redirect('sliders:slider_list')
         else:
             # نمایش خطاهای فرم
             for field, errors in form.errors.items():
                 field_label = form.fields[field].label if field in form.fields else field
                 for error in errors:
-                    messages.error(request, f'❌ {field_label}: {error}')
+                    messages.error(request, f'  {field_label}: {error}')
     else:
         form = SliderForm(instance=slider)
     
@@ -95,7 +95,7 @@ def slider_delete(request, slider_id):
         if slider.image:
             slider.image.delete()
         slider.delete()
-        messages.success(request, '✅ اسلایدر با موفقیت حذف شد')
+        messages.success(request, '  اسلایدر با موفقیت حذف شد')
         return redirect('sliders:slider_list')
     
     context = {
@@ -113,7 +113,7 @@ def slider_toggle_status(request, slider_id):
     slider.save()
     
     status = 'فعال' if slider.is_active else 'غیرفعال'
-    messages.success(request, f'✅ وضعیت اسلایدر به "{status}" تغییر کرد')
+    messages.success(request, f'  وضعیت اسلایدر به "{status}" تغییر کرد')
     return redirect('sliders:slider_list')
 
 

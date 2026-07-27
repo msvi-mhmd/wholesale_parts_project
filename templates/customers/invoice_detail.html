@@ -5,7 +5,9 @@
 {% load product_extras %}
 
 {% block title %}جزئیات فاکتور {{ invoice.invoice_id }} | عمده‌فروشی لوازم یدکی{% endblock %}
-
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
 <div class="container-custom py-8">
     <div class="mb-6">

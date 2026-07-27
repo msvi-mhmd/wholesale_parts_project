@@ -63,13 +63,13 @@ class SMSManager:
             print(f"📱 کد تایید به {phone} ارسال شد: {code}")
             return {'success': True, 'message': 'کد تایید ارسال شد'}
         except APIException as e:
-            print(f"❌ خطای API کاوه‌نگار: {e}")
+            print(f"  خطای API کاوه‌نگار: {e}")
             return {'success': False, 'message': str(e)}
         except HTTPException as e:
-            print(f"❌ خطای HTTP کاوه‌نگار: {e}")
+            print(f"  خطای HTTP کاوه‌نگار: {e}")
             return {'success': False, 'message': str(e)}
         except Exception as e:
-            print(f"❌ خطای ناشناخته: {e}")
+            print(f"  خطای ناشناخته: {e}")
             return {'success': False, 'message': str(e)}
     
     def _send_kavenegar_requests(self, phone, code):
@@ -88,10 +88,10 @@ class SMSManager:
                 return {'success': True, 'message': 'کد تایید ارسال شد'}
             else:
                 error_msg = result.get('return', {}).get('message', 'خطای ناشناخته')
-                print(f"❌ خطا: {error_msg}")
+                print(f"  خطا: {error_msg}")
                 return {'success': False, 'message': error_msg}
         except Exception as e:
-            print(f"❌ خطا: {str(e)}")
+            print(f"  خطا: {str(e)}")
             return {'success': False, 'message': str(e)}
     
     def _send_ghasedak(self, phone, code):

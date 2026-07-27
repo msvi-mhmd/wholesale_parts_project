@@ -552,7 +552,7 @@ def confirm_order(request):
     
     messages.success(
         request, 
-        f'✅ سفارش شما با شماره {invoice.invoice_id} ثبت شد و در انتظار تایید است.'
+        f'  سفارش شما با شماره {invoice.invoice_id} ثبت شد و در انتظار تایید است.'
     )
     return redirect('customers:invoice_detail', invoice_id=invoice.invoice_id)
 
@@ -1063,7 +1063,7 @@ def verify_payment(request):
                 
                 messages.success(
                     request, 
-                    f'✅ پرداخت شما با موفقیت انجام شد و در انتظار تایید ادمین است.\n'
+                    f'  پرداخت شما با موفقیت انجام شد و در انتظار تایید ادمین است.\n'
                     f'مبلغ: {payment_info["amount"]:,} ریال'
                 )
             else:
@@ -1273,7 +1273,7 @@ def verify_invoice_online_payment(request):
         invoice.payment_status = 'paid'
         invoice.save()
         
-        messages.success(request, f'✅ پرداخت فاکتور {invoice.invoice_id} با موفقیت انجام شد')
+        messages.success(request, f'  پرداخت فاکتور {invoice.invoice_id} با موفقیت انجام شد')
     else:
         payment.status = 'failed'
         payment.save()

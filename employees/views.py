@@ -269,14 +269,14 @@ def add_customer(request):
             if result and result.get('success'):
                 messages.success(
                     request, 
-                    f'✅ مشتری {first_name} {last_name} با موفقیت در نیکان ثبت شد.'
+                    f'  مشتری {first_name} {last_name} با موفقیت در نیکان ثبت شد.'
                 )
             else:
                 error_msg = result.get('error', 'خطا در ثبت مشتری') if result else 'نتیجه None است'
-                messages.error(request, f'❌ ثبت مشتری در نیکان ناموفق بود: {error_msg}')
+                messages.error(request, f'  ثبت مشتری در نیکان ناموفق بود: {error_msg}')
                 
         except Exception as e:
-            messages.error(request, f'❌ خطا در ارتباط با نیکان: {str(e)}')
+            messages.error(request, f'  خطا در ارتباط با نیکان: {str(e)}')
         
         return redirect('employees:add_customer')
     
@@ -526,13 +526,13 @@ def add_product(request):
                 accounting_code=accounting_product_code
             )
             
-            messages.success(request, f'✅ محصول {name} با موفقیت اضافه شد.')
+            messages.success(request, f'  محصول {name} با موفقیت اضافه شد.')
             return redirect('employees:manage_products')
         else:
             # ===== ۳. اگر ثبت در نیکان ناموفق بود =====
             messages.error(
                 request, 
-                f'❌ ثبت محصول در حسابداری ناموفق بود. لطفاً از برقراری ارتباط با سیستم حسابداری اطمینان حاصل کرده و مجددا تلاش کنید.\n'
+                f'  ثبت محصول در حسابداری ناموفق بود. لطفاً از برقراری ارتباط با سیستم حسابداری اطمینان حاصل کرده و مجددا تلاش کنید.\n'
                 f'خطا: {accounting_error}'
             )
             return redirect('employees:add_product')
@@ -803,6 +803,36 @@ def search_products(request):
 # ============================
 # مدیریت فاکتورها
 # ============================
+
+# employees/views.py
+@login_required
+@user_passes_test(is_admin_or_employee)
+def add_manual_discount(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    
+    if invoice.status.code != 'PENDING':
+        messages.error(request, 'فقط فاکتورهای در انتظار تایید قابل ویرایش هستند')
+        return redirect('employees:invoice_detail_admin', invoice_id=invoice.invoice_id)
+    
+    if request.method == 'POST':
+        discount = request.POST.get('discount_amount')
+        try:
+            discount = int(discount)
+            if discount < 0:
+                messages.error(request, 'مبلغ تخفیف نمیتواند منفی باشد')
+            elif discount > invoice.total:
+                messages.error(request, 'تخفیف نمیتواند از مبلغ فاکتور بیشتر باشد')
+            else:
+                invoice.manual_discount = discount
+                invoice.discount += discount
+                invoice.total -= discount
+                invoice.save()
+                messages.success(request, f'  تخفیف {discount:,} ریال با موفقیت اعمال شد')
+        except ValueError:
+            messages.error(request, 'لطفاً مبلغ معتبر وارد کنید')
+    
+    return redirect('employees:invoice_detail_admin', invoice_id=invoice.invoice_id)
+
 
 @login_required
 @user_passes_test(is_admin_or_employee)
@@ -1082,13 +1112,13 @@ def confirm_invoice(request, invoice_id):
         
         messages.success(
             request, 
-            f'✅ فاکتور {invoice.invoice_id} تایید و به حسابداری ارسال شد.'
+            f'  فاکتور {invoice.invoice_id} تایید و به حسابداری ارسال شد.'
         )
     else:
         # ===== ۴. اگر ثبت در نیکان ناموفق بود =====
         messages.error(
             request, 
-            f'❌ ثبت فاکتور در حسابداری ناموفق بود. لطفاً از برقراری ارتباط با سیستم حسابداری اطمینان حاصل کرده و مجددا تلاش کنید.\n'
+            f'  ثبت فاکتور در حسابداری ناموفق بود. لطفاً از برقراری ارتباط با سیستم حسابداری اطمینان حاصل کرده و مجددا تلاش کنید.\n'
             f'خطا: {accounting_error}'
         )
         
@@ -1119,7 +1149,7 @@ def reject_invoice(request, invoice_id):
         messages.error(request, 'این فاکتور قبلاً تایید یا رد شده است')
         return redirect('employees:manage_invoices')
     
-    reason = request.POST.get('reason', '')
+    reason = request.POST.get('reason', 'بدون دلیل')
     
     rejected_status, _ = InvoiceStatus.objects.get_or_create(
         code='REJECTED',
@@ -1129,7 +1159,7 @@ def reject_invoice(request, invoice_id):
     invoice.notes = f"رد شده به دلیل: {reason}"
     invoice.save()
     
-    messages.warning(request, f'❌ فاکتور {invoice.invoice_id} رد شد')
+    messages.warning(request, f'  فاکتور {invoice.invoice_id} رد شد')
     return redirect('employees:manage_invoices')
 
 
@@ -1255,13 +1285,13 @@ def send_invoice_to_accounting(request, invoice_id):
             invoice.sent_to_accounting_at = timezone.now()
             invoice.save()
             
-            messages.success(request, f'✅ فاکتور با شماره {accounting_number} به سیستم حسابداری ارسال شد')
+            messages.success(request, f'  فاکتور با شماره {accounting_number} به سیستم حسابداری ارسال شد')
         else:
             error_msg = result.get('error', 'خطای ناشناخته')
-            messages.error(request, f'❌ خطا در ارسال به سیستم حسابداری: {error_msg}')
+            messages.error(request, f'  خطا در ارسال به سیستم حسابداری: {error_msg}')
             
     except Exception as e:
-        messages.error(request, f'❌ خطا در ارتباط با سیستم حسابداری: {str(e)}')
+        messages.error(request, f'  خطا در ارتباط با سیستم حسابداری: {str(e)}')
     
     return redirect('employees:invoice_detail_admin', invoice_id=invoice.invoice_id)
 
@@ -1373,14 +1403,14 @@ def confirm_invoice_payment(request, payment_id):
                 payment.save()
                 
                 accounting_success = True
-                messages.success(request, '✅ پرداخت تایید و به حسابداری ارسال شد')
+                messages.success(request, '  پرداخت تایید و به حسابداری ارسال شد')
             else:
                 messages.warning(request, f'⚠️ پرداخت تایید شد اما ارسال به حسابداری ناموفق بود: {result.get("error")}')
         else:
             messages.warning(request, '⚠️ مشتری در حسابداری ثبت نشده است')
             
     except Exception as e:
-        messages.error(request, f'❌ خطا در ارسال به حسابداری: {str(e)}')
+        messages.error(request, f'  خطا در ارسال به حسابداری: {str(e)}')
     
     return redirect('employees:manage_invoice_payments')
 
@@ -1397,7 +1427,7 @@ def reject_invoice_payment(request, payment_id):
     payment.status = 'rejected'
     payment.save()
     
-    messages.warning(request, '❌ پرداخت رد شد')
+    messages.warning(request, '  پرداخت رد شد')
     return redirect('employees:manage_invoice_payments')
 
 
@@ -1421,9 +1451,9 @@ def send_invoice_payment_to_accounting(request, payment_id):
             payment.invoice.payment_status = 'paid'
             payment.invoice.save()
         
-        messages.success(request, '✅ پرداخت به حسابداری ارسال شد')
+        messages.success(request, '  پرداخت به حسابداری ارسال شد')
     else:
-        messages.error(request, '❌ خطا در ارسال به حسابداری')
+        messages.error(request, '  خطا در ارسال به حسابداری')
     
     return redirect('employees:manage_invoice_payments')
 
@@ -1605,12 +1635,12 @@ def confirm_payment(request, payment_id):
         
         messages.success(
             request, 
-            f'✅ پرداخت {payment.payment_id} تایید شد. مبلغ {payment.amount:,.0f} ریال به حساب مشتری اضافه شد و به حسابداری ارسال شد.'
+            f'  پرداخت {payment.payment_id} تایید شد. مبلغ {payment.amount:,.0f} ریال به حساب مشتری اضافه شد و به حسابداری ارسال شد.'
         )
     else:
         messages.error(
             request, 
-            f'❌ ثبت در حسابداری ناموفق بود: {accounting_error}'
+            f'  ثبت در حسابداری ناموفق بود: {accounting_error}'
         )
     
     return redirect('employees:manage_payments')
@@ -1630,7 +1660,7 @@ def reject_payment(request, payment_id):
     payment.status = 'rejected'
     payment.save()
     
-    messages.warning(request, f'❌ پرداخت {payment.payment_id} رد شد')
+    messages.warning(request, f'  پرداخت {payment.payment_id} رد شد')
     return redirect('employees:manage_payments')
 
 
@@ -2330,7 +2360,7 @@ def print_warehouse_invoice(request, invoice_id):
     html_string = render_to_string('employees/warehouse_invoice_print.html', {
         'invoice': invoice,
         'company_name': 'پخش لوازم یدکی پرشین گلف',
-        'company_phone': '۰۹۱۲۳۴۵۶۷۸۹',
+        'company_phone': ' ۰۹۱۷۵۹۲۷۲۶۲',
         'company_address': 'بندرعباس، بلوار علی ابن ابی طالب، رو به روی خانه شیوا',
         'user': request.user,
     })
@@ -2542,7 +2572,7 @@ def change_username(request):
         request.user.username = new_username
         request.user.save()
         
-        messages.success(request, f'✅ نام کاربری با موفقیت به "{new_username}" تغییر کرد')
+        messages.success(request, f'  نام کاربری با موفقیت به "{new_username}" تغییر کرد')
         return redirect('employees:change_username')
     
     context = {
@@ -2562,7 +2592,7 @@ def change_password(request):
             user = form.save()
             # جلوگیری از خروج کاربر
             update_session_auth_hash(request, user)
-            messages.success(request, '✅ رمز عبور با موفقیت تغییر کرد')
+            messages.success(request, '  رمز عبور با موفقیت تغییر کرد')
             return redirect('employees:change_password')
         else:
             for error in form.errors.values():

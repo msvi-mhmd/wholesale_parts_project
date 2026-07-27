@@ -4,7 +4,9 @@
 {% load product_extras %}
 
 {% block title %}پرداخت‌های در انتظار تایید | پنل مدیریت{% endblock %}
-
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
 <div class="container-custom py-8">
     <div class="flex justify-between items-center mb-6">

@@ -107,11 +107,11 @@ def sync_customers(request):
         if result.get('success'):
             messages.success(
                 request, 
-                f"✅ همگام‌سازی مشتریان با موفقیت انجام شد. "
+                f"  همگام‌سازی مشتریان با موفقیت انجام شد. "
                 f"{result.get('new_count', 0)} مشتری جدید اضافه شدند."
             )
         else:
-            messages.error(request, f"❌ خطا در همگام‌سازی مشتریان: {result.get('error')}")
+            messages.error(request, f"  خطا در همگام‌سازی مشتریان: {result.get('error')}")
         
         return redirect('accounting:sync_dashboard')
     
@@ -138,11 +138,11 @@ def sync_products(request):
         if result.get('success'):
             messages.success(
                 request, 
-                f"✅ همگام‌سازی محصولات با موفقیت انجام شد. "
+                f"  همگام‌سازی محصولات با موفقیت انجام شد. "
                 f"{result.get('new_count', 0)} محصول جدید اضافه شدند."
             )
         else:
-            messages.error(request, f"❌ خطا در همگام‌سازی محصولات: {result.get('error')}")
+            messages.error(request, f"  خطا در همگام‌سازی محصولات: {result.get('error')}")
         
         return redirect('accounting:sync_dashboard')
     
@@ -250,13 +250,13 @@ def send_invoice_to_accounting(request, invoice_id):
             invoice.sent_to_accounting_at = timezone.now()
             invoice.save()
             
-            messages.success(request, f'✅ فاکتور با شماره {accounting_number} به سیستم حسابداری ارسال شد')
+            messages.success(request, f'  فاکتور با شماره {accounting_number} به سیستم حسابداری ارسال شد')
         else:
             error_msg = result.get('error', 'خطای ناشناخته')
-            messages.error(request, f'❌ خطا در ارسال به سیستم حسابداری: {error_msg}')
+            messages.error(request, f'  خطا در ارسال به سیستم حسابداری: {error_msg}')
             
     except Exception as e:
-        messages.error(request, f'❌ خطا در ارتباط با سیستم حسابداری: {str(e)}')
+        messages.error(request, f'  خطا در ارتباط با سیستم حسابداری: {str(e)}')
     
     return redirect('employees:invoice_detail_admin', invoice_id=invoice.invoice_id)
 
@@ -443,14 +443,14 @@ def sync_invoices(request):
             if result.get('success'):
                 messages.success(
                     request, 
-                    f"✅ همگام‌سازی فاکتورها با موفقیت انجام شد. "
+                    f"  همگام‌سازی فاکتورها با موفقیت انجام شد. "
                     f"{result.get('saved_count', 0)} فاکتور جدید اضافه شدند."
                 )
             else:
-                messages.error(request, f"❌ خطا در همگام‌سازی فاکتورها: {result.get('error')}")
+                messages.error(request, f"  خطا در همگام‌سازی فاکتورها: {result.get('error')}")
                 
         except Exception as e:
-            messages.error(request, f"❌ خطا در همگام‌سازی فاکتورها: {str(e)}")
+            messages.error(request, f"  خطا در همگام‌سازی فاکتورها: {str(e)}")
         
         return redirect('accounting:sync_dashboard')
     
@@ -479,11 +479,11 @@ def sync_payments(request):
         if result.get('success'):
             messages.success(
                 request, 
-                f"✅ همگام‌سازی پرداخت‌ها با موفقیت انجام شد. "
+                f"  همگام‌سازی پرداخت‌ها با موفقیت انجام شد. "
                 f"{result.get('saved_count', 0)} پرداخت جدید اضافه شدند."
             )
         else:
-            messages.error(request, f"❌ خطا در همگام‌سازی پرداخت‌ها: {result.get('error')}")
+            messages.error(request, f"  خطا در همگام‌سازی پرداخت‌ها: {result.get('error')}")
         
         return redirect('accounting:sync_dashboard')
     

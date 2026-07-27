@@ -37,7 +37,7 @@ def edit_hero(request):
                 for chunk in file.chunks():
                     destination.write(chunk)
             
-            messages.success(request, '✅ تصویر هیرو با موفقیت تغییر کرد')
+            messages.success(request, '  تصویر هیرو با موفقیت تغییر کرد')
         else:
             messages.warning(request, 'هیچ تصویری انتخاب نشده است')
         return redirect('settings:edit_hero')

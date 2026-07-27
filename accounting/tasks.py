@@ -40,9 +40,9 @@ def sync_all_with_accounting():
         logger.info("🔄 شروع همگام‌سازی محصولات...")
         product_result = sync_products_task(api_client)
         results['products'] = product_result
-        logger.info(f"✅ محصولات: {product_result.get('message', '')}")
+        logger.info(f"  محصولات: {product_result.get('message', '')}")
     except Exception as e:
-        logger.error(f"❌ خطا در همگام‌سازی محصولات: {str(e)}")
+        logger.error(f"  خطا در همگام‌سازی محصولات: {str(e)}")
         results['products'] = {'success': False, 'message': str(e)}
     
     # ============================
@@ -52,9 +52,9 @@ def sync_all_with_accounting():
         logger.info("🔄 شروع همگام‌سازی مشتریان...")
         customer_result = sync_customers_task(api_client)
         results['customers'] = customer_result
-        logger.info(f"✅ مشتریان: {customer_result.get('message', '')}")
+        logger.info(f"  مشتریان: {customer_result.get('message', '')}")
     except Exception as e:
-        logger.error(f"❌ خطا در همگام‌سازی مشتریان: {str(e)}")
+        logger.error(f"  خطا در همگام‌سازی مشتریان: {str(e)}")
         results['customers'] = {'success': False, 'message': str(e)}
     
     # ============================
@@ -64,9 +64,9 @@ def sync_all_with_accounting():
         logger.info("🔄 شروع همگام‌سازی فاکتورها...")
         invoice_result = sync_invoices_task(api_client)
         results['invoices'] = invoice_result
-        logger.info(f"✅ فاکتورها: {invoice_result.get('message', '')}")
+        logger.info(f"  فاکتورها: {invoice_result.get('message', '')}")
     except Exception as e:
-        logger.error(f"❌ خطا در همگام‌سازی فاکتورها: {str(e)}")
+        logger.error(f"  خطا در همگام‌سازی فاکتورها: {str(e)}")
         results['invoices'] = {'success': False, 'message': str(e)}
     
     # ============================
@@ -76,9 +76,9 @@ def sync_all_with_accounting():
         logger.info("🔄 شروع همگام‌سازی پرداخت‌ها...")
         payment_result = sync_payments_task(api_client)
         results['payments'] = payment_result
-        logger.info(f"✅ پرداخت‌ها: {payment_result.get('message', '')}")
+        logger.info(f"  پرداخت‌ها: {payment_result.get('message', '')}")
     except Exception as e:
-        logger.error(f"❌ خطا در همگام‌سازی پرداخت‌ها: {str(e)}")
+        logger.error(f"  خطا در همگام‌سازی پرداخت‌ها: {str(e)}")
         results['payments'] = {'success': False, 'message': str(e)}
     
     logger.info("========== همگام‌سازی کامل پایان یافت ==========")

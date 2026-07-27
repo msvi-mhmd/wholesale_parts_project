@@ -39,7 +39,12 @@ class Invoice(models.Model):
 
     status = models.ForeignKey('InvoiceStatus', on_delete=models.PROTECT)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
-
+    manual_discount = models.DecimalField(
+        max_digits=15, 
+        decimal_places=0, 
+        default=0,
+        verbose_name='تخفیف دستی (ادمین)'
+    )
 
     customer = models.ForeignKey('customers.Customer', on_delete=models.CASCADE, related_name='invoices', verbose_name='مشتری')
     

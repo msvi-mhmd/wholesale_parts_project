@@ -3,7 +3,9 @@
 {% load product_extras %}
 
 {% block title %}همگام‌سازی مشتریان | پنل مدیریت{% endblock %}
-
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
 <div class="container-custom py-8">
     <div class="flex justify-between items-center mb-6">
@@ -51,11 +53,11 @@
                         <td class="px-4 py-2">{{ log.started_at|to_jalali }}</td>
                         <td class="px-4 py-2">
                             {% if log.status == 'completed' %}
-                                <span class="text-green-600">✅ تکمیل شده</span>
+                                <span class="text-green-600">  تکمیل شده</span>
                             {% elif log.status == 'processing' %}
                                 <span class="text-yellow-600">⏳ در حال پردازش</span>
                             {% else %}
-                                <span class="text-red-600">❌ ناموفق</span>
+                                <span class="text-red-600">  ناموفق</span>
                             {% endif %}
                         </td>
                         <td class="px-4 py-2">{{ log.new_items_count }}</td>

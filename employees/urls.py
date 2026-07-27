@@ -38,6 +38,7 @@ urlpatterns = [
     path('invoice-payments/<int:payment_id>/reject/', views.reject_invoice_payment, name='reject_invoice_payment'),
     path('invoice-payments/<int:payment_id>/confirm/', views.confirm_invoice_payment, name='confirm_invoice_payment'),  # اضافه شد
     path('invoice-payments/<int:payment_id>/send-accounting/', views.send_invoice_payment_to_accounting, name='send_invoice_payment_to_accounting'),
+    path('invoices/<int:invoice_id>/add-discount/', views.add_manual_discount, name='add_manual_discount'),
     
     # ویرایش فاکتور (API)
     path('invoices/<int:invoice_id>/update-item/', views.update_invoice_item, name='update_invoice_item'),

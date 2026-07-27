@@ -144,7 +144,7 @@ def create_ticket(request):
             status='open'
         )
         
-        messages.success(request, f'✅ تیکت شما با شماره {ticket.ticket_id} ثبت شد')
+        messages.success(request, f'  تیکت شما با شماره {ticket.ticket_id} ثبت شد')
         return redirect('support:ticket_detail', ticket_id=ticket.ticket_id)
     
     categories = TicketCategory.objects.filter(is_active=True)

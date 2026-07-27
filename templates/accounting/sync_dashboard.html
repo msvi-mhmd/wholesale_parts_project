@@ -3,10 +3,12 @@
 {% load product_extras %}
 
 {% block title %}داشبورد همگام‌سازی | پنل مدیریت{% endblock %}
-
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
 <div class="container-custom py-8">
-    <h1 class="text-2xl font-bold mb-6">📊 داشبورد همگام‌سازی با سیستم حسابداری</h1>
+    <h1 class="text-2xl font-bold mb-6">  داشبورد همگام‌سازی با سیستم حسابداری</h1>
     
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6">
@@ -80,11 +82,11 @@
                         <td class="px-4 py-2">{{ log.started_at|to_jalali }}</td>
                         <td class="px-4 py-2">
                             {% if log.status == 'completed' %}
-                                <span class="text-green-600">✅ تکمیل شده</span>
+                                <span class="text-green-600">  تکمیل شده</span>
                             {% elif log.status == 'processing' %}
                                 <span class="text-yellow-600">⏳ در حال پردازش</span>
                             {% else %}
-                                <span class="text-red-600">❌ ناموفق</span>
+                                <span class="text-red-600">  ناموفق</span>
                             {% endif %}
                         </td>
                         <td class="px-4 py-2">{{ log.new_items_count }}</td>

@@ -3,7 +3,9 @@
 {% load settings_extras %} 
  
 {% block title %}ویرایش درباره ما{% endblock %}
-
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block extra_head %}
 <style>
     .section-box {
@@ -163,7 +165,7 @@
 
             <!-- ===== آمار ===== -->
             <div class="section-box">
-                <h3>📊 آمار</h3>
+                <h3>  آمار</h3>
                 <div class="form-group">
                     <label>عنوان بخش آمار</label>
                     <input type="text" name="about_stats_title" value="{{ settings.about_stats_title }}" class="w-full border rounded px-3 py-2">

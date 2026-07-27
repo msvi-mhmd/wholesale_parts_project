@@ -12,7 +12,10 @@
         z-index: 9999 !important;
     }
 </style>
+
+<meta name="robots" content="noindex, nofollow">
 {% endblock %}
+
 
 {% block content %}
 <div class="container-custom py-8">
@@ -58,7 +61,7 @@
     <!-- لیست محصولات پرفروش -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b">
-            <h3 class="font-bold text-lg">📊 لیست محصولات پرفروش</h3>
+            <h3 class="font-bold text-lg">  لیست محصولات پرفروش</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -68,7 +71,6 @@
                         <th class="px-6 py-3 text-sm font-semibold">برند</th>
                         <th class="px-6 py-3 text-sm font-semibold text-center">تعداد فروش</th>
                         <th class="px-6 py-3 text-sm font-semibold text-center">درآمد کل</th>
-                        <th class="px-6 py-3 text-sm font-semibold text-center">امتیاز</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,7 +80,6 @@
                         <td class="px-6 py-4">{{ product.product__brand__name|default:"-" }}</td>
                         <td class="px-6 py-4 text-center">{{ product.total_quantity|format_price }}</td>
                         <td class="px-6 py-4 text-center">{{ product.total_revenue|format_price }} ریال</td>
-                        <td class="px-6 py-4 text-center">{{ product.total_points|format_price }}</td>
                     </tr>
                     {% empty %}
                     <tr>
