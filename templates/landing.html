@@ -716,8 +716,7 @@
                     {% for slider in hero_sliders %}
                     <div class="swiper-slide" style="background-image: url('{{ slider.image.url }}');">
                         <div class="slide-content">
-                            <h3>{{ slider.title }}</h3>
-                            <p>{{ slider.subtitle }}</p>
+                            
                             {% if slider.link %}
                             <a href="{{ slider.link }}" class="btn-slide">{{ slider.link_text|default:'مشاهده' }}</a>
                             {% else %}
